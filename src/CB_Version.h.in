@@ -1,0 +1,22 @@
+#ifndef _CB_VERSION_H_
+#define _CB_VERSION_H_
+
+/*
+###################################################################################
+#
+# CBrick
+#
+# Copyright (c) 2017 Research Institute for Information Technology(RIIT),
+#                    Kyushu University.  All rights reserved.
+#
+####################################################################################
+*/
+
+/**
+ * @file   CB_Version.h
+ * バージョン情報のヘッダーファイル
+ */
+
+#define CB_VERSION   "@PROJECT_VERSION@"
+
+#endif /* _CB_VERSION_H_ */

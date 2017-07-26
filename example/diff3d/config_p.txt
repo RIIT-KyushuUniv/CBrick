@@ -1,0 +1,11 @@
+30 nx
+30 ny
+30 nz
+2 Xdiv
+1 Ydiv
+1 Zdiv
+0.00015 dt
+1.0 alpha
+500 laststep
+100 fileout
+1 nonblocking

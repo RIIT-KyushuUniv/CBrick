@@ -6,12 +6,20 @@
 ## REVISION HISTORY
 
 ---
+- 2017-07-27 Version 0.4.0
+  - example/diff3d
+  - add Fortran env in case of turning on example
+  - introduce div_mode, and merge findParameter() into findOptimalDivision()
+
+
+---
 - 2017-07-26 Version 0.3.0
   - pack/unpack
   - CB_CommV.cpp
   - sortLenX(), sortCube()
   - findParameter()
   - example/div3.cpp, div4.cpp
+
 
 ---
 - 2017-07-23 Version 0.2.1

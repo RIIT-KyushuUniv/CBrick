@@ -119,6 +119,7 @@ public:
   int comm_tbl[6];      ///< 隣接ブロックのランク番号
   int halo_width;       ///< ガイドセル幅
   int ranking_opt;      ///< ランキングのオプション　（0=cubical, default, 1=vector）
+  int div_mode;         ///< 分割モード (0=自動、1=指定)
 
 
 protected:
@@ -149,6 +150,7 @@ public:
     numProc = 1;
     halo_width = 0;
     ranking_opt = 0;
+    div_mode = 0;
 
     for (int i=0; i<NOFACE; i++) comm_tbl[i] = -1;
 
@@ -174,48 +176,6 @@ public:
     f_zpr = NULL;  // Z+ direction recv
   }
 
-  // 領域サイズと領域分割数、プロセス数
-  SubDomain(int m_gsz[],
-            int m_halo,
-            int m_gdv[],
-            int m_np,
-            int m_myrank,
-            int m_procgrp,
-            MPI_Comm m_comm,
-            std::string m_type,
-            int priority=0) {
-
-    this->G_size[0]   = m_gsz[0];
-    this->G_size[1]   = m_gsz[1];
-    this->G_size[2]   = m_gsz[2];
-    this->halo_width  = m_halo;
-    this->G_div[0]    = m_gdv[0];
-    this->G_div[1]    = m_gdv[1];
-    this->G_div[2]    = m_gdv[2];
-    this->numProc     = m_np;
-    this->type        = m_type;
-    this->procGrp     = m_procgrp;
-    this->myRank      = m_myrank;
-    this->mpi_comm    = m_comm;
-    this->ranking_opt = priority;
-
-    if (m_halo<0) Exit(-1);
-
-    if (G_div[0]*G_div[1]*G_div[2] != numProc) {
-      printf("\tThe number of proceees does not agree with the G_div[] size.\n");
-      Exit(-1);
-    }
-
-    if ( G_div[0]>G_size[0] && G_div[1]>G_size[1] && G_div[2]>G_size[2] ) {
-      printf("\tG_div[] size is our of range.\n");
-      Exit(-1);
-    }
-
-    if ( !(sd = new SubdomainInfo[numProc]) ) {
-      printf("\tFail to allocate memory\n");
-      Exit(-1);
-    }
-  }
 
   // 領域サイズとプロセス数
   SubDomain(int m_gsz[],
@@ -273,8 +233,29 @@ public:
   // @brief 最適な分割数を見つける
   bool findOptimalDivision();
 
-  // 指定分割数に対応したパラメータを得る
-  bool findParameter();
+  /*
+   * @brief 分割数をセットする
+   * @param [in] m_dv   分割数
+   * @note G_div[0]*G_div[1]*G_div[2] != numProc を事前にチェックのこと
+   */
+  bool setDivision(const int* m_dv)
+  {
+    G_div[0] = m_dv[0];
+    G_div[1] = m_dv[1];
+    G_div[2] = m_dv[2];
+
+    if ( G_div[0]>G_size[0] && G_div[1]>G_size[1] && G_div[2]>G_size[2] ) {
+      printf("\tG_div[] size is our of range.\n");
+      return false;
+    }
+
+    div_mode = 1;
+
+    return true;
+  }
+
+
+protected:
 
   // @brief 開始インデクス=0の 3D=>1D インデクス変換、ガイドセルは考慮しない場合
   inline int rank_idx_0(const int _I, const int _J, const int _K, const int _NI, const int _NJ)
@@ -282,10 +263,9 @@ public:
     return _K * _NI * _NJ + _J * _NI + _I;
   }
 
-
-protected:
-
   void Evaluation(cntl_tbl* t, const int tbl_sz, FILE* fp);
+
+  bool findParameter();
 
   void getHeadIndex();
 

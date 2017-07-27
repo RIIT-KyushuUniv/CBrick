@@ -11,7 +11,7 @@
 # Process this file with cmake to produce a configure script.
 
 # Following parameters must be given at cmake command line
-# INSTALL_DIR, CXX, CC
+# INSTALL_DIR, CXX, CC, F90
 
 # Build options, see Readme.md for details.
 #
@@ -41,7 +41,11 @@ option(enable_DEBUG "Debug mode" "OFF")
 # Project setting
 #######
 
-project(CBrick C CXX)
+if (with_example)
+  project(CBrick C CXX Fortran)
+else()
+  project(CBrick C CXX)
+endif()
 
 if(INSTALL_DIR STREQUAL "")
   set(INSTALL_DIR "/usr/local/CBrick")
@@ -57,8 +61,8 @@ else()
 endif()
 
 #######
-set(PROJECT_VERSION "0.3.0")
-set(LIB_REVISION "20170726_1200")
+set(PROJECT_VERSION "0.4.0")
+set(LIB_REVISION "20170727_1300")
 #######
 
 
@@ -79,10 +83,18 @@ include(${PROJECT_SOURCE_DIR}/cmake/CBrick_package.cmake)
 
 AddOptimizeOption()
 
+
+# Fortran free form
+if (with_example)
+  FreeForm()
+endif()
+
+
 # OpennMP
 if (enable_OPENMP STREQUAL "yes")
   checkOpenMP()
 endif()
+
 
 # Real type
 precision()
@@ -97,6 +109,10 @@ message("${PROJECT_NAME} Version : ${PROJECT_VERSION} : ${LIB_REVISION}")
 message( STATUS "Destination PATH      : "      ${CMAKE_INSTALL_PREFIX})
 message( STATUS "CMAKE_CXX_COMPILER    : "      ${CMAKE_CXX_COMPILER})
 message( STATUS "CMAKE_CXX_FLAGS       : "      ${CMAKE_CXX_FLAGS})
+if (with_example)
+  message( STATUS "CMAKE_Fortran_COMPILER: "      ${CMAKE_Fortran_COMPILER})
+  message( STATUS "CMAKE_Fortran_FLAGS   : "      ${CMAKE_Fortran_FLAGS})
+endif()
 
 message( STATUS "OpenMP support        : "      ${enable_OPENMP})
 message( STATUS "Type of floating point: "      ${real_type})

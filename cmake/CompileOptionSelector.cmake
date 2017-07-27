@@ -19,6 +19,9 @@ macro (AddOptimizeOption)
     # -Xg   : gcc compatible flag
     # -fPIC : PIC flag
     # -Nfjcex : to link PMlib
+    if (with_example)
+      set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -Cpp -Kfast,ocl,preex,simd=2,array_private,parallel,optmsg=2 -V -Qt")
+    endif()
 
 #  elseif (TARGET_ARCH STREQUAL "K")
 #    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Kfast,ocl,preex,simd=2,array_private,parallel,optmsg=2 -V -Nsrc -x0 -Xg")
@@ -27,14 +30,23 @@ macro (AddOptimizeOption)
   elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -Wall")
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O3 -Wall")
+    if (with_example)
+      set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -O3 -cpp -Wall --free-line-length-none")
+    endif()
 
   elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -qopt-report=3 -DMPICH_IGNORE_CXX_SEEK")
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O3 -qopt-report=3")
+    if (with_example)
+      set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -O3 -Warn unused -fpp -qopt-report=5")
+    endif()
 
   elseif(CMAKE_CXX_COMPILER_ID STREQUAL "PGI")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fastsse")
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fastsse")
+    if (with_example)
+      set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -O3")
+    endif()
 
   else()
     message("using default option")
@@ -58,6 +70,23 @@ macro (AddSSE)
 endmacro()
 
 
+macro (FreeForm)
+  if(CMAKE_Fortran_COMPILER MATCHES ".*frtpx$")
+    #set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS}")
+
+  elseif(CMAKE_Fortran_COMPILER_ID STREQUAL "GNU")
+    set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -ffree-form")
+
+  elseif(CMAKE_Fortran_COMPILER_ID STREQUAL "Intel")
+    set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -free")
+
+  elseif(CMAKE_Fortran_COMPILER_ID STREQUAL "PGI")
+    set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -Mfree")
+
+  endif()
+endmacro()
+
+
 macro(C99)
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99")
 endmacro()
@@ -77,9 +106,18 @@ endmacro()
 
 macro(checkOpenMP)
   if(enable_OPENMP)
-    if(USE_F_TCS STREQUAL "YES")
+    if(CMAKE_CXX_COMPILER MATCHES ".*FCCpx$")
       set(OpenMP_C_FLAGS "-Kopenmp")
       set(OpenMP_CXX_FLAGS "-Kopenmp")
+      if (with_example)
+        set(OpenMP_Fortran_FLAGS "-Kopenmp")
+      endif()
+    elseif(CMAKE_Fortran_COMPILER_ID STREQUAL "Intel")
+      set(OpenMP_C_FLAGS "-qopenmp")
+      set(OpenMP_CXX_FLAGS "-qopenmp")
+      if (with_example)
+        set(OpenMP_Fortran_FLAGS "-qopenmp")
+      endif()
     else()
       find_package(OpenMP REQUIRED)
     endif()
@@ -87,6 +125,9 @@ macro(checkOpenMP)
     # OpenMP_*_FLAGSにはfind_package(OpenMP REQUIRED)でオプションフラグが設定される
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+    if (with_example)
+      set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} ${OpenMP_Fortran_FLAGS}")
+    endif()
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
   endif()
 endmacro()
@@ -103,6 +144,21 @@ macro(precision)
   elseif(real_type STREQUAL "double")
     ADD_DEFINITIONS(-D_REAL_IS_DOUBLE_)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D_REAL_IS_DOUBLE_")
+
+    if (with_example)
+      if(CMAKE_Fortran_COMPILER MATCHES ".*frtpx$")
+        set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -CcdRR8")
+
+      elseif(CMAKE_Fortran_COMPILER_ID STREQUAL "GNU")
+        set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -fdefault-real-8")
+
+      elseif(CMAKE_Fortran_COMPILER_ID STREQUAL "Intel")
+        set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -r8")
+
+      elseif(CMAKE_Fortran_COMPILER_ID STREQUAL "PGI")
+      endif()
+
+    endif()
 
   else() # neither 'float' nor 'double'
     message("@@@@@@@@@@@")

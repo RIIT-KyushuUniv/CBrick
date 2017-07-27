@@ -181,6 +181,10 @@ bool SubDomain::findParameter()
  */
 bool SubDomain::findOptimalDivision()
 {
+  if (div_mode == 1) return findParameter();
+
+
+
   FILE* fp=NULL;
 
   Hostonly_

@@ -4,6 +4,9 @@ include(CMakeForceCompiler)
 
 CMAKE_FORCE_C_COMPILER(mpifcc GNU)
 CMAKE_FORCE_CXX_COMPILER(mpiFCC GNU)
+if (with_example)
+  CMAKE_FORCE_Fortran_COMPILER(mpifrt GNU)
+endif()
 
 set(CMAKE_FIND_ROOT_PATH /opt/FJSVpclang/1.2.0)   # RIIT CX400
 set(CMAKE_INCLUDE_PATH /opt/FJSVpclang/1.2.0/include)

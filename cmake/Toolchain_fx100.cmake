@@ -4,6 +4,9 @@ include(CMakeForceCompiler)
 
 CMAKE_FORCE_C_COMPILER(mpifccpx GNU)
 CMAKE_FORCE_CXX_COMPILER(mpiFCCpx GNU)
+if (with_example)
+  CMAKE_FORCE_Fortran_COMPILER(mpifrtpx GNU)
+endif()
 
 set(CMAKE_FIND_ROOT_PATH /opt/FJSVfxlang/1.2.1)   # RIIT fx10, hayaka
 set(CMAKE_INCLUDE_PATH /opt/FJSVfxlang/1.2.1/include)

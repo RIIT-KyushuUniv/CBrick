@@ -14,9 +14,8 @@
 # Install files
 
 install(FILES
-        #program_description.pdf
         Doxyfile
         Makefile_doxygen
-        RIAM-Compact-example.pdf
+        CBrick_doc.md
         DESTINATION doc
 )

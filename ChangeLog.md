@@ -6,6 +6,11 @@
 ## REVISION HISTORY
 
 ---
+- 2017-07-28 Version 0.6.1
+  - fix install doc file
+
+
+---
 - 2017-07-27 Version 0.6.0
   - install header files
 

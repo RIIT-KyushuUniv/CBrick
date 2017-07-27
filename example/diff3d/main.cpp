@@ -271,13 +271,10 @@ int main(int argc, char * argv[])
     return 1;
   }
 
-  SubDomain D(dsz, gc, np, myRank, proc_grp, MPI_COMM_WORLD, "cell");
-
-  // Fortran Index
-  D.setFindex();
+  SubDomain D(dsz, gc, np, myRank, proc_grp, MPI_COMM_WORLD, "cell", "Findex");
 
   // 分割数指定
-  if (m_dv[0]*m_dv[1]*m_dv[2] != 0) D.setDivision(m_dv);
+  if (div_type == 1) D.setDivision(m_dv);
 
   if ( !D.findOptimalDivision() ) MPI_Abort(MPI_COMM_WORLD, -1);
   if ( !D.createRankTable() ) MPI_Abort(MPI_COMM_WORLD, -1);

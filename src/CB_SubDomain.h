@@ -117,16 +117,16 @@ public:
   int G_size[3];        ///< 全領域の要素数 (Global, Non-dimensional)
 
   int size[3];          ///< 各サブドメインの要素数 (Local, Non-dimensional
-  int head[3];          ///< 開始インデクス（グローバルインデクス, C表記）
+  int head[3];          ///< 開始インデクス（グローバルインデクス）
   int comm_tbl[6];      ///< 隣接ブロックのランク番号
   int halo_width;       ///< ガイドセル幅
   int ranking_opt;      ///< ランキングのオプション　（0=cubical, default, 1=vector）
   int div_mode;         ///< 分割モード (0=自動、1=指定)
-  int f_index;          ///< Findex (0-OFF, 1-ON)
+  int f_index;          ///< Findex (0-OFF, 1-ON) @note 関連するところは head index
 
 
 protected:
-  std::string type;     ///< "cell" or "node"
+  std::string grid_type;///< "cell" or "node"
   SubdomainInfo* sd;    ///< 全サブドメインの分割要素数配列
 
 private:
@@ -189,18 +189,38 @@ public:
             int m_procgrp,
             MPI_Comm m_comm,
             std::string m_type,
+            std::string m_idxtyp,
             int priority=0) {
 
-    this->G_size[0] = m_gsz[0];
-    this->G_size[1] = m_gsz[1];
-    this->G_size[2] = m_gsz[2];
+    this->G_size[0]   = m_gsz[0];
+    this->G_size[1]   = m_gsz[1];
+    this->G_size[2]   = m_gsz[2];
     this->halo_width  = m_halo;
     this->numProc     = m_np;
-    this->type        = m_type;
+    this->grid_type   = m_type;
     this->procGrp     = m_procgrp;
     this->myRank      = m_myrank;
     this->mpi_comm    = m_comm;
     this->ranking_opt = priority;
+
+    if (m_type == "node" || m_type == "cell") {
+      // ok
+    }
+    else {
+      printf("Error : Invalid grid type [%s]\n", m_type.c_str());
+      Exit(-1);
+    }
+
+    if (m_idxtyp == "Findex") {
+      f_index = 1;
+    }
+    else if (m_idxtyp == "Cindex") {
+      f_index = 0;
+    }
+    else {
+      printf("Error : Invalid Index type [%s]\n", m_idxtyp.c_str());
+      Exit(-1);
+    }
 
     if (m_halo<0) Exit(-1);
 
@@ -231,18 +251,14 @@ public:
 // CB_SubDomain.cpp
 public:
 
-  // @brief Fortranインデクス（1スタート）モード
-  void setFindex()
-  {
-    f_index = 1;
-  }
-
-
   // @brief 通信テーブルを作成
   bool createRankTable();
 
   // @brief 最適な分割数を見つける
   bool findOptimalDivision();
+
+  // @brief 　Global > Local　インデクス変換
+  bool G2L_index(const int* Gi, int* Li);
 
   /*
    * @brief 分割数をセットする

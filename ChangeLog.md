@@ -6,6 +6,11 @@
 ## REVISION HISTORY
 
 ---
+- 2017-07-27 Version 0.6.0
+  - install header files
+
+
+---
 - 2017-07-27 Version 0.5.0
   - convert to Fortran index >> f_index
 

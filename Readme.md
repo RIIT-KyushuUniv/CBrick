@@ -57,10 +57,9 @@ $ sudo make install
 ### INTEL/GNU compiler
 
 ~~~
-$ cmake -DINSTALL_DIR=${HOME}/CBrick \
+$ cmake -DINSTALL_DIR=${CB_HOME}/CBrick \
         -Denable_OPENMP=yes \
-        -Dwith_example=yes \
-        -Denable_DEBUG=yes ..
+        -Dwith_example=yes ..
 ~~~
 
 #### Note
@@ -71,29 +70,25 @@ In case of some Intel compiler environment, please specify environemnt variables
 ### FUJITSU compiler / FX10, FX100, K computer on login nodes (Cross compilation) and Fujitsu TCS environment for intel PC
 
 ~~~
-$ cmake -DINSTALL_DIR=${HOME}/CBrick \
+$ cmake -DINSTALL_DIR=${CB_HOME}/CBrick \
         -DCMAKE_TOOLCHAIN_FILE=../cmake/Toolchain_fx10.cmake \
         -Denable_OPENMP=yes \
-        -Dwith_example=yes \
-        -Denable_DEBUG=yes ..
+        -Dwith_example=yes ..
 
-$ cmake -DINSTALL_DIR=${HOME}/CBrick \
+$ cmake -DINSTALL_DIR=${CB_HOME}/CBrick \
         -DCMAKE_TOOLCHAIN_FILE=../cmake/Toolchain_fx100.cmake \
         -Denable_OPENMP=yes \
-        -Dwith_example=yes \
-        -Denable_DEBUG=yes ..
+        -Dwith_example=yes ..
 
-$ cmake -DINSTALL_DIR=${HOME}/CBrick \
+$ cmake -DINSTALL_DIR=${CB_HOME}/CBrick \
         -DCMAKE_TOOLCHAIN_FILE=../cmake/Toolchain_K.cmake \
         -Denable_OPENMP=yes \
-        -Dwith_example=yes \
-        -Denable_DEBUG=yes ..
+        -Dwith_example=yes ..
 
-$ cmake -DINSTALL_DIR=${HOME}/CBrick \
+$ cmake -DINSTALL_DIR=${CB_HOME}/CBrick \
         -DCMAKE_TOOLCHAIN_FILE=../cmake/Toolchain_intel_F_TCS.cmake \
         -Denable_OPENMP=yes \
-        -Dwith_example=yes \
-        -Denable_DEBUG=yes ..
+        -Dwith_example=yes ..
 
 ~~~
 

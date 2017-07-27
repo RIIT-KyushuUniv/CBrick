@@ -44,20 +44,9 @@
 
 #define NOFACE 6
 
-#define GUIDE 2  ///< ガイドセル数
-
 #define ON 1
 #define OFF 0
 
-
-/** 並列化モード */
-enum Parallel_mode
-{
-  Serial=0,
-  OpenMP,
-  FlatMPI,
-  Hybrid
-};
 
 enum DIRection {
   X_minus=0,

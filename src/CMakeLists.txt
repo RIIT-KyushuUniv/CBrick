@@ -23,5 +23,7 @@ target_link_libraries(CBrick)
 install(TARGETS CBrick DESTINATION lib)
 install(FILES
         ${PROJECT_BINARY_DIR}/src/CB_Version.h
+        ${PROJECT_SOURCE_DIR}/src/CB_SubDomain.h
+        ${PROJECT_SOURCE_DIR}/src/CB_Define.h
         DESTINATION include)
 ###

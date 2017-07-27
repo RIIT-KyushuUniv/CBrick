@@ -101,7 +101,7 @@ bool SubDomain::findParameter()
 
         pp = &tbl.score[m];
 
-        if ( type == "node") getSizeNode(pp);
+        if ( grid_type == "node") getSizeNode(pp);
 
         getSrf(pp);
 
@@ -147,11 +147,6 @@ bool SubDomain::findParameter()
   head[1] = sd[myRank].hd[1];
   head[2] = sd[myRank].hd[2];
 
-  if (f_index==1) {
-    head[0]++;
-    head[1]++;
-    head[2]++;
-  }
 
 #ifdef _DEBUG
   Hostonly_ {
@@ -160,19 +155,10 @@ bool SubDomain::findParameter()
       for (int j=0; j<G_div[1]; j++) {
         for (int i=0; i<G_div[0]; i++) {
           int r = rank_idx_0(i, j, k, G_div[0], G_div[1]);
-
-          if (f_index==0) { // C
-            fprintf(fp, "\t%8d : %7d %7d %7d : %7d %7d %7d : %7d %7d %7d\n", r,
-                    i,j,k,
-                    sd[r].sz[0], sd[r].sz[1], sd[r].sz[2],
-                    sd[r].hd[0], sd[r].hd[1], sd[r].hd[2]);
-          }
-          else { // F
-            fprintf(fp, "\t%8d : %7d %7d %7d : %7d %7d %7d : %7d %7d %7d\n", r,
-                    i,j,k,
-                    sd[r].sz[0], sd[r].sz[1], sd[r].sz[2],
-                    sd[r].hd[0]+1, sd[r].hd[1]+1, sd[r].hd[2]+1);
-          }
+          fprintf(fp, "\t%8d : %7d %7d %7d : %7d %7d %7d : %7d %7d %7d\n", r,
+                  i,j,k,
+                  sd[r].sz[0], sd[r].sz[1], sd[r].sz[2],
+                  sd[r].hd[0], sd[r].hd[1], sd[r].hd[2]);
         }
       }
     }
@@ -291,7 +277,7 @@ bool SubDomain::findOptimalDivision()
 
           pp = &tbl[c].score[m];
 
-          if ( type == "node") getSizeNode(pp);
+          if ( grid_type == "node") getSizeNode(pp);
 
           getSrf(pp);
 
@@ -415,11 +401,6 @@ bool SubDomain::findOptimalDivision()
   head[1] = sd[myRank].hd[1];
   head[2] = sd[myRank].hd[2];
 
-  if (f_index==1) {
-    head[0]++;
-    head[1]++;
-    head[2]++;
-  }
 
 #ifdef _DEBUG
   Hostonly_ {
@@ -428,18 +409,10 @@ bool SubDomain::findOptimalDivision()
       for (int j=0; j<G_div[1]; j++) {
         for (int i=0; i<G_div[0]; i++) {
           int r = rank_idx_0(i, j, k, G_div[0], G_div[1]);
-          if (f_index==0) { // C
-            fprintf(fp, "\t%8d : %7d %7d %7d : %7d %7d %7d : %7d %7d %7d\n", r,
-                    i,j,k,
-                    sd[r].sz[0], sd[r].sz[1], sd[r].sz[2],
-                    sd[r].hd[0], sd[r].hd[1], sd[r].hd[2]);
-          }
-          else { // F
-            fprintf(fp, "\t%8d : %7d %7d %7d : %7d %7d %7d : %7d %7d %7d\n", r,
-                    i,j,k,
-                    sd[r].sz[0], sd[r].sz[1], sd[r].sz[2],
-                    sd[r].hd[0]+1, sd[r].hd[1]+1, sd[r].hd[2]+1);
-          }
+          fprintf(fp, "\t%8d : %7d %7d %7d : %7d %7d %7d : %7d %7d %7d\n", r,
+                  i,j,k,
+                  sd[r].sz[0], sd[r].sz[1], sd[r].sz[2],
+                  sd[r].hd[0], sd[r].hd[1], sd[r].hd[2]);
         }
       }
     }
@@ -1027,6 +1000,15 @@ void SubDomain::getHeadIndex()
     }
   }
 
+  // Findexの場合の処理　headを調整
+  if (f_index == 1) {
+    for (int i=0; i<numProc; i++) {
+      sd[i].hd[0] += 1;
+      sd[i].hd[1] += 1;
+      sd[i].hd[2] += 1;
+    }
+  }
+
 }
 
 
@@ -1132,8 +1114,38 @@ bool SubDomain::createRankTable()
   }
 #endif // _DEBUG
 
-  // ワーク用 SubDomain クラス配列の破棄
-  if ( !sd ) delete [] sd;
+  // ワーク用 SubDomainInfo クラス配列の破棄 >> 使う
+  //if ( !sd ) delete [] sd;
+
+  return true;
+}
+
+
+/*
+ * @brief Global > Local　インデクス変換
+ * @param [in]   Gi   Global index
+ * @param [out]  Li   Local index
+ * @retval true-自領域内に存在
+ */
+bool SubDomain::G2L_index(const int* Gi, int* Li)
+{
+  // headとの相対位置なので、cell/nodeとも同じ式で計算
+  Li[0] = Gi[0] - head[0];
+  Li[1] = Gi[1] - head[1];
+  Li[2] = Gi[2] - head[2];
+
+  // 内外判定
+  if (f_index == 1)
+  {
+    if( Li[0] < 1 || Li[0] > size[0] ) return false;
+    if( Li[1] < 1 || Li[1] > size[1] ) return false;
+    if( Li[2] < 1 || Li[2] > size[2] ) return false;
+  }
+  else {
+    if( Li[0] < 0 || Li[0] >= size[0] ) return false;
+    if( Li[1] < 0 || Li[1] >= size[1] ) return false;
+    if( Li[2] < 0 || Li[2] >= size[2] ) return false;
+  }
 
   return true;
 }

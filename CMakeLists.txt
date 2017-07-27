@@ -61,8 +61,8 @@ else()
 endif()
 
 #######
-set(PROJECT_VERSION "0.4.0")
-set(LIB_REVISION "20170727_1300")
+set(PROJECT_VERSION "0.5.0")
+set(LIB_REVISION "20170727_1730")
 #######
 
 

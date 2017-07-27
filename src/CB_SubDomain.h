@@ -23,6 +23,7 @@
 #include <stdlib.h>
 #include "CB_Define.h"
 
+// ワーク用の構造体
 typedef struct {
   int sz[3];  ///< サブドメインのサイズ
   float srf;  ///< 通信量
@@ -74,7 +75,7 @@ public:
   }
 };
 
-
+// サブドメイン情報クラス （テンポラリ利用）
 class SubdomainInfo {
 public:
   int sz[3];    ///< サブドメインの要素数
@@ -104,6 +105,7 @@ public:
 };
 
 
+// サブドメイン情報保持クラス
 class SubDomain {
 public:
   int procGrp;          ///< プロセスグループ番号
@@ -120,6 +122,7 @@ public:
   int halo_width;       ///< ガイドセル幅
   int ranking_opt;      ///< ランキングのオプション　（0=cubical, default, 1=vector）
   int div_mode;         ///< 分割モード (0=自動、1=指定)
+  int f_index;          ///< Findex (0-OFF, 1-ON)
 
 
 protected:
@@ -151,6 +154,7 @@ public:
     halo_width = 0;
     ranking_opt = 0;
     div_mode = 0;
+    f_index = 0;
 
     for (int i=0; i<NOFACE; i++) comm_tbl[i] = -1;
 
@@ -226,6 +230,13 @@ public:
 
 // CB_SubDomain.cpp
 public:
+
+  // @brief Fortranインデクス（1スタート）モード
+  void setFindex()
+  {
+    f_index = 1;
+  }
+
 
   // @brief 通信テーブルを作成
   bool createRankTable();

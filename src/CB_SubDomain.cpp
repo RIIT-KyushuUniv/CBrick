@@ -147,16 +147,32 @@ bool SubDomain::findParameter()
   head[1] = sd[myRank].hd[1];
   head[2] = sd[myRank].hd[2];
 
+  if (f_index==1) {
+    head[0]++;
+    head[1]++;
+    head[2]++;
+  }
+
 #ifdef _DEBUG
   Hostonly_ {
-    fprintf(fp, "\t    Rank :    sz_X    sz_Y    sz_Z :    hd_X    hd_Y    hd_Z\n");
+    fprintf(fp, "\t    Rank :       I       J       K :    sz_X    sz_Y    sz_Z :    hd_X    hd_Y    hd_Z\n");
     for (int k=0; k<G_div[2]; k++) {
       for (int j=0; j<G_div[1]; j++) {
         for (int i=0; i<G_div[0]; i++) {
           int r = rank_idx_0(i, j, k, G_div[0], G_div[1]);
-          fprintf(fp, "\t%8d : %7d %7d %7d : %7d %7d %7d\n", r,
-                  sd[r].sz[0], sd[r].sz[1], sd[r].sz[2],
-                  sd[r].hd[0], sd[r].hd[1], sd[r].hd[2]);
+
+          if (f_index==0) { // C
+            fprintf(fp, "\t%8d : %7d %7d %7d : %7d %7d %7d : %7d %7d %7d\n", r,
+                    i,j,k,
+                    sd[r].sz[0], sd[r].sz[1], sd[r].sz[2],
+                    sd[r].hd[0], sd[r].hd[1], sd[r].hd[2]);
+          }
+          else { // F
+            fprintf(fp, "\t%8d : %7d %7d %7d : %7d %7d %7d : %7d %7d %7d\n", r,
+                    i,j,k,
+                    sd[r].sz[0], sd[r].sz[1], sd[r].sz[2],
+                    sd[r].hd[0]+1, sd[r].hd[1]+1, sd[r].hd[2]+1);
+          }
         }
       }
     }
@@ -399,16 +415,31 @@ bool SubDomain::findOptimalDivision()
   head[1] = sd[myRank].hd[1];
   head[2] = sd[myRank].hd[2];
 
+  if (f_index==1) {
+    head[0]++;
+    head[1]++;
+    head[2]++;
+  }
+
 #ifdef _DEBUG
   Hostonly_ {
-    fprintf(fp, "\t    Rank :    sz_X    sz_Y    sz_Z :    hd_X    hd_Y    hd_Z\n");
+    fprintf(fp, "\t    Rank :       I       J       K :    sz_X    sz_Y    sz_Z :    hd_X    hd_Y    hd_Z\n");
     for (int k=0; k<G_div[2]; k++) {
       for (int j=0; j<G_div[1]; j++) {
         for (int i=0; i<G_div[0]; i++) {
           int r = rank_idx_0(i, j, k, G_div[0], G_div[1]);
-          fprintf(fp, "\t%8d : %7d %7d %7d : %7d %7d %7d\n", r,
-                  sd[r].sz[0], sd[r].sz[1], sd[r].sz[2],
-                  sd[r].hd[0], sd[r].hd[1], sd[r].hd[2]);
+          if (f_index==0) { // C
+            fprintf(fp, "\t%8d : %7d %7d %7d : %7d %7d %7d : %7d %7d %7d\n", r,
+                    i,j,k,
+                    sd[r].sz[0], sd[r].sz[1], sd[r].sz[2],
+                    sd[r].hd[0], sd[r].hd[1], sd[r].hd[2]);
+          }
+          else { // F
+            fprintf(fp, "\t%8d : %7d %7d %7d : %7d %7d %7d : %7d %7d %7d\n", r,
+                    i,j,k,
+                    sd[r].sz[0], sd[r].sz[1], sd[r].sz[2],
+                    sd[r].hd[0]+1, sd[r].hd[1]+1, sd[r].hd[2]+1);
+          }
         }
       }
     }

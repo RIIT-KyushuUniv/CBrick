@@ -175,7 +175,7 @@ bool read_config(Phys_Param* p,
   p->dt    = param[1];
   p->alpha = param[2];
 
-#if 1
+#if 0
   printf("rank=%3d %10.6e %10.6e %10.6e\n", myRank, p->dh, p->dt, p->alpha);
 #endif
 
@@ -195,7 +195,7 @@ bool read_config(Phys_Param* p,
   c->blocking = cntl[8];
 
 
-#if 1
+#if 0
   printf("rank=%3d %4d %4d %4d %4d %4d %4d %8d %8d\n",
          myRank,
          m_sz[0], m_sz[1], m_sz[2],
@@ -220,7 +220,6 @@ int main(int argc, char * argv[])
   Phys_Param P_phys;
   Cntl_Param P_cntl;
 
-  int m_sz[3];      ///< 全計算領域の要素数
   int np=0;         ///< Number of processes
   int myRank=-1;    ///< Rank number
   int proc_grp = 0; ///< プロセスグループ番号
@@ -228,7 +227,7 @@ int main(int argc, char * argv[])
   int gc = 1;       ///< ガイドセル幅=1
   int div_type=0;   ///< 分割指定 (0-自動、1-指定)
 
-  int dsz[3]={0,0,0};    ///< Number of cell sizes of entire domain
+  int dsz[3]={0,0,0};    ///< 全計算領域の要素数
   REAL_TYPE origin[3]={0.0, 0.0, 0.0};  ///< global origin
   int m_dv[3]={0,0,0};   ///< 領域分割数
 
@@ -274,6 +273,9 @@ int main(int argc, char * argv[])
 
   SubDomain D(dsz, gc, np, myRank, proc_grp, MPI_COMM_WORLD, "cell");
 
+  // Fortran Index
+  D.setFindex();
+
   // 分割数指定
   if (m_dv[0]*m_dv[1]*m_dv[2] != 0) D.setDivision(m_dv);
 
@@ -281,10 +283,16 @@ int main(int argc, char * argv[])
   if ( !D.createRankTable() ) MPI_Abort(MPI_COMM_WORLD, -1);
 
 
-  // origin of each SubDomain
-  P_phys.org[0] = origin[0] + (D.head[0]+0.5)*P_phys.dh;
-  P_phys.org[1] = origin[1] + (D.head[1]+0.5)*P_phys.dh;
-  P_phys.org[2] = origin[2] + (D.head[2]+0.5)*P_phys.dh;
+  // origin of each SubDomain, Fortran Index
+  P_phys.org[0] = origin[0] + (D.head[0]-1)*P_phys.dh;
+  P_phys.org[1] = origin[1] + (D.head[1]-1)*P_phys.dh;
+  P_phys.org[2] = origin[2] + (D.head[2]-1)*P_phys.dh;
+
+
+  int lsz[3]={0,0,0}; //サブドメインサイズ
+  lsz[0] = D.size[0];
+  lsz[1] = D.size[1];
+  lsz[2] = D.size[2];
 
   // Definition of Array
   REAL_TYPE* q = NULL;  ///< unknown variable
@@ -292,7 +300,7 @@ int main(int argc, char * argv[])
 
 
   // Array allocation
-  size_t len = (size_t)( (dsz[0]+2*gc) * (dsz[1]+2*gc) * (dsz[2]+2*gc) );
+  size_t len = (size_t)( (lsz[0]+2*gc) * (lsz[1]+2*gc) * (lsz[2]+2*gc) );
 
   if ( !(q=alloc_real(len)) ) MPI_Abort(MPI_COMM_WORLD, -1);
   if ( !(w=alloc_real(len)) ) MPI_Abort(MPI_COMM_WORLD, -1);
@@ -306,7 +314,7 @@ int main(int argc, char * argv[])
   for (int i=0; i<12; i++) req[i] = MPI_REQUEST_NULL;
 
   // initialization
-  initialize_(dsz, &gc, q, w);
+  initialize_(lsz, &gc, q, w);
 
   if ( P_cntl.blocking == 1) {
     D.Comm_S_nonblocking(q, gc, req);
@@ -335,7 +343,7 @@ int main(int argc, char * argv[])
     time += P_phys.dt;
 
     // boundary condition
-    bc_(dsz, &gc, q, &P_phys.dh, P_phys.org, D.comm_tbl);
+    bc_(lsz, &gc, q, &P_phys.dh, P_phys.org, D.comm_tbl);
 
     if ( P_cntl.blocking == 1) {
       D.Comm_S_nonblocking(q, gc, req);
@@ -347,7 +355,7 @@ int main(int argc, char * argv[])
 
     // time marching
     res = 0.0;
-    euler_explicit_(dsz, &gc, q, w, &P_phys.dh, &P_phys.dt, &P_phys.alpha, &res);
+    euler_explicit_(lsz, &gc, q, w, &P_phys.dh, &P_phys.dt, &P_phys.alpha, &res);
 
     REAL_TYPE tmp=res;
 
@@ -376,7 +384,7 @@ int main(int argc, char * argv[])
     // file out
     if (0 == step-(step/P_cntl.fileout)*P_cntl.fileout)
     {
-      write_sph_(m_sz, &gc, &step, &time, &P_phys.dh, P_phys.org, fname, q);
+      write_sph_(lsz, &gc, &step, &time, &P_phys.dh, P_phys.org, fname, q);
     }
 
   }

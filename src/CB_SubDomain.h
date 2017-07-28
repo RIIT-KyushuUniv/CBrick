@@ -22,6 +22,7 @@
 #include <string>
 #include <stdlib.h>
 #include "CB_Define.h"
+#include "CB_Version.h"
 
 // ワーク用の構造体
 typedef struct {

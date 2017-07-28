@@ -204,8 +204,8 @@ bool read_config(Phys_Param* p,
 #endif
 
   // release buffer
-  if ( !param ) delete [] param;
-  if ( !cntl  ) delete [] cntl;
+  if ( param ) delete [] param;
+  if ( cntl  ) delete [] cntl;
 
   return true;
 }
@@ -390,8 +390,8 @@ int main(int argc, char * argv[])
 
 
   // release
-  if ( !q ) delete [] q;
-  if ( !w ) delete [] w;
+  if ( q ) delete [] q;
+  if ( w ) delete [] w;
 
 
   MPI_Finalize();

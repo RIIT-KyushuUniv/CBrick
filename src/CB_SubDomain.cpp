@@ -166,10 +166,10 @@ bool SubDomain::findParameter()
 #endif // _DEBUG
 
   // ワーク配列の後始末
-  if ( !tbl.score ) delete [] tbl.score;
+  if ( tbl.score ) delete [] tbl.score;
 
   Hostonly_ {
-    if ( !fp ) fclose(fp);
+    if ( fp ) fclose(fp);
   }
 
   return true;
@@ -421,12 +421,12 @@ bool SubDomain::findOptimalDivision()
 
   // ワーク配列の後始末
   for (int i=0; i<tbl_size; i++) {
-    if ( !tbl[i].score ) delete [] tbl[i].score;
+    if ( tbl[i].score ) delete [] tbl[i].score;
   }
-  if ( !tbl ) delete [] tbl;
+  if ( tbl ) delete [] tbl;
 
   Hostonly_ {
-    if ( !fp ) fclose(fp);
+    if ( fp ) fclose(fp);
   }
 
   return true;
@@ -1073,7 +1073,7 @@ bool SubDomain::createRankTable()
     }
   }
 
-  if ( !rt ) delete [] rt;
+  if ( rt ) delete [] rt;
   rt = NULL;
 
 
@@ -1109,13 +1109,13 @@ bool SubDomain::createRankTable()
                 s->cm[3], s->cm[4], s->cm[5]);
       }
 
-      if ( !fp ) fclose(fp);
+      if ( fp ) fclose(fp);
     }
   }
 #endif // _DEBUG
 
   // ワーク用 SubDomainInfo クラス配列の破棄 >> 使う
-  //if ( !sd ) delete [] sd;
+  //if ( sd ) delete [] sd;
 
   return true;
 }

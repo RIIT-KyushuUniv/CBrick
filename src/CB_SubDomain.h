@@ -55,7 +55,7 @@ public:
   }
 
   ~cntl_tbl() {
-    if ( !score ) delete [] score;
+    if ( score ) delete [] score;
     score = NULL;
   }
 
@@ -232,20 +232,20 @@ public:
 
   /** デストラクタ */
   virtual ~SubDomain() {
-    if ( !sd ) delete [] sd;
+    if ( sd ) delete [] sd;
 
-    if ( !f_xms ) delete [] f_xms;
-    if ( !f_xmr ) delete [] f_xmr;
-    if ( !f_xps ) delete [] f_xps;
-    if ( !f_xpr ) delete [] f_xpr;
-    if ( !f_yms ) delete [] f_yms;
-    if ( !f_ymr ) delete [] f_ymr;
-    if ( !f_yps ) delete [] f_yps;
-    if ( !f_ypr ) delete [] f_ypr;
-    if ( !f_zms ) delete [] f_zms;
-    if ( !f_zmr ) delete [] f_zmr;
-    if ( !f_zps ) delete [] f_zps;
-    if ( !f_zpr ) delete [] f_zpr;
+    if ( f_xms ) delete [] f_xms;
+    if ( f_xmr ) delete [] f_xmr;
+    if ( f_xps ) delete [] f_xps;
+    if ( f_xpr ) delete [] f_xpr;
+    if ( f_yms ) delete [] f_yms;
+    if ( f_ymr ) delete [] f_ymr;
+    if ( f_yps ) delete [] f_yps;
+    if ( f_ypr ) delete [] f_ypr;
+    if ( f_zms ) delete [] f_zms;
+    if ( f_zmr ) delete [] f_zmr;
+    if ( f_zps ) delete [] f_zps;
+    if ( f_zpr ) delete [] f_zpr;
   }
 
 // CB_SubDomain.cpp

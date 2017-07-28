@@ -6,6 +6,11 @@
 ## REVISION HISTORY
 
 ---
+- 2017-07-28 Version 0.6.2
+  - bug fix : if ( !f ) delete[] f; => if (f) ...
+
+
+---
 - 2017-07-28 Version 0.6.1
   - fix install doc file
 

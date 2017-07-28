@@ -6,6 +6,11 @@
 ## REVISION HISTORY
 
 ---
+- 2017-07-28 Version 0.6.5
+  - setSUbDomain()
+
+
+---
 - 2017-07-28 Version 0.6.4
   - useNonblocking()
 

@@ -32,6 +32,9 @@ typedef struct {
 } score_tbl;
 
 
+/****************************************************
+ * 分割情報クラス （テンポラリ利用）
+ */
 class cntl_tbl {
 public:
   int dsz[3];       ///< サブドメインの基準サイズ
@@ -76,7 +79,10 @@ public:
   }
 };
 
-// サブドメイン情報クラス （テンポラリ利用）
+
+/****************************************************
+ * サブドメイン情報クラス （テンポラリ利用）
+ */
 class SubdomainInfo {
 public:
   int sz[3];    ///< サブドメインの要素数
@@ -106,7 +112,9 @@ public:
 };
 
 
-// サブドメイン情報保持クラス
+/****************************************************
+ * サブドメイン情報保持クラス
+ */
 class SubDomain {
 public:
   int procGrp;          ///< プロセスグループ番号
@@ -116,7 +124,6 @@ public:
 
   int G_div[3];         ///< 各軸方向の領域分割数
   int G_size[3];        ///< 全領域の要素数 (Global, Non-dimensional)
-
   int size[3];          ///< 各サブドメインの要素数 (Local, Non-dimensional
   int head[3];          ///< 開始インデクス（グローバルインデクス）
   int comm_tbl[6];      ///< 隣接ブロックのランク番号
@@ -286,6 +293,57 @@ public:
     return true;
   }
 
+  bool setSubDomain(int m_gsz[],
+                    int m_halo,
+                    int m_np,
+                    int m_myrank,
+                    int m_procgrp,
+                    MPI_Comm m_comm,
+                    std::string m_type,
+                    std::string m_idxtyp,
+                    int m_useNB,
+                    int priority=0)
+  {
+    G_size[0]   = m_gsz[0];
+    G_size[1]   = m_gsz[1];
+    G_size[2]   = m_gsz[2];
+    halo_width  = m_halo;
+    numProc     = m_np;
+    grid_type   = m_type;
+    procGrp     = m_procgrp;
+    myRank      = m_myrank;
+    mpi_comm    = m_comm;
+    ranking_opt = priority;
+    use_NB      = m_useNB;
+
+    if (m_type == "node" || m_type == "cell") {
+      // ok
+    }
+    else {
+      printf("Error : Invalid grid type [%s]\n", m_type.c_str());
+      return false;
+    }
+
+    if (m_idxtyp == "Findex") {
+      f_index = 1;
+    }
+    else if (m_idxtyp == "Cindex") {
+      f_index = 0;
+    }
+    else {
+      printf("Error : Invalid Index type [%s]\n", m_idxtyp.c_str());
+      return false;
+    }
+
+    if (m_halo<0) Exit(-1);
+
+    if ( !(sd = new SubdomainInfo[numProc]) ) {
+      printf("\tFail to allocate memory\n");
+      return false;
+    }
+
+    return true;
+  }
 
 protected:
 

@@ -124,6 +124,7 @@ public:
   int ranking_opt;      ///< ランキングのオプション　（0=cubical, default, 1=vector）
   int div_mode;         ///< 分割モード (0=自動、1=指定)
   int f_index;          ///< Findex (0-OFF, 1-ON) @note 関連するところは head index
+  int use_NB;           ///< ノンブロッキング通信の利用　（0-no_use, 1-use）
 
 
 protected:
@@ -156,6 +157,7 @@ public:
     ranking_opt = 0;
     div_mode = 0;
     f_index = 0;
+    use_NB = 0;
 
     for (int i=0; i<NOFACE; i++) comm_tbl[i] = -1;
 
@@ -191,6 +193,7 @@ public:
             MPI_Comm m_comm,
             std::string m_type,
             std::string m_idxtyp,
+            int m_useNB,
             int priority=0) {
 
     this->G_size[0]   = m_gsz[0];
@@ -203,6 +206,7 @@ public:
     this->myRank      = m_myrank;
     this->mpi_comm    = m_comm;
     this->ranking_opt = priority;
+    this->use_NB      = m_useNB;
 
     if (m_type == "node" || m_type == "cell") {
       // ok

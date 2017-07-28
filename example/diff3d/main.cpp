@@ -271,7 +271,7 @@ int main(int argc, char * argv[])
     return 1;
   }
 
-  SubDomain D(dsz, gc, np, myRank, proc_grp, MPI_COMM_WORLD, "cell", "Findex");
+  SubDomain D(dsz, gc, np, myRank, proc_grp, MPI_COMM_WORLD, "cell", "Findex", 1);
 
   // 分割数指定
   if (div_type == 1) D.setDivision(m_dv);

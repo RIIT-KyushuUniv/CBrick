@@ -22,6 +22,9 @@
  */
 bool SubDomain::initComm()
 {
+  // ノンブロッキング通信を使わない場合には戻る
+  if (use_NB == 0) return true;
+
   int gc = halo_width;
 
   if (size[0]==0 || size[1]==0 || size[2]==0 || gc==0) {

@@ -53,7 +53,7 @@ int main(int argc, char * argv[]) {
   }
 
   // priorityはデフォルト
-  SubDomain D(m_sz, gc, np, myrank, proc_grp, MPI_COMM_WORLD, "node", "Cindex");
+  SubDomain D(m_sz, gc, np, myrank, proc_grp, MPI_COMM_WORLD, "node", "Cindex", 0);
   D.setDivision(m_dv);
 
   if ( !D.findOptimalDivision() ) MPI_Abort(MPI_COMM_WORLD, -1);

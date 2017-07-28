@@ -480,7 +480,7 @@ protected:
 
 
 // CB_CommV.cpp
-
+public:
   /*
    * @fn Comm_V_blocking
    * @brief ベクトル変数（i,j,k,l）型のブロッキング通信

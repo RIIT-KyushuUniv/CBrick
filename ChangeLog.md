@@ -6,8 +6,13 @@
 ## REVISION HISTORY
 
 ---
+- 2017-07-28 Version 0.6.6
+  - change scope of Comm_V_blocking() to public
+
+
+---
 - 2017-07-28 Version 0.6.5
-  - setSUbDomain()
+  - setSubDomain()
 
 
 ---

@@ -58,10 +58,7 @@ public:
     score = NULL;
   }
 
-  ~cntl_tbl() {
-    if ( score ) delete [] score;
-    score = NULL;
-  }
+  ~cntl_tbl() {}
 
   // copy constructor
   cntl_tbl(const cntl_tbl& src) {
@@ -236,28 +233,28 @@ public:
 
     if (m_halo<0) Exit(-1);
 
-    if ( !(sd = new SubdomainInfo[numProc]) ) {
-      printf("\tFail to allocate memory\n");
-      Exit(-1);
-    }
+    if ( numProc < 1 ) Exit(-1);
+    if ( !(sd=allocateSD()) ) Exit(-1);
   }
 
   /** デストラクタ */
-  virtual ~SubDomain() {
+  ~SubDomain() {
     if ( sd ) delete [] sd;
 
-    if ( f_xms ) delete [] f_xms;
-    if ( f_xmr ) delete [] f_xmr;
-    if ( f_xps ) delete [] f_xps;
-    if ( f_xpr ) delete [] f_xpr;
-    if ( f_yms ) delete [] f_yms;
-    if ( f_ymr ) delete [] f_ymr;
-    if ( f_yps ) delete [] f_yps;
-    if ( f_ypr ) delete [] f_ypr;
-    if ( f_zms ) delete [] f_zms;
-    if ( f_zmr ) delete [] f_zmr;
-    if ( f_zps ) delete [] f_zps;
-    if ( f_zpr ) delete [] f_zpr;
+    if ( use_NB == 1 ) {
+      if ( f_xms ) delete [] f_xms;
+      if ( f_xmr ) delete [] f_xmr;
+      if ( f_xps ) delete [] f_xps;
+      if ( f_xpr ) delete [] f_xpr;
+      if ( f_yms ) delete [] f_yms;
+      if ( f_ymr ) delete [] f_ymr;
+      if ( f_yps ) delete [] f_yps;
+      if ( f_ypr ) delete [] f_ypr;
+      if ( f_zms ) delete [] f_zms;
+      if ( f_zmr ) delete [] f_zmr;
+      if ( f_zps ) delete [] f_zps;
+      if ( f_zpr ) delete [] f_zpr;
+    }
   }
 
 // CB_SubDomain.cpp
@@ -337,15 +334,19 @@ public:
 
     if (m_halo<0) Exit(-1);
 
-    if ( !(sd = new SubdomainInfo[numProc]) ) {
-      printf("\tFail to allocate memory\n");
-      return false;
-    }
+    if ( numProc < 1 ) return false;
+    if ( !(sd=allocateSD()) ) return false;
 
     return true;
   }
 
-protected:
+private:
+
+  // @brief SubDomainInfoクラスの確保
+  SubdomainInfo* allocateSD()
+  {
+    return new SubdomainInfo[numProc];
+  }
 
   // @brief 開始インデクス=0の 3D=>1D インデクス変換、ガイドセルは考慮しない場合
   inline int rank_idx_0(const int _I, const int _J, const int _K, const int _NI, const int _NJ)
@@ -409,7 +410,7 @@ public:
                                MPI_Request *req);
 
 
-protected:
+private:
 
   bool send_and_recv(REAL_TYPE* ms,
                      REAL_TYPE* mr,

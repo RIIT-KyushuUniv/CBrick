@@ -126,7 +126,6 @@ bool SubDomain::findParameter()
   Evaluation(&tbl, 1, fp);
 
 
-
   // 決定した分割パラメータをsd[]に保存
   for (int i=0; i<numProc; i++) {
     score_tbl* p = &tbl.score[i];
@@ -146,6 +145,7 @@ bool SubDomain::findParameter()
   head[0] = sd[myRank].hd[0];
   head[1] = sd[myRank].hd[1];
   head[2] = sd[myRank].hd[2];
+
 
 
 #ifdef _DEBUG
@@ -184,7 +184,6 @@ bool SubDomain::findParameter()
 bool SubDomain::findOptimalDivision()
 {
   if (div_mode == 1) return findParameter();
-
 
 
   FILE* fp=NULL;

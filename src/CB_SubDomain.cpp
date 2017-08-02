@@ -148,7 +148,7 @@ bool SubDomain::findParameter()
 
 
 
-#ifdef _DEBUG
+
   Hostonly_ {
     fprintf(fp, "\t    Rank :       I       J       K :    sz_X    sz_Y    sz_Z :    hd_X    hd_Y    hd_Z\n");
     for (int k=0; k<G_div[2]; k++) {
@@ -163,7 +163,7 @@ bool SubDomain::findParameter()
       }
     }
   }
-#endif // _DEBUG
+
 
   // ワーク配列の後始末
   if ( tbl.score ) delete [] tbl.score;
@@ -401,7 +401,7 @@ bool SubDomain::findOptimalDivision()
   head[2] = sd[myRank].hd[2];
 
 
-#ifdef _DEBUG
+
   Hostonly_ {
     fprintf(fp, "\t    Rank :       I       J       K :    sz_X    sz_Y    sz_Z :    hd_X    hd_Y    hd_Z\n");
     for (int k=0; k<G_div[2]; k++) {
@@ -416,7 +416,7 @@ bool SubDomain::findOptimalDivision()
       }
     }
   }
-#endif // _DEBUG
+
 
   // ワーク配列の後始末
   for (int i=0; i<tbl_size; i++) {

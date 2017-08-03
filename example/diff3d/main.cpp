@@ -50,7 +50,8 @@ void usage()
   printf("\tdt;       Time increment of time marching (non-dimensional)\n");
   printf("\talpha;    Coefficient of diffusion (non-dimensional)\n");
   printf("\tlaststep; Time step to calculate\n");
-  printf("\tfileout;  Interval for writing a file\n\n");
+  printf("\tfileout;  Interval for writing a file\n");
+  printf("\tcomm.;    Communication mode (0-blocking, 1-nonblocking)\n\n");
 }
 
 

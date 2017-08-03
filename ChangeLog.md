@@ -1,9 +1,15 @@
 # CBrick
 
 ## TODO
+- Nonblocking communication has a bug. Use non-blocking.
 
 
 ## REVISION HISTORY
+
+---
+- 2017-08-03 Version 0.7.2
+  - found bug in blocking communication method, open issue.
+
 
 ---
 - 2017-08-03 Version 0.7.1

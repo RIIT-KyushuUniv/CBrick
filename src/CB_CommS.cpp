@@ -34,44 +34,20 @@ bool SubDomain::initComm()
   f_sz[1] = (size[0]+2*gc) * (size[2]+2*gc) * gc;
   f_sz[2] = (size[0]+2*gc) * (size[1]+2*gc) * gc;
 
-  if ( !(f_xms = new REAL_TYPE [f_sz[0]]) ) {
-    return false;
-  }
-  if ( !(f_xmr = new REAL_TYPE [f_sz[0]]) ) {
-    return false;
-  }
-  if ( !(f_xps = new REAL_TYPE [f_sz[0]]) ) {
-    return false;
-  }
-  if ( !(f_xpr = new REAL_TYPE [f_sz[0]]) ) {
-    return false;
-  }
+  if ( !(f_xms = new REAL_TYPE [f_sz[0]]) ) return false;
+  if ( !(f_xmr = new REAL_TYPE [f_sz[0]]) ) return false;
+  if ( !(f_xps = new REAL_TYPE [f_sz[0]]) ) return false;
+  if ( !(f_xpr = new REAL_TYPE [f_sz[0]]) ) return false;
 
-  if ( !(f_yms = new REAL_TYPE [f_sz[1]]) ) {
-    return false;
-  }
-  if ( !(f_ymr = new REAL_TYPE [f_sz[1]]) ) {
-    return false;
-  }
-  if ( !(f_yps = new REAL_TYPE [f_sz[1]]) ) {
-    return false;
-  }
-  if ( !(f_ypr = new REAL_TYPE [f_sz[1]]) ) {
-    return false;
-  }
+  if ( !(f_yms = new REAL_TYPE [f_sz[1]]) ) return false;
+  if ( !(f_ymr = new REAL_TYPE [f_sz[1]]) ) return false;
+  if ( !(f_yps = new REAL_TYPE [f_sz[1]]) ) return false;
+  if ( !(f_ypr = new REAL_TYPE [f_sz[1]]) ) return false;
 
-  if ( !(f_zms = new REAL_TYPE [f_sz[2]]) ) {
-    return false;
-  }
-  if ( !(f_zmr = new REAL_TYPE [f_sz[2]]) ) {
-    return false;
-  }
-  if ( !(f_zps = new REAL_TYPE [f_sz[2]]) ) {
-    return false;
-  }
-  if ( !(f_zpr = new REAL_TYPE [f_sz[2]]) ) {
-    return false;
-  }
+  if ( !(f_zms = new REAL_TYPE [f_sz[2]]) ) return false;
+  if ( !(f_zmr = new REAL_TYPE [f_sz[2]]) ) return false;
+  if ( !(f_zps = new REAL_TYPE [f_sz[2]]) ) return false;
+  if ( !(f_zpr = new REAL_TYPE [f_sz[2]]) ) return false;
 
   return true;
 }
@@ -88,7 +64,6 @@ bool SubDomain::Comm_S_blocking(REAL_TYPE* src, const int gc_comm)
   int imax = size[0];
   int jmax = size[1];
   int kmax = size[2];
-  int gc = halo_width;
 
   // 実際に送受信するメッセージサイズ
   int msz[3];
@@ -101,8 +76,8 @@ bool SubDomain::Comm_S_blocking(REAL_TYPE* src, const int gc_comm)
   int nIDp = comm_tbl[X_plus];
 
   packX(src, gc_comm, f_xms, f_xps, nIDm, nIDp);
-  if ( !send_and_recv(f_xms, f_xmr, f_xps, f_xpr, msz[0], nIDm, nIDp) ) return false;
-  //if ( !sendrecv(f_xms, f_xmr, f_xps, f_xpr, msz[0], nIDm, nIDp) ) return false;
+  //if ( !send_and_recv(f_xms, f_xmr, f_xps, f_xpr, msz[0], nIDm, nIDp) ) return false;
+  if ( !sendrecv(f_xms, f_xmr, f_xps, f_xpr, msz[0], nIDm, nIDp) ) return false;
   unpackX(src, gc_comm, f_xmr, f_xpr, nIDm, nIDp);
 
 
@@ -111,8 +86,8 @@ bool SubDomain::Comm_S_blocking(REAL_TYPE* src, const int gc_comm)
   nIDp = comm_tbl[Y_plus];
 
   packY(src, gc_comm, f_yms, f_yps, nIDm, nIDp);
-  if ( !send_and_recv(f_yms, f_ymr, f_yps, f_ypr, msz[1], nIDm, nIDp) ) return false;
-  //if ( !sendrecv(f_yms, f_ymr, f_yps, f_ypr, msz[1], nIDm, nIDp) ) return false;
+  //if ( !send_and_recv(f_yms, f_ymr, f_yps, f_ypr, msz[1], nIDm, nIDp) ) return false;
+  if ( !sendrecv(f_yms, f_ymr, f_yps, f_ypr, msz[1], nIDm, nIDp) ) return false;
   unpackY(src, gc_comm, f_ymr, f_ypr, nIDm, nIDp);
 
 
@@ -121,8 +96,8 @@ bool SubDomain::Comm_S_blocking(REAL_TYPE* src, const int gc_comm)
   nIDp = comm_tbl[Z_plus];
 
   packZ(src, gc_comm, f_zms, f_zps, nIDm, nIDp);
-  if ( !send_and_recv(f_zms, f_zmr, f_zps, f_zpr, msz[2], nIDm, nIDp) ) return false;
-  //if ( !sendrecv(f_zms, f_zmr, f_zps, f_zpr, msz[2], nIDm, nIDp) ) return false;
+  //if ( !send_and_recv(f_zms, f_zmr, f_zps, f_zpr, msz[2], nIDm, nIDp) ) return false;
+  if ( !sendrecv(f_zms, f_zmr, f_zps, f_zpr, msz[2], nIDm, nIDp) ) return false;
   unpackZ(src, gc_comm, f_zmr, f_zpr, nIDm, nIDp);
 
   return true;
@@ -582,6 +557,7 @@ void SubDomain::unpackZ(REAL_TYPE *array,
  * @brief スカラー変数のノンブロッキング通信
  * @param [in,out]  src     スカラー変数
  * @param [in]      gc_comm 実際に通信する通信面数
+ * @param [in,out]  req     MPI_Request
  * @retval true-success, false-fail
  */
 bool SubDomain::Comm_S_nonblocking(REAL_TYPE* src,
@@ -591,7 +567,6 @@ bool SubDomain::Comm_S_nonblocking(REAL_TYPE* src,
   int imax = size[0];
   int jmax = size[1];
   int kmax = size[2];
-  int gc = halo_width;
 
   // Communication identifier
   for (int i=0; i<12; i++) req[i] = MPI_REQUEST_NULL;

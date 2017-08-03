@@ -18,7 +18,10 @@
  * @todo sort >> k>j スレッド化のためのオプション、オプションの与え方
  */
 
+#ifndef DISABLE_MPI // CBrick自体は並列のみであるが、他のツールでインクルードして逐次ビルドする場合の処理
 #include <mpi.h>
+#endif
+
 #include <string>
 #include <stdlib.h>
 #include "CB_Define.h"

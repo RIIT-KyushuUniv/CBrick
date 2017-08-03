@@ -7,6 +7,11 @@
 ## REVISION HISTORY
 
 ---
+- 2017-08-03 Version 0.7.3
+  - add #ifndef DISABLE_MPI for serial build of applications
+
+
+---
 - 2017-08-03 Version 0.7.2
   - found bug in blocking communication method, open issue.
 

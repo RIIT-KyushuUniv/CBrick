@@ -48,6 +48,10 @@ $ sudo make install
 
 >  Specify the type of floating point. If this option is omitted, the default is float.
 
+`-D with_DEBUG=` {no|yes}
+
+`-D with_example=` {no|yes}
+
 
 
 ## Configure Examples

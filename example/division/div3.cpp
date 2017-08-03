@@ -43,7 +43,7 @@ int main(int argc, char * argv[]) {
   if (myrank==0) printf("%d x %d x %d / %d\n", m_sz[0], m_sz[1], m_sz[2], np);
 
   // priorityはデフォルト
-  SubDomain D(m_sz, gc, np, myrank, proc_grp, MPI_COMM_WORLD, "node", "Cindex", 0);
+  SubDomain D(m_sz, gc, np, myrank, proc_grp, MPI_COMM_WORLD, "node", "Cindex");
 
   if ( !D.findOptimalDivision() ) MPI_Abort(MPI_COMM_WORLD, -1);
 

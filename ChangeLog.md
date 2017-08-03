@@ -6,6 +6,11 @@
 ## REVISION HISTORY
 
 ---
+- 2017-08-03 Version 0.7.1
+  - expire use_NB
+
+
+---
 - 2017-08-03 Version 0.7.0
   - modify G2L_index()
 

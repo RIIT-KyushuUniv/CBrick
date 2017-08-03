@@ -128,7 +128,6 @@ public:
   int ranking_opt;      ///< ランキングのオプション　（0=cubical, default, 1=vector）
   int div_mode;         ///< 分割モード (0=自動、1=指定)
   int f_index;          ///< Findex (0-OFF, 1-ON) @note 関連するところは head index
-  int use_NB;           ///< ノンブロッキング通信の利用　（0-no_use, 1-use）
 
 
 protected:
@@ -161,7 +160,6 @@ public:
     ranking_opt = 0;
     div_mode = 0;
     f_index = 0;
-    use_NB = 0;
 
     for (int i=0; i<NOFACE; i++) comm_tbl[i] = -1;
 
@@ -197,7 +195,6 @@ public:
             MPI_Comm m_comm,
             std::string m_type,
             std::string m_idxtyp,
-            int m_useNB,
             int priority=0) {
 
     this->G_size[0]   = m_gsz[0];
@@ -210,7 +207,6 @@ public:
     this->myRank      = m_myrank;
     this->mpi_comm    = m_comm;
     this->ranking_opt = priority;
-    this->use_NB      = m_useNB;
 
     if (m_type == "node" || m_type == "cell") {
       // ok
@@ -241,20 +237,18 @@ public:
   ~SubDomain() {
     if ( sd ) delete [] sd;
 
-    if ( use_NB == 1 ) {
-      if ( f_xms ) delete [] f_xms;
-      if ( f_xmr ) delete [] f_xmr;
-      if ( f_xps ) delete [] f_xps;
-      if ( f_xpr ) delete [] f_xpr;
-      if ( f_yms ) delete [] f_yms;
-      if ( f_ymr ) delete [] f_ymr;
-      if ( f_yps ) delete [] f_yps;
-      if ( f_ypr ) delete [] f_ypr;
-      if ( f_zms ) delete [] f_zms;
-      if ( f_zmr ) delete [] f_zmr;
-      if ( f_zps ) delete [] f_zps;
-      if ( f_zpr ) delete [] f_zpr;
-    }
+    if ( f_xms ) delete [] f_xms;
+    if ( f_xmr ) delete [] f_xmr;
+    if ( f_xps ) delete [] f_xps;
+    if ( f_xpr ) delete [] f_xpr;
+    if ( f_yms ) delete [] f_yms;
+    if ( f_ymr ) delete [] f_ymr;
+    if ( f_yps ) delete [] f_yps;
+    if ( f_ypr ) delete [] f_ypr;
+    if ( f_zms ) delete [] f_zms;
+    if ( f_zmr ) delete [] f_zmr;
+    if ( f_zps ) delete [] f_zps;
+    if ( f_zpr ) delete [] f_zpr;
   }
 
 // CB_SubDomain.cpp
@@ -298,7 +292,6 @@ public:
                     MPI_Comm m_comm,
                     std::string m_type,
                     std::string m_idxtyp,
-                    int m_useNB,
                     int priority=0)
   {
     G_size[0]   = m_gsz[0];
@@ -311,7 +304,6 @@ public:
     myRank      = m_myrank;
     mpi_comm    = m_comm;
     ranking_opt = priority;
-    use_NB      = m_useNB;
 
     if (m_type == "node" || m_type == "cell") {
       // ok

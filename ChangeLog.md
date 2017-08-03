@@ -6,6 +6,11 @@
 ## REVISION HISTORY
 
 ---
+- 2017-08-03 Version 0.6.9
+  - modify getHeadIndex()
+
+
+---
 - 2017-08-02 Version 0.6.8
   - write size, head info into div_process.txt
 

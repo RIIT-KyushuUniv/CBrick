@@ -923,7 +923,9 @@ int SubDomain::sortCube(cntl_tbl* t, const int c_sz, FILE* fp)
 /*
  * @fn getHeadIndex
  * @brief 各サブドメインの先頭のグローバルインデクスを計算
- * @note インデクスは、ゼロから開始、cell, nodeとも同じ値になる
+ * @note インデクスは、ゼロから開始
+ * cell >> hd[i] = hd[i-1] + sz[i-1]
+ * node >> hd[i] = hd[i-1] + sz[i-1] - 1
  *
  * Rank |     0     |     1     |     2     |    3   |
  *        0           4           8          12        << head
@@ -942,6 +944,8 @@ void SubDomain::getHeadIndex()
   int ny = G_div[1];
   int nz = G_div[2];
 
+  int a = ( grid_type == "node") ? 1 : 0;
+
   // i=0の位置のプロセスのHeadIndexを0に初期化する
   i = 0;
   for (k=0; k<nz; k++) {
@@ -954,9 +958,9 @@ void SubDomain::getHeadIndex()
   for (k=0; k<nz; k++) {
     for (j=0; j<ny; j++) {
       for (i=1; i<nx; i++) {
-        int r0 = rank_idx_0(i,   j, k, nx, ny);
+        int r  = rank_idx_0(i,   j, k, nx, ny);
         int r1 = rank_idx_0(i-1, j, k, nx, ny);
-        sd[r0].hd[0] = sd[r1].hd[0] + sd[r1].sz[0];
+        sd[r].hd[0] = sd[r1].hd[0] + sd[r1].sz[0] - a;
       }
     }
   }
@@ -973,9 +977,9 @@ void SubDomain::getHeadIndex()
   for (k=0; k<nz; k++) {
     for (i=0; i<nx; i++) {
       for (j=1; j<ny; j++) {
-        int r0 = rank_idx_0(i, j,   k, nx, ny);
+        int r  = rank_idx_0(i, j,   k, nx, ny);
         int r1 = rank_idx_0(i, j-1, k, nx, ny);
-        sd[r0].hd[1] = sd[r1].hd[1] + sd[r1].sz[1];
+        sd[r].hd[1] = sd[r1].hd[1] + sd[r1].sz[1] - a;
       }
     }
   }
@@ -992,9 +996,9 @@ void SubDomain::getHeadIndex()
   for (j=0; j<ny; j++) {
     for (i=0; i<nx; i++) {
       for (k=1; k<nz; k++) {
-        int r0 = rank_idx_0(i, j, k,   nx, ny);
+        int r  = rank_idx_0(i, j, k,   nx, ny);
         int r1 = rank_idx_0(i, j, k-1, nx, ny);
-        sd[r0].hd[2] = sd[r1].hd[2] + sd[r1].sz[2];
+        sd[r].hd[2] = sd[r1].hd[2] + sd[r1].sz[2] - a;
       }
     }
   }

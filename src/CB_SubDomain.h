@@ -19,7 +19,11 @@
  */
 
 #ifndef DISABLE_MPI // CBrick自体は並列のみであるが、他のツールでインクルードして逐次ビルドする場合の処理
-#include <mpi.h>
+  #include <mpi.h>
+#else
+  // stubとしてint型を定義
+  typedef int MPI_Comm;
+  typedef int MPI_Request;
 #endif
 
 #include <string>

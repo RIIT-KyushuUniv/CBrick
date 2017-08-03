@@ -944,7 +944,7 @@ void SubDomain::getHeadIndex()
   int ny = G_div[1];
   int nz = G_div[2];
 
-  int a = ( grid_type == "node") ? 1 : 0;
+  int a = ( grid_type == "node" ) ? 1 : 0;
 
   // i=0の位置のプロセスのHeadIndexを0に初期化する
   i = 0;
@@ -1129,26 +1129,39 @@ bool SubDomain::createRankTable()
  * @param [in]   Gi   Global index
  * @param [out]  Li   Local index
  * @retval true-自領域内に存在
+ *
+ * Rank |     0     |     1     |     2     |    3   |
+ *        1           5           9          13        << head in F
+ *        1  2  3  4  5  6  7  8  9 10 11 12 13 14 15  << Global in F
+ *        1  2  3  4  1  2  3  4  1  2  3  4  1  2  3  << Local in F
+ *
+ *        0           4           8          12        << head in C
+ *        0  1  2  3  4  5  6  7  8  9 10 11 12 13 14  << Global in C
+ * cell   0  1  2  3  0  1  2  3  0  1  2  3  0  1  2  << Local in C
+ *      |--+--+--+--|--+--+--+--|--+--+--+--|--+--+--|
+ * node 0  1  2  3  4           0  1  2  3  4          << Local in C
+ *                  0  1  2  3  4           0  1  2  3 << Local in C
+ *      0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 << Global in C
+ *      0           4           8          12          << head in C
+ *
+ *      1  2  3  4  5           1  2  3  4  5          << Local in F
+ *                  1  2  3  4  5           1  2  3  4 << Local in F
+ *      1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 << Global in F
+ *      1           5           9          13          << head in F
+ *
+ * @note headとの相対位置なので、cell/nodeとも同じ式で計算するが、CとFで異なる
  */
 bool SubDomain::G2L_index(const int* Gi, int* Li)
 {
-  // headとの相対位置なので、cell/nodeとも同じ式で計算
-  Li[0] = Gi[0] - head[0];
-  Li[1] = Gi[1] - head[1];
-  Li[2] = Gi[2] - head[2];
+  int a = f_index; // 1(F), 0(C)
 
-  // 内外判定
-  if (f_index == 1)
-  {
-    if( Li[0] < 1 || Li[0] > size[0] ) return false;
-    if( Li[1] < 1 || Li[1] > size[1] ) return false;
-    if( Li[2] < 1 || Li[2] > size[2] ) return false;
-  }
-  else {
-    if( Li[0] < 0 || Li[0] >= size[0] ) return false;
-    if( Li[1] < 0 || Li[1] >= size[1] ) return false;
-    if( Li[2] < 0 || Li[2] >= size[2] ) return false;
-  }
+  Li[0] = Gi[0] - head[0] + a;
+  Li[1] = Gi[1] - head[1] + a;
+  Li[2] = Gi[2] - head[2] + a;
+
+  if( Li[0] < a || Li[0] > size[0] + a-1 ) return false;
+  if( Li[1] < a || Li[1] > size[1] + a-1 ) return false;
+  if( Li[2] < a || Li[2] > size[2] + a-1 ) return false;
 
   return true;
 }

@@ -21,7 +21,7 @@ link_directories(
 ## Cell: G_size, numProc
 
 add_executable(div1 div1.cpp)
-target_link_libraries(div1 -lCBrick)
+target_link_libraries(div1 -lCBrick_f)
 set (test_parameters -np 16 "./div1" "30" "24" "24")
 add_test(NAME test1 COMMAND "mpirun" ${test_parameters})
 
@@ -29,7 +29,7 @@ add_test(NAME test1 COMMAND "mpirun" ${test_parameters})
 ## Cell: G_size, G_div, numProc
 
 add_executable(div2 div2.cpp)
-target_link_libraries(div2 -lCBrick)
+target_link_libraries(div2 -lCBrick_f)
 set (test_parameters -np 16 "./div2" "30" "24" "24" "2" "4" "2")
 add_test(NAME test2 COMMAND "mpirun" ${test_parameters})
 
@@ -37,7 +37,7 @@ add_test(NAME test2 COMMAND "mpirun" ${test_parameters})
 ## Node: G_size, numProc
 
 add_executable(div3 div3.cpp)
-target_link_libraries(div3 -lCBrick)
+target_link_libraries(div3 -lCBrick_f)
 set (test_parameters -np 16 "./div3" "30" "24" "24")
 add_test(NAME test3 COMMAND "mpirun" ${test_parameters})
 
@@ -45,6 +45,6 @@ add_test(NAME test3 COMMAND "mpirun" ${test_parameters})
 ## Node: G_size, G_div, numProc
 
 add_executable(div4 div4.cpp)
-target_link_libraries(div4 -lCBrick)
+target_link_libraries(div4 -lCBrick_f)
 set (test_parameters -np 16 "./div4" "30" "24" "24" "2" "4" "2")
 add_test(NAME test4 COMMAND "mpirun" ${test_parameters})

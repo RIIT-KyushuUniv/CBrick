@@ -37,7 +37,7 @@ REAL_TYPE* alloc_real(const size_t sz)
 void usage()
 {
   printf("Usage:\n");
-  //printf("\t$ ./diff3d config_file\n\n");
+
   printf("\t$ mpirun -np n diff3d config_file\n\n");
   printf("\tContents of config_file\n");
   printf("\tnx;       Number of cells for x-dir.\n");
@@ -46,7 +46,6 @@ void usage()
   printf("\tXdiv;     Number of division for x-dir.\n");
   printf("\tYdiv;     Number of division for y-dir.\n");
   printf("\tZdiv;     Number of division for z-dir.\n");
-  //printf("\tdh;       Mesh width (isotropic, non-dimensional)\n");
   printf("\tdt;       Time increment of time marching (non-dimensional)\n");
   printf("\talpha;    Coefficient of diffusion (non-dimensional)\n");
   printf("\tlaststep; Time step to calculate\n");
@@ -65,11 +64,11 @@ void usage()
 // @param [in]     myRank Rank ID of my own
 // @retval 0-fail, 1-success
 bool read_config(Phys_Param* p,
-                         Cntl_Param* c,
-                         int* m_sz,
-                         int* div,
-                         const char* fname,
-                         const int myRank)
+                 Cntl_Param* c,
+                 int* m_sz,
+                 int* div,
+                 const char* fname,
+                 const int myRank)
 {
   // config fileのオープン
   Hostonly_
@@ -84,6 +83,7 @@ bool read_config(Phys_Param* p,
 
     // for string
     char buf[1024];
+    float m_dt=0.0, m_alp=0.0;
 
     fscanf(fp, "%d %s", &m_sz[0], buf);
     fscanf(fp, "%d %s", &m_sz[1], buf);
@@ -93,8 +93,8 @@ bool read_config(Phys_Param* p,
     fscanf(fp, "%d %s", &div[1], buf);
     fscanf(fp, "%d %s", &div[2], buf);
 
-    fscanf(fp, "%e %s", &p->dt, buf);
-    fscanf(fp, "%e %s", &p->alpha, buf);
+    fscanf(fp, "%e %s", &m_dt, buf);
+    fscanf(fp, "%e %s", &m_alp, buf);
 
     fscanf(fp, "%d %s", &c->laststep, buf);
     fscanf(fp, "%d %s", &c->fileout, buf);
@@ -104,6 +104,8 @@ bool read_config(Phys_Param* p,
     fp = NULL;
 
     p->dh = 1.0 / (REAL_TYPE)m_sz[0];
+    p->dt = (REAL_TYPE)m_dt;
+    p->alpha = (REAL_TYPE)m_alp;
 
     printf("\nPARAMETERS\n");
     printf("\tnx   = %4d ;         Number of cells for x-dir.\n", m_sz[0]);
@@ -176,9 +178,6 @@ bool read_config(Phys_Param* p,
   p->dt    = param[1];
   p->alpha = param[2];
 
-#if 0
-  printf("rank=%3d %10.6e %10.6e %10.6e\n", myRank, p->dh, p->dt, p->alpha);
-#endif
 
 
   MPI_Barrier(MPI_COMM_WORLD);
@@ -195,14 +194,6 @@ bool read_config(Phys_Param* p,
   c->fileout  = cntl[7];
   c->blocking = cntl[8];
 
-
-#if 0
-  printf("rank=%3d %4d %4d %4d %4d %4d %4d %8d %8d\n",
-         myRank,
-         m_sz[0], m_sz[1], m_sz[2],
-         div[0], div[1], div[2],
-         c->laststep, c->fileout);
-#endif
 
   // release buffer
   if ( param ) delete [] param;

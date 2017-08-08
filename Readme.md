@@ -32,6 +32,11 @@ $ sudo make install
 ~~~
 
 
+#### Note
+
+This Cmake generates CBrick_f for float, and CBrick_d for double precision.
+
+
 ### Options
 
 `-D INSTALL_DIR=` *Install_directory*
@@ -44,9 +49,6 @@ $ sudo make install
 
 >  This option makes OpenMP directives effect. Default is yes.
 
-`-D real_type=` {float | double}
-
->  Specify the type of floating point. If this option is omitted, the default is float.
 
 `-D with_DEBUG=` {no|yes}
 

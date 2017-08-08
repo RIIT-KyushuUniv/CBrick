@@ -17,8 +17,6 @@
 #
 # -D INSTALL_DIR=install_directory
 #
-# -D real_type=(float|double)
-#
 # -D enable_OPENMP=(no|yes)
 #
 # -D with_example= {no|yes}
@@ -33,7 +31,6 @@ cmake_minimum_required(VERSION 2.6)
 #######
 
 option(enable_OPENMP "Enable OpenMP" "OFF")
-option(real_type "Type of floating point" "OFF")
 option(enable_DEBUG "Debug mode" "OFF")
 
 
@@ -61,8 +58,8 @@ else()
 endif()
 
 #######
-set(PROJECT_VERSION "0.7.4")
-set(LIB_REVISION "20170803_1630")
+set(PROJECT_VERSION "0.8.0")
+set(LIB_REVISION "20170808_0930")
 #######
 
 
@@ -96,10 +93,6 @@ if (enable_OPENMP STREQUAL "yes")
 endif()
 
 
-# Real type
-precision()
-
-
 #######
 # Display options
 #######
@@ -115,7 +108,6 @@ if (with_example)
 endif()
 
 message( STATUS "OpenMP support        : "      ${enable_OPENMP})
-message( STATUS "Type of floating point: "      ${real_type})
 message( STATUS "Debug mode            : "      ${enable_DEBUG})
 message( STATUS "Example               : "      ${with_example})
 message(" ")

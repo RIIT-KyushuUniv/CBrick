@@ -295,8 +295,8 @@ int main(int argc, char * argv[])
   if ( !(w=alloc_real(len)) ) MPI_Abort(MPI_COMM_WORLD, -1);
 
 
-  // 通信バッファ確保
-  D.initComm();
+  // 通信バッファ確保 scalar
+  D.initComm(1);
 
   // Communication identifier for nonblocking
   MPI_Request req[12];
@@ -305,17 +305,13 @@ int main(int argc, char * argv[])
   // initialization
   initialize_(lsz, &gc, q, w);
 
-  if ( P_cntl.blocking == 1) {
-    D.Comm_S_nonblocking(q, gc, req);
-    D.Comm_S_wait_nonblocking(q, gc, req);
 
-    D.Comm_S_nonblocking(w, gc, req);
-    D.Comm_S_wait_nonblocking(w, gc, req);
-  }
-  else {
-    D.Comm_S_blocking(q, gc);
-    D.Comm_S_blocking(w, gc);
-  }
+  D.Comm_S_nonblocking(q, gc, req);
+  D.Comm_S_wait_nonblocking(q, gc, req);
+
+  D.Comm_S_nonblocking(w, gc, req);
+  D.Comm_S_wait_nonblocking(w, gc, req);
+
 
 
   REAL_TYPE time = 0.0;
@@ -334,13 +330,10 @@ int main(int argc, char * argv[])
     // boundary condition
     bc_(lsz, &gc, q, &P_phys.dh, P_phys.org, D.comm_tbl);
 
-    if ( P_cntl.blocking == 1) {
-      D.Comm_S_nonblocking(q, gc, req);
-      D.Comm_S_wait_nonblocking(q, gc, req);
-    }
-    else {
-      D.Comm_S_blocking(q, gc);
-    }
+
+    D.Comm_S_nonblocking(q, gc, req);
+    D.Comm_S_wait_nonblocking(q, gc, req);
+
 
     // time marching
     res = 0.0;
@@ -357,14 +350,9 @@ int main(int argc, char * argv[])
 
     res = sqrt(res);
 
-    if ( P_cntl.blocking == 1) {
-      D.Comm_S_nonblocking(q, gc, req);
-      D.Comm_S_wait_nonblocking(q, gc, req);
-    }
-    else {
-      D.Comm_S_blocking(q, gc);
-    }
 
+    D.Comm_S_nonblocking(q, gc, req);
+    D.Comm_S_wait_nonblocking(q, gc, req);
 
 
     // display history

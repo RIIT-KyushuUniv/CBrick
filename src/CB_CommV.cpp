@@ -17,24 +17,24 @@
 #include "CB_SubDomain.h"
 
 
+
 /*
- * @fn Comm_V_blocking
- * @brief ベクトル変数（i,j,k,l）型のブロッキング通信
+ * @brief ベクトル変数のノンブロッキング通信
  * @param [in,out]  src     ベクトル変数
  * @param [in]      gc_comm 実際に通信する通信面数
+ * @param [in,out]  req     MPI_Request
  * @retval true-success, false-fail
  */
-bool SubDomain::Comm_V_blocking(REAL_TYPE* src, const int gc_comm)
+bool SubDomain::Comm_V_nonblocking(REAL_TYPE* src,
+                                   const int gc_comm,
+                                   MPI_Request *req)
 {
   int imax = size[0];
   int jmax = size[1];
   int kmax = size[2];
-  int gc = halo_width;
 
-  // 各成分の先頭アドレス
-  size_t p_u = 0;
-  size_t p_v = (imax+2*gc) * (jmax+2*gc) * (kmax+2*gc);
-  size_t p_w = (imax+2*gc) * (jmax+2*gc) * (kmax+2*gc) * 2;
+  // Communication identifier
+  for (int i=0; i<12; i++) req[i] = MPI_REQUEST_NULL;
 
   // 実際に送受信するメッセージサイズ
   int msz[3];
@@ -46,60 +46,60 @@ bool SubDomain::Comm_V_blocking(REAL_TYPE* src, const int gc_comm)
   int nIDm = comm_tbl[X_minus];
   int nIDp = comm_tbl[X_plus];
 
-  packX(&src[p_u], gc_comm, f_xms, f_xps, nIDm, nIDp);
-  if ( !send_and_recv(f_xms, f_xmr, f_xps, f_xpr, msz[0], nIDm, nIDp) ) return false;
-  //if ( !sendrecv(f_xms, f_xmr, f_xps, f_xpr, msz[0], nIDm, nIDp) ) return false;
-  unpackX(&src[p_u], gc_comm, f_xmr, f_xpr, nIDm, nIDp);
-
-  packX(&src[p_v], gc_comm, f_xms, f_xps, nIDm, nIDp);
-  if ( !send_and_recv(f_xms, f_xmr, f_xps, f_xpr, msz[0], nIDm, nIDp) ) return false;
-  //if ( !sendrecv(f_xms, f_xmr, f_xps, f_xpr, msz[0], nIDm, nIDp) ) return false;
-  unpackX(&src[p_v], gc_comm, f_xmr, f_xpr, nIDm, nIDp);
-
-  packX(&src[p_w], gc_comm, f_xms, f_xps, nIDm, nIDp);
-  if ( !send_and_recv(f_xms, f_xmr, f_xps, f_xpr, msz[0], nIDm, nIDp) ) return false;
-  //if ( !sendrecv(f_xms, f_xmr, f_xps, f_xpr, msz[0], nIDm, nIDp) ) return false;
-  unpackX(&src[p_w], gc_comm, f_xmr, f_xpr, nIDm, nIDp);
-
+  pack_VX(src, gc_comm, f_xms, f_xps, nIDm, nIDp);
+  if ( !IsendIrecv(f_xms, f_xmr, f_xps, f_xpr, msz[0], nIDm, nIDp, &req[0]) ) return false;
 
   // Y direction
   nIDm = comm_tbl[Y_minus];
   nIDp = comm_tbl[Y_plus];
 
-  packY(&src[p_u], gc_comm, f_yms, f_yps, nIDm, nIDp);
-  if ( !send_and_recv(f_yms, f_ymr, f_yps, f_ypr, msz[1], nIDm, nIDp) ) return false;
-  //if ( !sendrecv(f_yms, f_ymr, f_yps, f_ypr, msz[1], nIDm, nIDp) ) return false;
-  unpackY(&src[p_u], gc_comm, f_ymr, f_ypr, nIDm, nIDp);
-
-  packY(&src[p_v], gc_comm, f_yms, f_yps, nIDm, nIDp);
-  if ( !send_and_recv(f_yms, f_ymr, f_yps, f_ypr, msz[1], nIDm, nIDp) ) return false;
-  //if ( !sendrecv(f_yms, f_ymr, f_yps, f_ypr, msz[1], nIDm, nIDp) ) return false;
-  unpackY(&src[p_v], gc_comm, f_ymr, f_ypr, nIDm, nIDp);
-
-  packY(&src[p_w], gc_comm, f_yms, f_yps, nIDm, nIDp);
-  if ( !send_and_recv(f_yms, f_ymr, f_yps, f_ypr, msz[1], nIDm, nIDp) ) return false;
-  //if ( !sendrecv(f_yms, f_ymr, f_yps, f_ypr, msz[1], nIDm, nIDp) ) return false;
-  unpackY(&src[p_w], gc_comm, f_ymr, f_ypr, nIDm, nIDp);
-
+  pack_VY(src, gc_comm, f_yms, f_yps, nIDm, nIDp);
+  if ( !IsendIrecv(f_yms, f_ymr, f_yps, f_ypr, msz[1], nIDm, nIDp, &req[4]) ) return false;
 
   // Z direction
   nIDm = comm_tbl[Z_minus];
   nIDp = comm_tbl[Z_plus];
 
-  packZ(&src[p_u], gc_comm, f_zms, f_zps, nIDm, nIDp);
-  if ( !send_and_recv(f_zms, f_zmr, f_zps, f_zpr, msz[2], nIDm, nIDp) ) return false;
-  //if ( !sendrecv(f_zms, f_zmr, f_zps, f_zpr, msz[2], nIDm, nIDp) ) return false;
-  unpackZ(&src[p_u], gc_comm, f_zmr, f_zpr, nIDm, nIDp);
+  pack_VZ(src, gc_comm, f_zms, f_zps, nIDm, nIDp);
+  if ( !IsendIrecv(f_zms, f_zmr, f_zps, f_zpr, msz[2], nIDm, nIDp, &req[8]) ) return false;
 
-  packZ(&src[p_v], gc_comm, f_zms, f_zps, nIDm, nIDp);
-  if ( !send_and_recv(f_zms, f_zmr, f_zps, f_zpr, msz[2], nIDm, nIDp) ) return false;
-  //if ( !sendrecv(f_zms, f_zmr, f_zps, f_zpr, msz[2], nIDm, nIDp) ) return false;
-  unpackZ(&src[p_v], gc_comm, f_zmr, f_zpr, nIDm, nIDp);
+  return true;
+}
 
-  packZ(&src[p_w], gc_comm, f_zms, f_zps, nIDm, nIDp);
-  if ( !send_and_recv(f_zms, f_zmr, f_zps, f_zpr, msz[2], nIDm, nIDp) ) return false;
-  //if ( !sendrecv(f_zms, f_zmr, f_zps, f_zpr, msz[2], nIDm, nIDp) ) return false;
-  unpackZ(&src[p_w], gc_comm, f_zmr, f_zpr, nIDm, nIDp);
+
+
+/*
+ * @brief ベクトル変数のノンブロッキング通信
+ * @param [in,out]  dest    ベクトル変数
+ * @param [in]      gc_comm 実際に通信する通信面数
+ * @param [out]     req     Array of MPI request
+ * @retval true-success, false-fail
+ */
+bool SubDomain::Comm_V_wait_nonblocking(REAL_TYPE* dest,
+                                        const int gc_comm,
+                                        MPI_Request *req)
+{
+  MPI_Status stat[4];
+
+  //// X face ////
+  int nIDm = comm_tbl[X_minus];
+  int nIDp = comm_tbl[X_plus];
+  if ( MPI_SUCCESS != MPI_Waitall( 4, &req[0], stat ) ) return false;
+  unpack_VX(dest, gc_comm, f_xmr, f_xpr, nIDm, nIDp);
+
+
+  //// Y face ////
+  nIDm = comm_tbl[Y_minus];
+  nIDp = comm_tbl[Y_plus];
+  if ( MPI_SUCCESS != MPI_Waitall( 4, &req[4], stat ) ) return false;
+  unpack_VY(dest, gc_comm, f_ymr, f_ypr, nIDm, nIDp);
+
+
+  //// Z face ////
+  nIDm = comm_tbl[Z_minus];
+  nIDp = comm_tbl[Z_plus];
+  if ( MPI_SUCCESS != MPI_Waitall( 4, &req[8], stat ) ) return false;
+  unpack_VZ(dest, gc_comm, f_zmr, f_zpr, nIDm, nIDp);
 
   return true;
 }

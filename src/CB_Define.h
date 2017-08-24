@@ -39,9 +39,6 @@
 
 #define _SIZE_DOUBLE_ 8
 
-#define SINGLE_EPSILON 1.19e-7
-#define DOUBLE_EPSILON 2.22e-16
-
 #define NOFACE 6
 
 #define ON 1
@@ -73,52 +70,6 @@ enum DIRection {
 + (_I+_VC) \
 )
 
-/* バッファへのインデクス変換 (I方向)
- *  @param [in] _I  i方向インデクス
- *  @param [in] _J  j方向インデクス
- *  @param [in] _K  k方向インデクス
- *  @param [in] _IS i方向の開始点インデクス
- *  @param [in] _NJ j方向インデクスサイズ
- *  @param [in] _VC 実際に送受信する仮想セル数
- *  @return 1次元インデクス
- */
-#define _IDXFX(_I,_J,_K,_IS,_NJ,_VC) \
-( (_K+_VC) * _VC * (_NJ+2*_VC) \
-+ (_J+_VC) * _VC \
-+ (_I-_IS) \
-)
-
-/* バッファへのインデクス変換 (J方向)
- *  @param [in] _I  i方向インデクス
- *  @param [in] _J  j方向インデクス
- *  @param [in] _K  k方向インデクス
- *  @param [in] _NI i方向インデクスサイズ
- *  @param [in] _JS j方向の開始点インデクス
- *  @param [in] _VC 実際に送受信する仮想セル数
- *  @return 1次元インデクス
- */
-#define _IDXFY(_I,_J,_K,_NI,_JS,_VC) \
-( (_K+_VC) * (_NI+2*_VC) * _VC \
-+ (_J-_JS) * (_NI+2*_VC) \
-+ (_I+_VC) \
-)
-
-/* バッファへのインデクス変換 (K方向)
- *  @param [in] _I  i方向インデクス
- *  @param [in] _J  j方向インデクス
- *  @param [in] _K  k方向インデクス
- *  @param [in] _NI i方向インデクスサイズ
- *  @param [in] _NJ j方向インデクスサイズ
- *  @param [in] _KS ｋ方向の開始点インデクス
- *  @param [in] _VC 実際に送受信する仮想セル数
- *  @return 1次元インデクス
- */
-#define _IDXFZ(_I,_J,_K,_NI,_NJ,_KS,_VC) \
-( (_K-_KS) * (_NI+2*_VC) * (_NJ+2*_VC) \
-+ (_J+_VC) * (_NI+2*_VC) \
-+ (_I+_VC) \
-)
-
 
 /** 3次元インデクス(i,j,k) -> 1次元インデクス変換マクロ
  *  @note i,j,kインデクスはF表記
@@ -135,6 +86,25 @@ enum DIRection {
 ( (_K+_VC-1) * (_NI+2*_VC) * (_NJ+2*_VC) \
 + (_J+_VC-1) * (_NI+2*_VC) \
 + (_I+_VC-1) \
+)
+
+
+/** 3次元インデクス(i,j,k,l) -> 1次元インデクス変換マクロ [C version]
+ *  @param [in] _I  i方向インデクス
+ *  @param [in] _J  j方向インデクス
+ *  @param [in] _K  k方向インデクス
+ *  @param [in] _L  ベクトル成分インデクス {0,1,2}
+ *  @param [in] _NI i方向インデクスサイズ
+ *  @param [in] _NJ j方向インデクスサイズ
+ *  @param [in] _NK k方向インデクスサイズ
+ *  @param [in] _VC 仮想セル数
+ *  @return 1次元インデクス
+ */
+#define _IDX_V3D(_I,_J,_K,_L,_NI,_NJ,_NK,_VC) \
+( _L * (_NI+2*_VC) * (_NJ+2*_VC) * (_NK+2*_VC)  \
++ (_K+_VC) * (_NI+2*_VC) * (_NJ+2*_VC) \
++ (_J+_VC) * (_NI+2*_VC) \
++ (_I+_VC) \
 )
 
 

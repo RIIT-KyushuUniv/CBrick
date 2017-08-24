@@ -14,7 +14,11 @@ include_directories(
 
 link_directories()
 
-set(cb_files CB_SubDomain.cpp CB_CommS.cpp CB_CommV.cpp CB_Packing.cpp)
+set(cb_files CB_SubDomain.cpp
+             CB_CommS.cpp
+             CB_CommV.cpp 
+             CB_PackingScalar.cpp
+             CB_PackingVector.cpp)
 
 
 ## float

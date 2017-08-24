@@ -40,7 +40,7 @@ typedef struct {
 
 
 /****************************************************
- * 分割情報クラス （テンポラリ利用）
+ * 分割情報クラス
  */
 class cntl_tbl {
 public:
@@ -85,7 +85,7 @@ public:
 
 
 /****************************************************
- * サブドメイン情報クラス （テンポラリ利用）
+ * サブドメイン情報クラス
  */
 class SubdomainInfo {
 public:
@@ -383,13 +383,9 @@ private:
 public:
 
   // @brief 通信バッファの確保
-  bool initComm();
+  // @param [in] gnum_compo バッファで利用する最大の層数（1-scalar, 3-vector, ?-others）
+  bool initComm(const int num_compo);
 
-  // @brief スカラー変数のブロッキング通信
-  // @param [in,out]  src     スカラー変数
-  // @param [in]      gc_comm 実際に通信する通信面数
-  // @retval true-success, false-fail
-  bool Comm_S_blocking(REAL_TYPE* src, const int gc_comm);
 
   // @brief スカラー変数のノンブロッキング通信
   // @param [in,out]  src     スカラー変数
@@ -408,66 +404,7 @@ public:
                                const int gc_comm,
                                MPI_Request *req);
 
-
 private:
-
-  bool send_and_recv(REAL_TYPE* ms,
-                     REAL_TYPE* mr,
-                     REAL_TYPE* ps,
-                     REAL_TYPE* pr,
-                     int msz,
-                     int nIDm,
-                     int nIDp);
-
-  bool sendrecv(REAL_TYPE* ms,
-                REAL_TYPE* mr,
-                REAL_TYPE* ps,
-                REAL_TYPE* pr,
-                int msz,
-                int nIDm,
-                int nIDp);
-
-  void packX(const REAL_TYPE *array,
-             const int vc_comm,
-             REAL_TYPE *sendm,
-             REAL_TYPE *sendp,
-             const int nIDm,
-             const int nIDp);
-
-  void unpackX(REAL_TYPE *array,
-               const int vc_comm,
-               const REAL_TYPE *recvm,
-               const REAL_TYPE *recvp,
-               const int nIDm,
-               const int nIDp);
-
-  void packY(const REAL_TYPE *array,
-             const int vc_comm,
-             REAL_TYPE *sendm,
-             REAL_TYPE *sendp,
-             const int nIDm,
-             const int nIDp);
-
-  void unpackY(REAL_TYPE *array,
-               const int vc_comm,
-               const REAL_TYPE *recvm,
-               const REAL_TYPE *recvp,
-               const int nIDm,
-               const int nIDp);
-
-  void packZ(const REAL_TYPE *array,
-             const int vc_comm,
-             REAL_TYPE *sendm,
-             REAL_TYPE *sendp,
-             const int nIDm,
-             const int nIDp);
-
-  void unpackZ(REAL_TYPE *array,
-               const int vc_comm,
-               const REAL_TYPE *recvm,
-               const REAL_TYPE *recvp,
-               const int nIDm,
-               const int nIDp);
 
   bool IsendIrecv(REAL_TYPE* ms,
                   REAL_TYPE* mr,
@@ -479,16 +416,118 @@ private:
                   MPI_Request *req);
 
 
+// CB_PackingScalar.cpp
+private:
+
+  void pack_SX(const REAL_TYPE *array,
+               const int vc_comm,
+               REAL_TYPE *sendm,
+               REAL_TYPE *sendp,
+               const int nIDm,
+               const int nIDp);
+
+  void unpack_SX(REAL_TYPE *array,
+                 const int vc_comm,
+                 const REAL_TYPE *recvm,
+                 const REAL_TYPE *recvp,
+                 const int nIDm,
+                 const int nIDp);
+
+  void pack_SY(const REAL_TYPE *array,
+               const int vc_comm,
+               REAL_TYPE *sendm,
+               REAL_TYPE *sendp,
+               const int nIDm,
+               const int nIDp);
+
+  void unpack_SY(REAL_TYPE *array,
+                 const int vc_comm,
+                 const REAL_TYPE *recvm,
+                 const REAL_TYPE *recvp,
+                 const int nIDm,
+                 const int nIDp);
+
+  void pack_SZ(const REAL_TYPE *array,
+               const int vc_comm,
+               REAL_TYPE *sendm,
+               REAL_TYPE *sendp,
+               const int nIDm,
+               const int nIDp);
+
+  void unpack_SZ(REAL_TYPE *array,
+                 const int vc_comm,
+                 const REAL_TYPE *recvm,
+                 const REAL_TYPE *recvp,
+                 const int nIDm,
+                 const int nIDp);
+
+
+
 // CB_CommV.cpp
 public:
-  /*
-   * @fn Comm_V_blocking
-   * @brief ベクトル変数（i,j,k,l）型のブロッキング通信
-   * @param [in,out]  src     ベクトル変数
-   * @param [in]      gc_comm 実際に通信する通信面数
-   * @retval true-success, false-fail
-   */
-  bool Comm_V_blocking(REAL_TYPE* src, const int gc_comm);
+
+  // @brief ベクトル変数のノンブロッキング通信
+  // @param [in,out]  src     ベクトル変数
+  // @param [in]      gc_comm 実際に通信する通信面数
+  // @retval true-success, false-fail
+  bool Comm_V_nonblocking(REAL_TYPE* src,
+                          const int gc_comm,
+                          MPI_Request *req);
+
+  // @brief ベクトル変数のノンブロッキング通信
+  // @param [in,out]  dest    ベクトル変数
+  // @param [in]      gc_comm 実際に通信する通信面数
+  // @param [out]     req     Array of MPI request
+  // @retval true-success, false-fail
+  bool Comm_V_wait_nonblocking(REAL_TYPE* dest,
+                               const int gc_comm,
+                               MPI_Request *req);
+
+
+// CB_PackingVector.cpp
+private:
+
+  void pack_VX(const REAL_TYPE *array,
+               const int vc_comm,
+               REAL_TYPE *sendm,
+               REAL_TYPE *sendp,
+               const int nIDm,
+               const int nIDp);
+
+  void unpack_VX(REAL_TYPE *array,
+                 const int vc_comm,
+                 const REAL_TYPE *recvm,
+                 const REAL_TYPE *recvp,
+                 const int nIDm,
+                 const int nIDp);
+
+  void pack_VY(const REAL_TYPE *array,
+               const int vc_comm,
+               REAL_TYPE *sendm,
+               REAL_TYPE *sendp,
+               const int nIDm,
+               const int nIDp);
+
+  void unpack_VY(REAL_TYPE *array,
+                 const int vc_comm,
+                 const REAL_TYPE *recvm,
+                 const REAL_TYPE *recvp,
+                 const int nIDm,
+                 const int nIDp);
+
+  void pack_VZ(const REAL_TYPE *array,
+               const int vc_comm,
+               REAL_TYPE *sendm,
+               REAL_TYPE *sendp,
+               const int nIDm,
+               const int nIDp);
+
+  void unpack_VZ(REAL_TYPE *array,
+                 const int vc_comm,
+                 const REAL_TYPE *recvm,
+                 const REAL_TYPE *recvp,
+                 const int nIDm,
+                 const int nIDp);
 
 };
 

@@ -20,19 +20,19 @@
  * @fn initComm()
  * @brief 通信バッファの確保
  */
-bool SubDomain::initComm()
+bool SubDomain::initComm(const int num_compo)
 {
   int gc = halo_width;
 
-  if (size[0]==0 || size[1]==0 || size[2]==0 || gc==0) {
+  if (size[0]==0 || size[1]==0 || size[2]==0 || gc==0 || num_compo==0) {
     return false;
   }
 
   // バッファ領域としては、最大値で確保しておく
   int f_sz[3];
-  f_sz[0] = (size[1]+2*gc) * (size[2]+2*gc) * gc;
-  f_sz[1] = (size[0]+2*gc) * (size[2]+2*gc) * gc;
-  f_sz[2] = (size[0]+2*gc) * (size[1]+2*gc) * gc;
+  f_sz[0] = (size[1]+2*gc) * (size[2]+2*gc) * gc * num_compo;
+  f_sz[1] = (size[0]+2*gc) * (size[2]+2*gc) * gc * num_compo;
+  f_sz[2] = (size[0]+2*gc) * (size[1]+2*gc) * gc * num_compo;
 
   if ( !(f_xms = new REAL_TYPE [f_sz[0]]) ) return false;
   if ( !(f_xmr = new REAL_TYPE [f_sz[0]]) ) return false;
@@ -48,225 +48,6 @@ bool SubDomain::initComm()
   if ( !(f_zmr = new REAL_TYPE [f_sz[2]]) ) return false;
   if ( !(f_zps = new REAL_TYPE [f_sz[2]]) ) return false;
   if ( !(f_zpr = new REAL_TYPE [f_sz[2]]) ) return false;
-
-  return true;
-}
-
-/*
- * @fn Comm_S_blocking
- * @brief スカラー変数のブロッキング通信
- * @param [in,out]  src     スカラー変数
- * @param [in]      gc_comm 実際に通信する通信面数
- * @retval true-success, false-fail
- */
-bool SubDomain::Comm_S_blocking(REAL_TYPE* src, const int gc_comm)
-{
-  int imax = size[0];
-  int jmax = size[1];
-  int kmax = size[2];
-
-  // 実際に送受信するメッセージサイズ
-  int msz[3];
-  msz[0] = (size[1]+2*gc_comm) * (size[2]+2*gc_comm) * gc_comm;
-  msz[1] = (size[0]+2*gc_comm) * (size[2]+2*gc_comm) * gc_comm;
-  msz[2] = (size[0]+2*gc_comm) * (size[1]+2*gc_comm) * gc_comm;
-
-  // X direction
-  int nIDm = comm_tbl[X_minus];
-  int nIDp = comm_tbl[X_plus];
-
-  packX(src, gc_comm, f_xms, f_xps, nIDm, nIDp);
-  //if ( !send_and_recv(f_xms, f_xmr, f_xps, f_xpr, msz[0], nIDm, nIDp) ) return false;
-  if ( !sendrecv(f_xms, f_xmr, f_xps, f_xpr, msz[0], nIDm, nIDp) ) return false;
-  unpackX(src, gc_comm, f_xmr, f_xpr, nIDm, nIDp);
-
-
-  // Y direction
-  nIDm = comm_tbl[Y_minus];
-  nIDp = comm_tbl[Y_plus];
-
-  packY(src, gc_comm, f_yms, f_yps, nIDm, nIDp);
-  //if ( !send_and_recv(f_yms, f_ymr, f_yps, f_ypr, msz[1], nIDm, nIDp) ) return false;
-  if ( !sendrecv(f_yms, f_ymr, f_yps, f_ypr, msz[1], nIDm, nIDp) ) return false;
-  unpackY(src, gc_comm, f_ymr, f_ypr, nIDm, nIDp);
-
-
-  // Z direction
-  nIDm = comm_tbl[Z_minus];
-  nIDp = comm_tbl[Z_plus];
-
-  packZ(src, gc_comm, f_zms, f_zps, nIDm, nIDp);
-  //if ( !send_and_recv(f_zms, f_zmr, f_zps, f_zpr, msz[2], nIDm, nIDp) ) return false;
-  if ( !sendrecv(f_zms, f_zmr, f_zps, f_zpr, msz[2], nIDm, nIDp) ) return false;
-  unpackZ(src, gc_comm, f_zmr, f_zpr, nIDm, nIDp);
-
-  return true;
-}
-
-
-/*
- * @fn send_and_recv
- * @brief 隣接間通信
- * @param [in]  ms   Send buffer to Minus direction
- * @param [out] mr   Recieve buffer from Mminus direction
- * @param [in]  ps   Send buffer to Plus direction
- * @param [out] pr   Recieve buffer from Plus direction
- * @param [in]  msz  send/recieve size
- * @param [in]  nIDm Neighbor ID for Minus direction
- * @param [in]  nIDp Neighbor ID for Plus direction
- */
-bool SubDomain::send_and_recv(REAL_TYPE* ms,
-                              REAL_TYPE* mr,
-                              REAL_TYPE* ps,
-                              REAL_TYPE* pr,
-                              int msz,
-                              int nIDm,
-                              int nIDp)
-{
-  // Plus side of subdomain
-  int tag_p=0;
-  MPI_Status *stat_p;
-
-  if ( sizeof(REAL_TYPE) == _SIZE_DOUBLE_ ) {
-    if ( nIDp >= 0 )
-      if ( MPI_SUCCESS != MPI_Send(ps,
-                                   msz,
-                                   MPI_DOUBLE,
-                                   nIDp,
-                                   tag_p,
-                                   MPI_COMM_WORLD) ) return false;
-    if ( nIDp >= 0 )
-      if ( MPI_SUCCESS != MPI_Recv(pr,
-                                   msz,
-                                   MPI_DOUBLE,
-                                   nIDp,
-                                   tag_p,
-                                   MPI_COMM_WORLD,
-                                   stat_p) ) return false;
-  }
-  else {
-    if ( nIDp >= 0 )
-      if ( MPI_SUCCESS != MPI_Send(ps,
-                                   msz,
-                                   MPI_FLOAT,
-                                   nIDp,
-                                   tag_p,
-                                   MPI_COMM_WORLD) ) return false;
-    if ( nIDp >= 0 )
-      if ( MPI_SUCCESS != MPI_Recv(pr,
-                                   msz,
-                                   MPI_FLOAT,
-                                   nIDp,
-                                   tag_p,
-                                   MPI_COMM_WORLD,
-                                   stat_p) ) return false;
-  }
-
-
-  // Minus side of subdomain
-  int tag_m=0;
-  MPI_Status *stat_m;
-
-  if ( sizeof(REAL_TYPE) == _SIZE_DOUBLE_ ) {
-    if ( nIDm >= 0 )
-      if ( MPI_SUCCESS != MPI_Recv(mr,
-                                   msz,
-                                   MPI_DOUBLE,
-                                   nIDm,
-                                   tag_m,
-                                   MPI_COMM_WORLD,
-                                   stat_m) ) return false;
-    if ( nIDm >= 0 )
-      if ( MPI_SUCCESS != MPI_Send(ms,
-                                   msz,
-                                   MPI_DOUBLE,
-                                   nIDm,
-                                   tag_m,
-                                   MPI_COMM_WORLD) ) return false;
-  }
-  else {
-    if ( nIDm >= 0 )
-      if ( MPI_SUCCESS != MPI_Recv(mr,
-                                   msz,
-                                   MPI_FLOAT,
-                                   nIDm,
-                                   tag_m,
-                                   MPI_COMM_WORLD,
-                                   stat_m) ) return false;
-    if ( nIDm >= 0 )
-      if ( MPI_SUCCESS != MPI_Send(ms,
-                                   msz,
-                                   MPI_FLOAT,
-                                   nIDm,
-                                   tag_m,
-                                   MPI_COMM_WORLD) ) return false;
-  }
-
-  return true;
-}
-
-
-/*
- * @fn sendrecv
- * @brief 隣接間通信
- * @param [in]  ms   Send buffer to Minus direction
- * @param [out] mr   Recieve buffer from Mminus direction
- * @param [in]  ps   Send buffer to Plus direction
- * @param [out] pr   Recieve buffer from Plus direction
- * @param [in]  msz  send/recieve size
- * @param [in]  nIDm Neighbor ID for Minus direction
- * @param [in]  nIDp Neighbor ID for Plus direction
- */
-bool SubDomain::sendrecv(REAL_TYPE* ms,
-                         REAL_TYPE* mr,
-                         REAL_TYPE* ps,
-                         REAL_TYPE* pr,
-                         int msz,
-                         int nIDm,
-                         int nIDp)
-{
-  // Plus side of subdomain
-  int tag_p=0;
-  MPI_Status *stat_p;
-
-  if ( sizeof(REAL_TYPE) == _SIZE_DOUBLE_ ) {
-    if ( nIDp >= 0 ) {
-      if ( MPI_SUCCESS != MPI_Sendrecv(ps, msz, MPI_DOUBLE, nIDp, tag_p,
-                                       pr, msz, MPI_DOUBLE, nIDp, tag_p,
-                                       MPI_COMM_WORLD,
-                                       stat_p) ) return false;
-    }
-  }
-  else {
-    if ( nIDp >= 0 ) {
-      if ( MPI_SUCCESS != MPI_Sendrecv(ps, msz, MPI_FLOAT, nIDp, tag_p,
-                                       pr, msz, MPI_FLOAT, nIDp, tag_p,
-                                       MPI_COMM_WORLD,
-                                       stat_p) ) return false;
-    }
-  }
-
-
-  // Minus side of subdomain
-  int tag_m=0;
-  MPI_Status *stat_m;
-
-  if ( sizeof(REAL_TYPE) == _SIZE_DOUBLE_ ) {
-    if ( nIDm >= 0 ) {
-      if ( MPI_SUCCESS != MPI_Sendrecv(ms, msz, MPI_DOUBLE, nIDm, tag_m,
-                                       mr, msz, MPI_DOUBLE, nIDm, tag_m,
-                                       MPI_COMM_WORLD,
-                                       stat_m) ) return false;
-    }
-  }
-  else {
-    if ( nIDm >= 0 ) {
-      if ( MPI_SUCCESS != MPI_Sendrecv(ms, msz, MPI_FLOAT, nIDm, tag_m,
-                                       mr, msz, MPI_FLOAT, nIDm, tag_m,
-                                       MPI_COMM_WORLD,
-                                       stat_m) ) return false;
-      }
-  }
 
   return true;
 }
@@ -300,21 +81,21 @@ bool SubDomain::Comm_S_nonblocking(REAL_TYPE* src,
   int nIDm = comm_tbl[X_minus];
   int nIDp = comm_tbl[X_plus];
 
-  packX(src, gc_comm, f_xms, f_xps, nIDm, nIDp);
+  pack_SX(src, gc_comm, f_xms, f_xps, nIDm, nIDp);
   if ( !IsendIrecv(f_xms, f_xmr, f_xps, f_xpr, msz[0], nIDm, nIDp, &req[0]) ) return false;
 
   // Y direction
   nIDm = comm_tbl[Y_minus];
   nIDp = comm_tbl[Y_plus];
 
-  packY(src, gc_comm, f_yms, f_yps, nIDm, nIDp);
+  pack_SY(src, gc_comm, f_yms, f_yps, nIDm, nIDp);
   if ( !IsendIrecv(f_yms, f_ymr, f_yps, f_ypr, msz[1], nIDm, nIDp, &req[4]) ) return false;
 
   // Z direction
   nIDm = comm_tbl[Z_minus];
   nIDp = comm_tbl[Z_plus];
 
-  packZ(src, gc_comm, f_zms, f_zps, nIDm, nIDp);
+  pack_SZ(src, gc_comm, f_zms, f_zps, nIDm, nIDp);
   if ( !IsendIrecv(f_zms, f_zmr, f_zps, f_zpr, msz[2], nIDm, nIDp, &req[8]) ) return false;
 
   return true;
@@ -466,21 +247,21 @@ bool SubDomain::Comm_S_wait_nonblocking(REAL_TYPE* dest,
   int nIDm = comm_tbl[X_minus];
   int nIDp = comm_tbl[X_plus];
   if ( MPI_SUCCESS != MPI_Waitall( 4, &req[0], stat ) ) return false;
-  unpackX(dest, gc_comm, f_xmr, f_xpr, nIDm, nIDp);
+  unpack_SX(dest, gc_comm, f_xmr, f_xpr, nIDm, nIDp);
 
 
   //// Y face ////
   nIDm = comm_tbl[Y_minus];
   nIDp = comm_tbl[Y_plus];
   if ( MPI_SUCCESS != MPI_Waitall( 4, &req[4], stat ) ) return false;
-  unpackY(dest, gc_comm, f_ymr, f_ypr, nIDm, nIDp);
+  unpack_SY(dest, gc_comm, f_ymr, f_ypr, nIDm, nIDp);
 
 
   //// Z face ////
   nIDm = comm_tbl[Z_minus];
   nIDp = comm_tbl[Z_plus];
   if ( MPI_SUCCESS != MPI_Waitall( 4, &req[8], stat ) ) return false;
-  unpackZ(dest, gc_comm, f_zmr, f_zpr, nIDm, nIDp);
+  unpack_SZ(dest, gc_comm, f_zmr, f_zpr, nIDm, nIDp);
 
   return true;
 }

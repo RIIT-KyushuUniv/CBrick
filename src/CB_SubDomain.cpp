@@ -36,13 +36,8 @@ bool SubDomain::findParameter()
 
 
   // 候補パラメータ保持クラス
-  cntl_tbl tbl;
+  cntl_tbl tbl(numProc);
 
-  // 評価するパラメータを保持する配列
-  if ( !(tbl.score = new score_tbl[numProc]) ) {
-    printf("\tFail to allocate memory\n");
-    return false;
-  }
 
   Hostonly_ {
     printf("G_size = %5d %5d %5d\n\n", G_size[0], G_size[1], G_size[2]);
@@ -164,12 +159,8 @@ bool SubDomain::findParameter()
     }
   }
 
-
-  // ワーク配列の後始末
-  if ( tbl.score ) delete [] tbl.score;
-
   Hostonly_ {
-    if ( fp ) fclose(fp);
+    fclose(fp);
   }
 
   return true;
@@ -208,8 +199,7 @@ bool SubDomain::findOptimalDivision()
     return false;
   }
 
-
-  // 評価するパラメータを保持する配列
+  // 評価するパラメータを保持する配列 >> デストラクタで delete score [];
   for (int i=0; i<tbl_size; i++)
   {
     if ( !(tbl[i].score = new score_tbl[numProc]) ) {
@@ -419,13 +409,10 @@ bool SubDomain::findOptimalDivision()
 
 
   // ワーク配列の後始末
-  for (int i=0; i<tbl_size; i++) {
-    if ( tbl[i].score ) delete [] tbl[i].score;
-  }
-  if ( tbl ) delete [] tbl;
+  delete [] tbl;
 
   Hostonly_ {
-    if ( fp ) fclose(fp);
+    fclose(fp);
   }
 
   return true;
@@ -1076,7 +1063,7 @@ bool SubDomain::createRankTable()
     }
   }
 
-  if ( rt ) delete [] rt;
+  delete [] rt;
   rt = NULL;
 
 
@@ -1112,13 +1099,12 @@ bool SubDomain::createRankTable()
                 s->cm[3], s->cm[4], s->cm[5]);
       }
 
-      if ( fp ) fclose(fp);
+      fclose(fp);
     }
   }
 #endif // _DEBUG
 
-  // ワーク用 SubDomainInfo クラス配列の破棄 >> 使う
-  //if ( sd ) delete [] sd;
+  // ワーク用 SubDomainInfo クラス配列は使うので、ここでは破棄しない
 
   return true;
 }

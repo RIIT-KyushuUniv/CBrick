@@ -49,6 +49,8 @@ bool SubDomain::initComm(const int num_compo)
   if ( !(f_zps = new REAL_TYPE [f_sz[2]]) ) return false;
   if ( !(f_zpr = new REAL_TYPE [f_sz[2]]) ) return false;
 
+  buf_flag = 1; // バッファ確保ずみ
+
   return true;
 }
 

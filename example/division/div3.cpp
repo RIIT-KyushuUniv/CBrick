@@ -9,7 +9,9 @@
 // $ gcc div3.cpp -o div3
 
 // Execution
-// $ ./div3 31 12 20 12
+// $ mpirun -np  4 div3 15  1  1
+// $ mpirun -np 12 div3 31 12 20
+// $ mpirun -np 16 div3 30 24 24
 
 // 領域サイズと領域分割数を与えて、最適な分割パターンを得る（ノードベース FDM）
 

@@ -1,20 +1,25 @@
 # CBrick
 
 ## TODO
-- Nonblocking communication has a bug. Use non-blocking.
-- Vector pack/unpacking
 
 
 ## REVISION HISTORY
+
+---
+- 2017-08-30 Version 0.9.1
+  - change instance method of cntl_tbl class
+  - add buf_flag for delete pointer
 
 ---
 - 2017-08-24 Version 0.9.0
   - Vector pack/unpack
   - remove blocking communication
 
+
 ---
 - 2017-08-08 Version 0.8.0
   - build both float and double libraries
+
 
 ---
 - 2017-08-03 Version 0.7.4

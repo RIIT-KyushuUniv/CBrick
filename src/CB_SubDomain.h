@@ -43,6 +43,9 @@ typedef struct {
  * 分割情報クラス
  */
 class cntl_tbl {
+private:
+  int mode;         ///< インスタンスのモード
+
 public:
   int dsz[3];       ///< サブドメインの基準サイズ
   int mod[3];       ///< 基準サイズの個数
@@ -54,6 +57,7 @@ public:
   float sc_hex;     ///< 評価値：立方体度
   score_tbl* score;
 
+  // デフォルトコンストラクタ
   cntl_tbl() {
     for (int i=0; i<3; i++) {
       dsz[i] = 0;
@@ -62,12 +66,26 @@ public:
     }
     sc_vol = sc_com = sc_len = sc_hex = 0.0;
     org_idx = -1;
+    mode = 0;
     score = NULL;
   }
 
-  ~cntl_tbl() {}
+  // @param [in] num_array 評価するパラメータを保持する配列数
+  cntl_tbl(const int num_array) {
+    for (int i=0; i<3; i++) {
+      dsz[i] = 0;
+      mod[i] = 0;
+      div[i] = 0;
+    }
+    sc_vol = sc_com = sc_len = sc_hex = 0.0;
+    org_idx = -1;
+    mode = 1;
 
-  // copy constructor
+    if (num_array < 1) exit(184);
+    score = new score_tbl[num_array];
+  }
+
+  // コンストラクタ　cntl_tbl p = src; からの自動変換に利用
   cntl_tbl(const cntl_tbl& src) {
     for (int i=0; i<3; i++) {
       dsz[i] = src.dsz[i];
@@ -78,8 +96,13 @@ public:
     sc_com = src.sc_com;
     sc_len = src.sc_len;
     sc_hex = src.sc_hex;
-    score  = src.score;   // アドレスコピー、ポイント先の内容は変更しない
     org_idx= src.org_idx;
+    score  = src.score;   // アドレスのみコピー、ポイント先の内容は変更しない
+    mode = 2;
+  }
+
+  ~cntl_tbl() {
+    if ( mode == 1 ) delete [] score;
   }
 };
 
@@ -156,6 +179,8 @@ private:
   REAL_TYPE* f_zps;  // Z+ direction send
   REAL_TYPE* f_zpr;  // Z+ direction recv
 
+  int buf_flag;     // バッファを確保済みのときに1
+
 
 public:
   // デフォルト　コンストラクタ
@@ -190,6 +215,7 @@ public:
     f_zmr = NULL;  // Z- direction recv
     f_zps = NULL;  // Z+ direction send
     f_zpr = NULL;  // Z+ direction recv
+    buf_flag = 0;
   }
 
 
@@ -238,24 +264,26 @@ public:
 
     if ( numProc < 1 ) Exit(-1);
     if ( !(sd=allocateSD()) ) Exit(-1);
+
+    buf_flag = 0;
   }
 
   /** デストラクタ */
   ~SubDomain() {
-    if ( sd ) delete [] sd;
-
-    if ( f_xms ) delete [] f_xms;
-    if ( f_xmr ) delete [] f_xmr;
-    if ( f_xps ) delete [] f_xps;
-    if ( f_xpr ) delete [] f_xpr;
-    if ( f_yms ) delete [] f_yms;
-    if ( f_ymr ) delete [] f_ymr;
-    if ( f_yps ) delete [] f_yps;
-    if ( f_ypr ) delete [] f_ypr;
-    if ( f_zms ) delete [] f_zms;
-    if ( f_zmr ) delete [] f_zmr;
-    if ( f_zps ) delete [] f_zps;
-    if ( f_zpr ) delete [] f_zpr;
+    if ( buf_flag == 1 ) {
+      delete [] f_xms;
+      delete [] f_xmr;
+      delete [] f_xps;
+      delete [] f_xpr;
+      delete [] f_yms;
+      delete [] f_ymr;
+      delete [] f_yps;
+      delete [] f_ypr;
+      delete [] f_zms;
+      delete [] f_zmr;
+      delete [] f_zps;
+      delete [] f_zpr;
+    }
   }
 
 // CB_SubDomain.cpp

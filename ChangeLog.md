@@ -6,6 +6,11 @@
 ## REVISION HISTORY
 
 ---
+- 2017-08-30 Version 0.9.2
+  - change implementation of createRankTable() for OpenMP
+  - add omp single
+
+---
 - 2017-08-30 Version 0.9.1
   - change instance method of cntl_tbl class
   - add buf_flag for delete pointer

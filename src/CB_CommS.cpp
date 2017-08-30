@@ -66,10 +66,6 @@ bool SubDomain::Comm_S_nonblocking(REAL_TYPE* src,
                                    const int gc_comm,
                                    MPI_Request *req)
 {
-  int imax = size[0];
-  int jmax = size[1];
-  int kmax = size[2];
-
   // Communication identifier
   for (int i=0; i<12; i++) req[i] = MPI_REQUEST_NULL;
 

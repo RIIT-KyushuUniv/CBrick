@@ -143,13 +143,12 @@ bool SubDomain::findParameter()
 
 
 
-
   Hostonly_ {
     fprintf(fp, "\t    Rank :       I       J       K :    sz_X    sz_Y    sz_Z :    hd_X    hd_Y    hd_Z\n");
     for (int k=0; k<G_div[2]; k++) {
       for (int j=0; j<G_div[1]; j++) {
         for (int i=0; i<G_div[0]; i++) {
-          int r = rank_idx_0(i, j, k, G_div[0], G_div[1]);
+          int r = _IDX_S3D(i, j, k, G_div[0], G_div[1], 0);
           fprintf(fp, "\t%8d : %7d %7d %7d : %7d %7d %7d : %7d %7d %7d\n", r,
                   i,j,k,
                   sd[r].sz[0], sd[r].sz[1], sd[r].sz[2],
@@ -255,6 +254,7 @@ bool SubDomain::findOptimalDivision()
 #endif // _DEBUG
 
     int m = 0;
+#pragma omp single
     for (int k=0; k<tbl[c].div[2]; k++) {
       for (int j=0; j<tbl[c].div[1]; j++) {
         for (int i=0; i<tbl[c].div[0]; i++) {
@@ -397,7 +397,7 @@ bool SubDomain::findOptimalDivision()
     for (int k=0; k<G_div[2]; k++) {
       for (int j=0; j<G_div[1]; j++) {
         for (int i=0; i<G_div[0]; i++) {
-          int r = rank_idx_0(i, j, k, G_div[0], G_div[1]);
+          int r = _IDX_S3D(i, j, k, G_div[0], G_div[1], 0);
           fprintf(fp, "\t%8d : %7d %7d %7d : %7d %7d %7d : %7d %7d %7d\n", r,
                   i,j,k,
                   sd[r].sz[0], sd[r].sz[1], sd[r].sz[2],
@@ -430,6 +430,7 @@ int SubDomain::getNumCandidates()
   int odr=0;
   int np = numProc;
 
+#pragma omp single
   for (int k=1; k<=np; k++) {
     for (int j=1; j<=np/k+1; j++) {
       for (int i=1; i<=np/(j*k)+1; i++) {
@@ -455,6 +456,7 @@ void SubDomain::registerCandidates(cntl_tbl* tbl)
   int odr=0;
   int np = numProc;
 
+#pragma omp single
   for (int k=1; k<=np; k++) {
     for (int j=1; j<=np/k+1; j++) {
       for (int i=1; i<=np/(j*k)+1; i++) {
@@ -937,7 +939,7 @@ void SubDomain::getHeadIndex()
   i = 0;
   for (k=0; k<nz; k++) {
     for (j=0; j<ny; j++) {
-      int r = rank_idx_0(i, j, k, nx, ny);
+      int r = _IDX_S3D(i, j, k, nx, ny, 0);
       sd[r].hd[0] = 0;
     }
   }
@@ -945,8 +947,8 @@ void SubDomain::getHeadIndex()
   for (k=0; k<nz; k++) {
     for (j=0; j<ny; j++) {
       for (i=1; i<nx; i++) {
-        int r  = rank_idx_0(i,   j, k, nx, ny);
-        int r1 = rank_idx_0(i-1, j, k, nx, ny);
+        int r  = _IDX_S3D(i,   j, k, nx, ny, 0);
+        int r1 = _IDX_S3D(i-1, j, k, nx, ny, 0);
         sd[r].hd[0] = sd[r1].hd[0] + sd[r1].sz[0] - a;
       }
     }
@@ -956,7 +958,7 @@ void SubDomain::getHeadIndex()
   j = 0;
   for (k=0; k<nz; k++) {
     for (i=0; i<nx; i++) {
-      int r = rank_idx_0(i, j, k, nx, ny);
+      int r = _IDX_S3D(i, j, k, nx, ny, 0);
       sd[r].hd[1] = 0;
     }
   }
@@ -964,8 +966,8 @@ void SubDomain::getHeadIndex()
   for (k=0; k<nz; k++) {
     for (i=0; i<nx; i++) {
       for (j=1; j<ny; j++) {
-        int r  = rank_idx_0(i, j,   k, nx, ny);
-        int r1 = rank_idx_0(i, j-1, k, nx, ny);
+        int r  = _IDX_S3D(i, j,   k, nx, ny, 0);
+        int r1 = _IDX_S3D(i, j-1, k, nx, ny, 0);
         sd[r].hd[1] = sd[r1].hd[1] + sd[r1].sz[1] - a;
       }
     }
@@ -975,7 +977,7 @@ void SubDomain::getHeadIndex()
   k = 0;
   for (j=0; j<ny; j++) {
     for (i=0; i<nx; i++) {
-      int r = rank_idx_0(i, j, k, nx, ny);
+      int r = _IDX_S3D(i, j, k, nx, ny, 0);
       sd[r].hd[2] = 0;
     }
   }
@@ -983,8 +985,8 @@ void SubDomain::getHeadIndex()
   for (j=0; j<ny; j++) {
     for (i=0; i<nx; i++) {
       for (k=1; k<nz; k++) {
-        int r  = rank_idx_0(i, j, k,   nx, ny);
-        int r1 = rank_idx_0(i, j, k-1, nx, ny);
+        int r  = _IDX_S3D(i, j, k,   nx, ny, 0);
+        int r1 = _IDX_S3D(i, j, k-1, nx, ny, 0);
         sd[r].hd[2] = sd[r1].hd[2] + sd[r1].sz[2] - a;
       }
     }
@@ -1036,29 +1038,27 @@ bool SubDomain::createRankTable()
   }
 
   // rank number
-  int c = 0;
   #pragma omp parallel for collapse(2)
   for (int k=0; k<nz; k++) {
     for (int j=0; j<ny; j++) {
       for (int i=0; i<nx; i++) {
-        rt[_IDX_S3D(i, j, k, nx, ny, 1)] = c++;
+        rt[_IDX_S3D(i, j, k, nx, ny, 1)] = _IDX_S3D(i, j, k, nx, ny, 0);
       }
     }
   }
 
   // Neighbor rank ID for comm
-  int m = 0;
   #pragma omp parallel for collapse(2)
   for (int k=0; k<nz; k++) {
     for (int j=0; j<ny; j++) {
       for (int i=0; i<nx; i++) {
+        int m = rt[_IDX_S3D(i, j, k, nx, ny, 1)];
         sd[m].cm[X_minus] = rt[_IDX_S3D(i-1, j  , k  , nx, ny, 1)];
         sd[m].cm[X_plus]  = rt[_IDX_S3D(i+1, j  , k  , nx, ny, 1)];
         sd[m].cm[Y_minus] = rt[_IDX_S3D(i  , j-1, k  , nx, ny, 1)];
         sd[m].cm[Y_plus]  = rt[_IDX_S3D(i  , j+1, k  , nx, ny, 1)];
         sd[m].cm[Z_minus] = rt[_IDX_S3D(i  , j  , k-1, nx, ny, 1)];
         sd[m].cm[Z_plus]  = rt[_IDX_S3D(i  , j  , k+1, nx, ny, 1)];
-        m++;
       }
     }
   }

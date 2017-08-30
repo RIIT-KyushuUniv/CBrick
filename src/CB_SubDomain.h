@@ -375,12 +375,6 @@ private:
     return new SubdomainInfo[numProc];
   }
 
-  // @brief 開始インデクス=0の 3D=>1D インデクス変換、ガイドセルは考慮しない場合
-  inline int rank_idx_0(const int _I, const int _J, const int _K, const int _NI, const int _NJ)
-  {
-    return _K * _NI * _NJ + _J * _NI + _I;
-  }
-
   void Evaluation(cntl_tbl* t, const int tbl_sz, FILE* fp);
 
   bool findParameter();

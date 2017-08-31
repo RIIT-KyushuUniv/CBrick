@@ -50,8 +50,6 @@ This Cmake generates CBrick_f for float, and CBrick_d for double precision.
 >  This option makes OpenMP directives effect. Default is yes.
 
 
-`-D with_DEBUG=` {no|yes}
-
 `-D with_example=` {no|yes}
 
 

@@ -6,6 +6,10 @@
 ## REVISION HISTORY
 
 ---
+- 2017-08-31 Version 0.9.3
+  - use CMAKE_BUILD_TYPE for Debug > > define -DNDEBUG
+
+---
 - 2017-08-30 Version 0.9.2
   - change implementation of createRankTable() for OpenMP
   - add omp single

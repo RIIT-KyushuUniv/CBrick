@@ -80,11 +80,13 @@ bool SubDomain::findParameter()
   score_tbl* pp=NULL;
   int pin[3];
 
-#ifdef _DEBUG
+#ifndef NDEBUG
   Hostonly_ fprintf(fp, "\tRank :     (s_x, s_y, s_z) :        vol          srf         sxy\n");
-#endif // _DEBUG
+#endif
 
   int m = 0;
+
+#pragma omp single
   for (int k=0; k<G_div[2]; k++) {
     for (int j=0; j<G_div[1]; j++) {
       for (int i=0; i<G_div[0]; i++) {
@@ -104,11 +106,11 @@ bool SubDomain::findParameter()
         float srf = pp->srf;
         float sxy = pp->sxy;
 
-#ifdef _DEBUG
+#ifndef NDEBUG
         Hostonly_ fprintf(fp, "\t%4d :  %5d %5d %5d  : %10.3e : %10.3e  %10.3e\n",
                  m, pp->sz[0], pp->sz[1], pp->sz[2],
                  vol, srf, sxy);
-#endif // _DEBUG
+#endif
 
         m++;
       }
@@ -239,21 +241,22 @@ bool SubDomain::findOptimalDivision()
 
   for (int c=0; c<tbl_size; c++) {
 
-#ifdef _DEBUG
+#ifndef NDEBUG
     Hostonly_ fprintf(fp, "\nCandiate[%d] : div= %d %d %d : default= %d %d %d : mod= %d %d %d\n",
            c,
            tbl[c].div[0], tbl[c].div[1], tbl[c].div[2],
            tbl[c].dsz[0], tbl[c].dsz[1], tbl[c].dsz[2],
            tbl[c].mod[0], tbl[c].mod[1], tbl[c].mod[2]);
-#endif // _DEBUG
+#endif
 
     int pin[3];
 
-#ifdef _DEBUG
+#ifndef NDEBUG
     Hostonly_ fprintf(fp, "\tRank :     (s_x, s_y, s_z) :        vol          srf         sxy\n");
-#endif // _DEBUG
+#endif
 
     int m = 0;
+
 #pragma omp single
     for (int k=0; k<tbl[c].div[2]; k++) {
       for (int j=0; j<tbl[c].div[1]; j++) {
@@ -275,11 +278,11 @@ bool SubDomain::findOptimalDivision()
           float srf = pp->srf;
           float sxy = pp->sxy;
 
-#ifdef _DEBUG
+#ifndef NDEBUG
           Hostonly_ fprintf(fp, "\t%4d :  %5d %5d %5d  : %10.3e : %10.3e  %10.3e\n",
                  m, pp->sz[0], pp->sz[1], pp->sz[2],
                  vol, srf, sxy);
-#endif // _DEBUG
+#endif
 
           m++;
         }
@@ -647,6 +650,7 @@ void SubDomain::Evaluation(cntl_tbl* t, const int tbl_sz, FILE* fp)
     fprintf(fp, " No :      surface     length       cubical\n");
   }
 
+#pragma omp single
   for (int i=0; i<tbl_sz; i++)
   {
     float c_sum= 0.0;
@@ -687,6 +691,7 @@ int SubDomain::sortVolume(cntl_tbl* t, const int tbl_sz, FILE* fp)
     printf("\n1st screening by volume balance\n");
   }
 
+#pragma omp single
   for (int i=0; i<tbl_sz; i++)
   {
     for (int j=tbl_sz-1; j>i; j--)
@@ -722,6 +727,8 @@ int SubDomain::sortVolume(cntl_tbl* t, const int tbl_sz, FILE* fp)
   // 最小値を持つものがいくつあるか
   float v_min = t[0].sc_vol;
   int count = 0;
+
+#pragma omp single
   for (int i=1; i<tbl_sz; i++)
   {
     if ( v_min == t[i].sc_vol) count++;
@@ -747,6 +754,7 @@ int SubDomain::sortComm(cntl_tbl* t, const int c_sz, FILE* fp)
     printf("\n2nd screening by amount of communication\n");
   }
 
+#pragma omp single
   for (int i=0; i<c_sz; i++)
   {
     for (int j=c_sz-1; j>i; j--)
@@ -781,6 +789,8 @@ int SubDomain::sortComm(cntl_tbl* t, const int c_sz, FILE* fp)
   // 最小値を持つものがいくつあるか
   float c_min = t[0].sc_com;
   int count = 0;
+
+#pragma omp single
   for (int i=1; i<c_sz; i++)
   {
     if ( c_min == t[i].sc_com) count++;
@@ -806,6 +816,7 @@ int SubDomain::sortLenX(cntl_tbl* t, const int c_sz, FILE* fp)
     printf("\nScreening by Vector length in X\n");
   }
 
+#pragma omp single
   for (int i=0; i<c_sz; i++)
   {
     for (int j=c_sz-1; j>i; j--)
@@ -840,6 +851,8 @@ int SubDomain::sortLenX(cntl_tbl* t, const int c_sz, FILE* fp)
   // 最小値を持つものがいくつあるか
   float c_min = t[0].sc_len;
   int count = 0;
+
+#pragma omp single
   for (int i=1; i<c_sz; i++)
   {
     if ( c_min == t[i].sc_len) count++;
@@ -866,6 +879,7 @@ int SubDomain::sortCube(cntl_tbl* t, const int c_sz, FILE* fp)
     printf("\nScreening by cubical shape\n");
   }
 
+#pragma omp single
   for (int i=0; i<c_sz; i++)
   {
     for (int j=c_sz-1; j>i; j--)
@@ -900,6 +914,8 @@ int SubDomain::sortCube(cntl_tbl* t, const int c_sz, FILE* fp)
   // 最小値を持つものがいくつあるか
   float c_min = t[0].sc_hex;
   int count = 0;
+
+#pragma omp single
   for (int i=1; i<c_sz; i++)
   {
     if ( c_min == t[i].sc_hex) count++;
@@ -937,6 +953,8 @@ void SubDomain::getHeadIndex()
 
   // i=0の位置のプロセスのHeadIndexを0に初期化する
   i = 0;
+
+#pragma omp single
   for (k=0; k<nz; k++) {
     for (j=0; j<ny; j++) {
       int r = _IDX_S3D(i, j, k, nx, ny, 0);
@@ -944,6 +962,7 @@ void SubDomain::getHeadIndex()
     }
   }
 
+#pragma omp single
   for (k=0; k<nz; k++) {
     for (j=0; j<ny; j++) {
       for (i=1; i<nx; i++) {
@@ -956,6 +975,8 @@ void SubDomain::getHeadIndex()
 
   // j=0の位置のプロセスのHeadIndexを0に初期化する
   j = 0;
+
+#pragma omp single
   for (k=0; k<nz; k++) {
     for (i=0; i<nx; i++) {
       int r = _IDX_S3D(i, j, k, nx, ny, 0);
@@ -963,6 +984,7 @@ void SubDomain::getHeadIndex()
     }
   }
 
+#pragma omp single
   for (k=0; k<nz; k++) {
     for (i=0; i<nx; i++) {
       for (j=1; j<ny; j++) {
@@ -975,6 +997,8 @@ void SubDomain::getHeadIndex()
 
   // k=0の位置のプロセスのHeadIndexを0に初期化する
   k = 0;
+
+#pragma omp single
   for (j=0; j<ny; j++) {
     for (i=0; i<nx; i++) {
       int r = _IDX_S3D(i, j, k, nx, ny, 0);
@@ -982,6 +1006,7 @@ void SubDomain::getHeadIndex()
     }
   }
 
+#pragma omp single
   for (j=0; j<ny; j++) {
     for (i=0; i<nx; i++) {
       for (k=1; k<nz; k++) {
@@ -1073,7 +1098,7 @@ bool SubDomain::createRankTable()
   }
 
 
-#ifdef _DEBUG
+#ifndef NDEBUG
   // 確認のため出力
   Hostonly_ {
     printf("\n==================\n");
@@ -1102,7 +1127,7 @@ bool SubDomain::createRankTable()
       fclose(fp);
     }
   }
-#endif // _DEBUG
+#endif
 
   // ワーク用 SubDomainInfo クラス配列は使うので、ここでは破棄しない
 

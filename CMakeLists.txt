@@ -21,7 +21,6 @@
 #
 # -D with_example= {no|yes}
 #
-# -D with_DEBUG= {no|yes}
 
 cmake_minimum_required(VERSION 2.6)
 
@@ -31,7 +30,6 @@ cmake_minimum_required(VERSION 2.6)
 #######
 
 option(enable_OPENMP "Enable OpenMP" "OFF")
-option(enable_DEBUG "Debug mode" "OFF")
 
 
 #######
@@ -51,15 +49,12 @@ endif()
 # project()でCMAKE_INSTALL_PREFIX=/usr/localとなるので、再定義
 set (CMAKE_INSTALL_PREFIX "${INSTALL_DIR}")
 
-if (enable_DEBUG)
-  set(CMAKE_BUILD_TYPE Debug)
-else()
-  set(CMAKE_BUILD_TYPE Release)
-endif()
+#set(CMAKE_BUILD_TYPE Debug)
+set(CMAKE_BUILD_TYPE Release)
 
 #######
-set(PROJECT_VERSION "0.9.2")
-set(LIB_REVISION "20170830_2300")
+set(PROJECT_VERSION "0.9.3")
+set(LIB_REVISION "20170831_1100")
 #######
 
 
@@ -108,7 +103,6 @@ if (with_example)
 endif()
 
 message( STATUS "OpenMP support        : "      ${enable_OPENMP})
-message( STATUS "Debug mode            : "      ${enable_DEBUG})
 message( STATUS "Example               : "      ${with_example})
 message(" ")
 
@@ -134,10 +128,6 @@ endif()
 # find Libraries to depend on
 #######
 
-# Debug
-IF(enable_DEBUG)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D_DEBUG")
-ENDIF()
 
 
 

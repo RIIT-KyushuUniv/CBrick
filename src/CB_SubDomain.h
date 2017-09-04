@@ -230,6 +230,39 @@ public:
             std::string m_idxtyp,
             int priority=0) {
 
+    procGrp = -1;
+    myRank  = -1;
+    numProc = 1;
+    halo_width = 0;
+    ranking_opt = 0;
+    div_mode = 0;
+    f_index = 0;
+
+    for (int i=0; i<NOFACE; i++) comm_tbl[i] = -1;
+
+    for (int i=0; i<3; i++) {
+      head[i]       = 0;
+      size[i]       = 0;
+      G_size[i]     = 0;
+      G_div[i]      = 0;
+    }
+    sd = NULL;
+
+    f_xms = NULL;  // X- direction send
+    f_xmr = NULL;  // X- direction recv
+    f_xps = NULL;  // X+ direction send
+    f_xpr = NULL;  // X+ direction recv
+    f_yms = NULL;  // Y- direction send
+    f_ymr = NULL;  // Y- direction recv
+    f_yps = NULL;  // Y+ direction send
+    f_ypr = NULL;  // Y+ direction recv
+    f_zms = NULL;  // Z- direction send
+    f_zmr = NULL;  // Z- direction recv
+    f_zps = NULL;  // Z+ direction send
+    f_zpr = NULL;  // Z+ direction recv
+    buf_flag = 0;
+
+
     this->G_size[0]   = m_gsz[0];
     this->G_size[1]   = m_gsz[1];
     this->G_size[2]   = m_gsz[2];
@@ -267,6 +300,7 @@ public:
 
     buf_flag = 0;
   }
+
 
   /** デストラクタ */
   virtual ~SubDomain() {
@@ -386,15 +420,19 @@ private:
 
   int getNumCandidates4JK();
 
-  void getSizeCell(cntl_tbl* t, const int* in, const int m);
+  void getSize(cntl_tbl* t, const int* in, const int m);
 
   void getSizeNode(score_tbl* t);
 
   void getSrf(score_tbl* t);
 
-  void registerCandidates(cntl_tbl* t);
+  void registerCandidates_Cell(cntl_tbl* t);
 
-  void registerCandidates4JK(cntl_tbl* tbl);
+  void registerCandidates_Node(cntl_tbl* t);
+
+  void registerCandidates4JK_Cell(cntl_tbl* tbl);
+
+  void registerCandidates4JK_Node(cntl_tbl* tbl);
 
   int sortComm(cntl_tbl* t, const int c_sz, FILE* fp);
 

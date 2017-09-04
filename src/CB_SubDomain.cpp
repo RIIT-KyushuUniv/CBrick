@@ -94,11 +94,9 @@ bool SubDomain::findParameter()
         pin[1] = j;
         pin[2] = k;
 
-        getSizeCell(&tbl, pin, m);
+        getSize(&tbl, pin, m);
 
         pp = &tbl.score[m];
-
-        if ( grid_type == "node") getSizeNode(pp);
 
         getSrf(pp);
 
@@ -227,10 +225,20 @@ bool SubDomain::findOptimalDivision(int terrain_mode)
 
   // 候補のパラメータを登録
   if (terrain_mode == 1) {
-    registerCandidates4JK(tbl);
+    if (grid_type == "node") {
+      registerCandidates4JK_Node(tbl);
+    }
+    else {
+      registerCandidates4JK_Cell(tbl);
+    }
   }
   else {
-    registerCandidates(tbl);
+    if (grid_type == "node") {
+      registerCandidates_Node(tbl);
+    }
+    else {
+      registerCandidates_Cell(tbl);
+    }
   }
 
 
@@ -268,7 +276,7 @@ bool SubDomain::findOptimalDivision(int terrain_mode)
     Hostonly_ fprintf(fp, "\tRank :     (s_x, s_y, s_z) :        vol          srf         sxy\n");
 #endif
 
-    int m = 0;
+
 
 #pragma omp single
     for (int k=0; k<tbl[c].div[2]; k++) {
@@ -277,12 +285,11 @@ bool SubDomain::findOptimalDivision(int terrain_mode)
           pin[0] = i;
           pin[1] = j;
           pin[2] = k;
+          int m = _IDX_S3D(i, j, k, tbl[c].div[0], tbl[c].div[1], 0);
 
-          getSizeCell(&tbl[c], pin, m);
+          getSize(&tbl[c], pin, m);
 
           pp = &tbl[c].score[m];
-
-          if ( grid_type == "node") getSizeNode(pp);
 
           getSrf(pp);
 
@@ -296,8 +303,6 @@ bool SubDomain::findOptimalDivision(int terrain_mode)
                  m, pp->sz[0], pp->sz[1], pp->sz[2],
                  vol, srf, sxy);
 #endif
-
-          m++;
         }
       }
     }
@@ -486,12 +491,11 @@ int SubDomain::getNumCandidates4JK()
 
 
 /*
- * @fn registerCandidates
+ * @fn registerCandidates_Cell
  * @brief 分割数の候補パラメータを登録する
  * @param [in,out] tbl 候補配列
- * @note FDM, FVM共通
  */
-void SubDomain::registerCandidates(cntl_tbl* tbl)
+void SubDomain::registerCandidates_Cell(cntl_tbl* tbl)
 {
   int odr=0;
   int np = numProc;
@@ -503,7 +507,7 @@ void SubDomain::registerCandidates(cntl_tbl* tbl)
 
         if ( i*j*k == np && i<=G_size[0] && j<=G_size[1] && k<=G_size[2] ) {
 
-          // 割り切れない場合には、基準サイズを一つだけ大きくしておく
+          // 等分で割り切れない場合には、基準サイズを一つだけ大きくしておく
           int vx = G_size[0]/i;
           if ( G_size[0] != vx*i ) vx +=1;
 
@@ -526,9 +530,7 @@ void SubDomain::registerCandidates(cntl_tbl* tbl)
           tbl[odr].div[1]= j;
           tbl[odr].div[2]= k;
 
-          tbl[odr].org_idx = odr; // 作成時のリストの順番を記録
-
-          odr++;
+          tbl[odr].org_idx = odr++; // 作成時のリストの順番を記録
         }
       }
     }
@@ -538,12 +540,124 @@ void SubDomain::registerCandidates(cntl_tbl* tbl)
 
 
 /*
- * @fn registerCandidates4JK
+ * @fn registerCandidates_Node
+ * @brief 分割数の候補パラメータを登録する
+ * @param [in,out] tbl 候補配列
+ * ex) G_size=11
+ *  index     1  2  3  4  5  6  7  8  9  10 11 : T%div    S
+ *  div=1     |  +  +  +  +  +  +  +  +  +  |     0      11
+ *  div=2     |  +  +  +  +  |  +  +  +  +  |     0       6
+ *  div=3     |  +  +  +  |  +  +  |  +  +  |     1       5
+ *  div=4     |  +  +  |  +  +  |  +  |  +  |     2       4
+ *  div=5     |  +  |  +  |  +  |  +  |  +  |     0       3
+ *
+ *  T = G_size + div - 1;
+ *  S = T/div (T%div==0), T/div+1(T%div/=0)
+ */
+void SubDomain::registerCandidates_Node(cntl_tbl* tbl)
+{
+  int odr=0;
+  int np = numProc;
+
+#pragma omp single
+  for (int k=1; k<=np; k++) {
+    for (int j=1; j<=np/k+1; j++) {
+      for (int i=1; i<=np/(j*k)+1; i++) {
+
+        if ( i*j*k == np && i<=G_size[0] && j<=G_size[1] && k<=G_size[2] ) {
+          int ii = G_size[0]+i-1;
+          int jj = G_size[1]+j-1;
+          int kk = G_size[2]+k-1;
+
+          int im = ii % i;
+          int jm = jj % j;
+          int km = kk % k;
+
+          // 余りの数だけ基準サイズで、残りは基準サイズ-1
+          tbl[odr].mod[0] = im;
+          tbl[odr].mod[1] = jm;
+          tbl[odr].mod[2] = km;
+
+          // 等分で割り切れない場合には、基準サイズを一つだけ大きくしておく
+          int vx = ii / i;
+          if ( im != 0 ) vx++;
+
+          int vy = jj / j;
+          if ( jm != 0 ) vy++;
+
+          int vz = kk / k;
+          if ( km != 0 ) vz++;
+
+          tbl[odr].dsz[0] = vx;  // 基準サイズ
+          tbl[odr].dsz[1] = vy;
+          tbl[odr].dsz[2] = vz;
+
+          tbl[odr].div[0]= i;  // Number of divisions for each direction
+          tbl[odr].div[1]= j;
+          tbl[odr].div[2]= k;
+
+          tbl[odr].org_idx = odr++; // 作成時のリストの順番を記録
+        }
+      }
+    }
+  }
+
+}
+
+
+/*
+ * @fn registerCandidates4JK_Cell
  * @brief JK分割時の分割数の候補パラメータを登録する
  * @param [in,out] tbl 候補配列
- * @note FDM, FVM共通
  */
-void SubDomain::registerCandidates4JK(cntl_tbl* tbl)
+void SubDomain::registerCandidates4JK_Cell(cntl_tbl* tbl)
+{
+  int odr=0;
+  int np = numProc;
+  const int a = (grid_type == "node") ? 1 : 0;
+  const int gsize[3] = {G_size[0]+a, G_size[1]+a, G_size[2]+a};
+  const int i = 1;
+
+#pragma omp single
+  for (int k=1; k<=np; k++) {
+    for (int j=1; j<=np/k+1; j++) {
+
+      if ( i*j*k == np && j<=G_size[1] && k<=G_size[2] ) {
+
+        // 割り切れない場合には、基準サイズを一つだけ大きくしておく
+        int vy = gsize[1]/j;
+        if ( gsize[1] != vy*j ) vy +=1;
+
+        int vz = gsize[2]/k;
+        if ( gsize[2] != vz*k ) vz +=1;
+
+        tbl[odr].dsz[0] = 1; // 基準サイズ
+        tbl[odr].dsz[1] = vy;
+        tbl[odr].dsz[2] = vz;
+
+        // 余りの数だけ基準サイズで、残りは基準サイズ-1
+        tbl[odr].mod[0] = 0;
+        tbl[odr].mod[1] = gsize[1] % j;
+        tbl[odr].mod[2] = gsize[2] % k;
+
+        tbl[odr].div[0]= 1;  // Number of divisions for each direction
+        tbl[odr].div[1]= j;
+        tbl[odr].div[2]= k;
+
+        tbl[odr].org_idx = odr++; // 作成時のリストの順番を記録
+      }
+    }
+  }
+
+}
+
+
+/*
+ * @fn registerCandidates4JK_Node
+ * @brief JK分割時の分割数の候補パラメータを登録する
+ * @param [in,out] tbl 候補配列
+ */
+void SubDomain::registerCandidates4JK_Node(cntl_tbl* tbl)
 {
   int odr=0;
   int np = numProc;
@@ -554,28 +668,33 @@ void SubDomain::registerCandidates4JK(cntl_tbl* tbl)
     for (int j=1; j<=np/k+1; j++) {
 
       if ( i*j*k == np && j<=G_size[1] && k<=G_size[2] ) {
+        int jj = G_size[1]+j-1;
+        int kk = G_size[2]+k-1;
+
+        int jm = jj % j;
+        int km = kk % k;
+
+        // 余りの数だけ基準サイズで、残りは基準サイズ-1
+        tbl[odr].mod[0] = 0;
+        tbl[odr].mod[1] = jm;
+        tbl[odr].mod[2] = km;
 
         // 割り切れない場合には、基準サイズを一つだけ大きくしておく
-        int vy = G_size[1]/j;
-        if ( G_size[1] != vy*j ) vy +=1;
+        int vy = jj / j;
+        if ( jm != 0 ) vy++;
 
-        int vz = G_size[2]/k;
-        if ( G_size[2] != vz*k ) vz +=1;
+        int vz = kk / k;
+        if ( km != 0 ) vz++;
 
         tbl[odr].dsz[0] = 1; // 基準サイズ
         tbl[odr].dsz[1] = vy;
         tbl[odr].dsz[2] = vz;
 
-        // 余りの数だけ基準サイズで、残りは基準サイズ-1
-        tbl[odr].mod[0] = 0;
-        tbl[odr].mod[1] = G_size[1] % j;
-        tbl[odr].mod[2] = G_size[2] % k;
-
         tbl[odr].div[0]= 1;  // Number of divisions for each direction
         tbl[odr].div[1]= j;
         tbl[odr].div[2]= k;
-        tbl[odr].org_idx = odr; // 作成時のリストの順番を記録
-        odr++;
+
+        tbl[odr].org_idx = odr++; // 作成時のリストの順番を記録
       }
     }
   }
@@ -584,8 +703,8 @@ void SubDomain::registerCandidates4JK(cntl_tbl* tbl)
 
 
 /*
- * @fn getSizeCell
- * @brief サブドメインのセルサイズを計算(セルベース)
+ * @fn getSize
+ * @brief サブドメインのサイズを計算
  * @param [in,out]  t       候補配列
  * @param [in]      in[3]   候補配列インデクス
  * @param [in]      m       ランク番号
@@ -599,7 +718,7 @@ void SubDomain::registerCandidates4JK(cntl_tbl* tbl)
                     0  1  2  3  4           0  1  2  3
         0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15
  */
-void SubDomain::getSizeCell(cntl_tbl* t, const int* in, const int m)
+void SubDomain::getSize(cntl_tbl* t, const int* in, const int m)
 {
   int tmp[3];
 
@@ -627,29 +746,6 @@ void SubDomain::getSizeCell(cntl_tbl* t, const int* in, const int m)
   t->score[m].sz[0] = tmp[0];
   t->score[m].sz[1] = tmp[1];
   t->score[m].sz[2] = tmp[2];
-}
-
-
-
-/*
- * @fn getSizeNode
- * @brief サブドメインのセルサイズを計算(ノードベース)
- * @param [in,out]  t       候補配列のスコアクラス
- * @note 配列の先頭 0 から数えてmod[]未満は標準、それ以降は一つ少ない。
- *       ただし、mod[]==0の場合は標準サイズ
- *
- *        0  1  2  3  4  5  6  7  8  9 10 11 12 13 14
- * cell   0  1  2  3  0  1  2  3  0  1  2  3  0  1  2
- *      |--+--+--+--|--+--+--+--|--+--+--+--|--+--+--|
- * node 0  1  2  3  4           0  1  2  3  4
-                    0  1  2  3  4           0  1  2  3
-        0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15
- */
-void SubDomain::getSizeNode(score_tbl* t)
-{
-  t->sz[0] += 1;
-  t->sz[1] += 1;
-  t->sz[2] += 1;
 }
 
 

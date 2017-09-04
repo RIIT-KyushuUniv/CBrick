@@ -6,6 +6,12 @@
 ## REVISION HISTORY
 
 ---
+- 2017-09-04 Version 0.9.5
+  - bug fix : registerCandidates() >> registerCandidates_Cell() / _Node()
+  - registerCandidates4JK_Cell() / _Node()
+
+
+---
 - 2017-09-04 Version 0.9.4
   - virtual instruction modifier for destructor
   - JK division

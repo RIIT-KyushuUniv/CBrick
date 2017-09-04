@@ -10,8 +10,8 @@
 
 // Execution
 // $ mpirun -np  4 div3 15  1  1 0
-// $ mpirun -np 12 div3 31 12 20 0 0
-// $ mpirun -np 16 div3 30 24 24
+// $ mpirun -np 12 div3 31 12 20 0
+// $ mpirun -np 16 div3 30 24 24 0
 
 // 領域サイズと領域分割数を与えて、最適な分割パターンを得る（ノードベース FDM）
 

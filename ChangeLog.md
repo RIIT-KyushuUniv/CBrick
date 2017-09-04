@@ -1,9 +1,14 @@
 # CBrick
 
 ## TODO
-
+- padding for inner most loop
 
 ## REVISION HISTORY
+
+---
+- 2017-09-04 Version 0.9.4
+  - virtual instruction modifier for destructor
+  - JK division
 
 ---
 - 2017-08-31 Version 0.9.3

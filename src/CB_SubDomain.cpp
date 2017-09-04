@@ -171,9 +171,10 @@ bool SubDomain::findParameter()
 /*
  * @fn findOptimalDivision
  * @brief 最適な分割数を見つける
+ * @param [in] mode {0-IJK分割、デフォルト、1-JK分割}
  * @retval true-success, false-fail
  */
-bool SubDomain::findOptimalDivision()
+bool SubDomain::findOptimalDivision(int terrain_mode)
 {
   if (div_mode == 1) return findParameter();
 
@@ -190,7 +191,13 @@ bool SubDomain::findOptimalDivision()
   }
 
   // 候補の数を因数分解的に数え上げる
-  int tbl_size = getNumCandidates();
+  int tbl_size;
+  if (terrain_mode == 1) {
+    tbl_size = getNumCandidates4JK();
+  }
+  else {
+    tbl_size = getNumCandidates();
+  }
 
 
   // 候補配列の確保
@@ -219,7 +226,13 @@ bool SubDomain::findOptimalDivision()
 
 
   // 候補のパラメータを登録
-  registerCandidates(tbl);
+  if (terrain_mode == 1) {
+    registerCandidates4JK(tbl);
+  }
+  else {
+    registerCandidates(tbl);
+  }
+
 
 
   // printout
@@ -449,6 +462,30 @@ int SubDomain::getNumCandidates()
 
 
 /*
+ * @fn getNumCandidates4JK
+ * @brief 分割数の組み合わせ数を数え上げる(I方向は非分割)
+ * @retval 候補の数
+ * @note FDM, FVM共通
+ */
+int SubDomain::getNumCandidates4JK()
+{
+  int odr=0;
+  int np = numProc;
+  const int i = 1;
+
+#pragma omp single
+  for (int k=1; k<=np; k++) {
+    for (int j=1; j<=np/k+1; j++) {
+      // 分割候補の積がプロセス数、かつ、分割数が全要素数以下であること
+      if ( i*j*k == np && j<=G_size[1] && k<=G_size[2] ) odr++;
+    }
+  }
+
+  return odr;
+}
+
+
+/*
  * @fn registerCandidates
  * @brief 分割数の候補パラメータを登録する
  * @param [in,out] tbl 候補配列
@@ -493,6 +530,52 @@ void SubDomain::registerCandidates(cntl_tbl* tbl)
 
           odr++;
         }
+      }
+    }
+  }
+
+}
+
+
+/*
+ * @fn registerCandidates4JK
+ * @brief JK分割時の分割数の候補パラメータを登録する
+ * @param [in,out] tbl 候補配列
+ * @note FDM, FVM共通
+ */
+void SubDomain::registerCandidates4JK(cntl_tbl* tbl)
+{
+  int odr=0;
+  int np = numProc;
+  const int i = 1;
+
+#pragma omp single
+  for (int k=1; k<=np; k++) {
+    for (int j=1; j<=np/k+1; j++) {
+
+      if ( i*j*k == np && j<=G_size[1] && k<=G_size[2] ) {
+
+        // 割り切れない場合には、基準サイズを一つだけ大きくしておく
+        int vy = G_size[1]/j;
+        if ( G_size[1] != vy*j ) vy +=1;
+
+        int vz = G_size[2]/k;
+        if ( G_size[2] != vz*k ) vz +=1;
+
+        tbl[odr].dsz[0] = 1; // 基準サイズ
+        tbl[odr].dsz[1] = vy;
+        tbl[odr].dsz[2] = vz;
+
+        // 余りの数だけ基準サイズで、残りは基準サイズ-1
+        tbl[odr].mod[0] = 0;
+        tbl[odr].mod[1] = G_size[1] % j;
+        tbl[odr].mod[2] = G_size[2] % k;
+
+        tbl[odr].div[0]= 1;  // Number of divisions for each direction
+        tbl[odr].div[1]= j;
+        tbl[odr].div[2]= k;
+        tbl[odr].org_idx = odr; // 作成時のリストの順番を記録
+        odr++;
       }
     }
   }

@@ -43,6 +43,7 @@ void usage()
   printf("\tnx;       Number of cells for x-dir.\n");
   printf("\tny;       Number of cells for y-dir.\n");
   printf("\tnz;       Number of cells for z-dir.\n");
+  printf("\tDivMode;  Division mode (0-IJK, 1-JK).\n");
   printf("\tXdiv;     Number of division for x-dir.\n");
   printf("\tYdiv;     Number of division for y-dir.\n");
   printf("\tZdiv;     Number of division for z-dir.\n");
@@ -99,6 +100,7 @@ bool read_config(Phys_Param* p,
     fscanf(fp, "%d %s", &c->laststep, buf);
     fscanf(fp, "%d %s", &c->fileout, buf);
     fscanf(fp, "%d %s", &c->blocking, buf);
+    fscanf(fp, "%d %s", &c->div_mode, buf);
 
     fclose(fp);
     fp = NULL;
@@ -111,6 +113,8 @@ bool read_config(Phys_Param* p,
     printf("\tnx   = %4d ;         Number of cells for x-dir.\n", m_sz[0]);
     printf("\tny   = %4d ;         Number of cells for y-dir.\n", m_sz[1]);
     printf("\tnz   = %4d ;         Number of cells for z-dir.\n", m_sz[2]);
+
+    printf("\tDivMode =      %s\n", (c->div_mode==0)?"IJK":"JK");
 
     if (div[0]*div[1]*div[2] == 0) {
       printf("\tNumber of division is not specified\n");
@@ -144,7 +148,7 @@ bool read_config(Phys_Param* p,
   }
 
   int* cntl=NULL;
-  if ( !(cntl= new int[9]) ) {
+  if ( !(cntl= new int[10]) ) {
     printf("fail to allocate memory\n");
     return false;
   }
@@ -164,6 +168,8 @@ bool read_config(Phys_Param* p,
     cntl[6] = c->laststep;
     cntl[7] = c->fileout;
     cntl[8] = c->blocking;
+    cntl[9] = c->div_mode;
+
   }
 
   // Broadcat to all processes
@@ -182,7 +188,7 @@ bool read_config(Phys_Param* p,
 
   MPI_Barrier(MPI_COMM_WORLD);
 
-  MPI_Bcast(cntl, 9, MPI_INT, 0, MPI_COMM_WORLD);
+  MPI_Bcast(cntl, 10, MPI_INT, 0, MPI_COMM_WORLD);
 
   m_sz[0]     = cntl[0];
   m_sz[1]     = cntl[1];
@@ -193,6 +199,7 @@ bool read_config(Phys_Param* p,
   c->laststep = cntl[6];
   c->fileout  = cntl[7];
   c->blocking = cntl[8];
+  c->div_mode = cntl[9];
 
 
   // release buffer
@@ -268,7 +275,7 @@ int main(int argc, char * argv[])
   // 分割数指定
   if (div_type == 1) D.setDivision(m_dv);
 
-  if ( !D.findOptimalDivision() ) MPI_Abort(MPI_COMM_WORLD, -1);
+  if ( !D.findOptimalDivision(P_cntl.div_mode) ) MPI_Abort(MPI_COMM_WORLD, -1);
   if ( !D.createRankTable() ) MPI_Abort(MPI_COMM_WORLD, -1);
 
 

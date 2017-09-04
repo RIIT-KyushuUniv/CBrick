@@ -101,7 +101,7 @@ public:
     mode = 2;
   }
 
-  ~cntl_tbl() {
+  virtual ~cntl_tbl() {
     if ( mode == 1 ) delete [] score;
   }
 };
@@ -124,7 +124,7 @@ public:
     for (int i=0; i<6; i++) cm[i] = -1;
   }
 
-  ~SubdomainInfo() {}
+  virtual ~SubdomainInfo() {}
 
   // copy constructor
   SubdomainInfo(const SubdomainInfo& src) {
@@ -269,7 +269,7 @@ public:
   }
 
   /** デストラクタ */
-  ~SubDomain() {
+  virtual ~SubDomain() {
     if ( buf_flag == 1 ) {
       delete [] f_xms;
       delete [] f_xmr;
@@ -293,7 +293,8 @@ public:
   bool createRankTable();
 
   // @brief 最適な分割数を見つける
-  bool findOptimalDivision();
+  // @param [in] mode {0-IJK分割、デフォルト、1-JK分割}
+  bool findOptimalDivision(int terrain_mode=0);
 
   // @brief 　Global > Local　インデクス変換
   bool G2L_index(const int* Gi, int* Li);
@@ -383,6 +384,8 @@ private:
 
   int getNumCandidates();
 
+  int getNumCandidates4JK();
+
   void getSizeCell(cntl_tbl* t, const int* in, const int m);
 
   void getSizeNode(score_tbl* t);
@@ -390,6 +393,8 @@ private:
   void getSrf(score_tbl* t);
 
   void registerCandidates(cntl_tbl* t);
+
+  void registerCandidates4JK(cntl_tbl* tbl);
 
   int sortComm(cntl_tbl* t, const int c_sz, FILE* fp);
 

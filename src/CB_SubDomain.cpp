@@ -169,7 +169,7 @@ bool SubDomain::findParameter()
 /*
  * @fn findOptimalDivision
  * @brief 最適な分割数を見つける
- * @param [in] mode {0-IJK分割、デフォルト、1-JK分割}
+ * @param [in] terrain_mode {0-IJK分割、デフォルト、1-JK分割}
  * @retval true-success, false-fail
  */
 bool SubDomain::findOptimalDivision(int terrain_mode)
@@ -631,7 +631,7 @@ void SubDomain::registerCandidates4JK_Cell(cntl_tbl* tbl)
         int vz = gsize[2]/k;
         if ( gsize[2] != vz*k ) vz +=1;
 
-        tbl[odr].dsz[0] = 1; // 基準サイズ
+        tbl[odr].dsz[0] = G_size[0]; // 基準サイズ
         tbl[odr].dsz[1] = vy;
         tbl[odr].dsz[2] = vz;
 
@@ -686,7 +686,7 @@ void SubDomain::registerCandidates4JK_Node(cntl_tbl* tbl)
         int vz = kk / k;
         if ( km != 0 ) vz++;
 
-        tbl[odr].dsz[0] = 1; // 基準サイズ
+        tbl[odr].dsz[0] = G_size[0]; // 基準サイズ
         tbl[odr].dsz[1] = vy;
         tbl[odr].dsz[2] = vz;
 

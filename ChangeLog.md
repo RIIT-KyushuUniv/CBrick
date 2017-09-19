@@ -6,6 +6,11 @@
 ## REVISION HISTORY
 
 ---
+- 2017-09-20 Version 0.9.6
+  - bug fix : registerCandidates4JK_Cell() / _Node() >>  tbl[odr].dsz[0]=G_size[0]
+
+
+---
 - 2017-09-04 Version 0.9.5
   - bug fix : registerCandidates() >> registerCandidates_Cell() / _Node()
   - registerCandidates4JK_Cell() / _Node()

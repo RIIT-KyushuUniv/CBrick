@@ -1257,12 +1257,12 @@ bool SubDomain::createRankTable()
     for (int j=0; j<ny; j++) {
       for (int i=0; i<nx; i++) {
         int m = rt[_IDX_S3D(i, j, k, nx, ny, 1)];
-        sd[m].cm[X_minus] = rt[_IDX_S3D(i-1, j  , k  , nx, ny, 1)];
-        sd[m].cm[X_plus]  = rt[_IDX_S3D(i+1, j  , k  , nx, ny, 1)];
-        sd[m].cm[Y_minus] = rt[_IDX_S3D(i  , j-1, k  , nx, ny, 1)];
-        sd[m].cm[Y_plus]  = rt[_IDX_S3D(i  , j+1, k  , nx, ny, 1)];
-        sd[m].cm[Z_minus] = rt[_IDX_S3D(i  , j  , k-1, nx, ny, 1)];
-        sd[m].cm[Z_plus]  = rt[_IDX_S3D(i  , j  , k+1, nx, ny, 1)];
+        sd[m].cm[I_minus] = rt[_IDX_S3D(i-1, j  , k  , nx, ny, 1)];
+        sd[m].cm[I_plus]  = rt[_IDX_S3D(i+1, j  , k  , nx, ny, 1)];
+        sd[m].cm[J_minus] = rt[_IDX_S3D(i  , j-1, k  , nx, ny, 1)];
+        sd[m].cm[J_plus]  = rt[_IDX_S3D(i  , j+1, k  , nx, ny, 1)];
+        sd[m].cm[K_minus] = rt[_IDX_S3D(i  , j  , k-1, nx, ny, 1)];
+        sd[m].cm[K_plus]  = rt[_IDX_S3D(i  , j  , k+1, nx, ny, 1)];
       }
     }
   }
@@ -1293,7 +1293,7 @@ bool SubDomain::createRankTable()
     {
       fprintf(fp, "\n==================\n");
       fprintf(fp,"\tGenerate Rank Table\n\n");
-      fprintf(fp, "    Rank :  X_minus   X_plus  Y_minus   Y_plus  Z_minus   Z_plus\n");
+      fprintf(fp, "    Rank :  I_minus   I_plus  J_minus   J_plus  K_minus   K_plus\n");
 
       for (int i=0; i<numProc; i++)
       {

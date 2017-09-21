@@ -29,10 +29,6 @@ bool SubDomain::Comm_V_nonblocking(REAL_TYPE* src,
                                    const int gc_comm,
                                    MPI_Request *req)
 {
-  int imax = size[0];
-  int jmax = size[1];
-  int kmax = size[2];
-
   // Communication identifier
   for (int i=0; i<12; i++) req[i] = MPI_REQUEST_NULL;
 
@@ -43,25 +39,25 @@ bool SubDomain::Comm_V_nonblocking(REAL_TYPE* src,
   msz[2] = (size[0]+2*gc_comm) * (size[1]+2*gc_comm) * gc_comm;
 
   // X direction
-  int nIDm = comm_tbl[X_minus];
-  int nIDp = comm_tbl[X_plus];
+  int nIDm = comm_tbl[I_minus];
+  int nIDp = comm_tbl[I_plus];
 
-  pack_VX(src, gc_comm, f_xms, f_xps, nIDm, nIDp);
-  if ( !IsendIrecv(f_xms, f_xmr, f_xps, f_xpr, msz[0], nIDm, nIDp, &req[0]) ) return false;
+  pack_VI(src, gc_comm, f_ims, f_ips, nIDm, nIDp);
+  if ( !IsendIrecv(f_ims, f_imr, f_ips, f_ipr, msz[0], nIDm, nIDp, &req[0]) ) return false;
 
   // Y direction
-  nIDm = comm_tbl[Y_minus];
-  nIDp = comm_tbl[Y_plus];
+  nIDm = comm_tbl[J_minus];
+  nIDp = comm_tbl[J_plus];
 
-  pack_VY(src, gc_comm, f_yms, f_yps, nIDm, nIDp);
-  if ( !IsendIrecv(f_yms, f_ymr, f_yps, f_ypr, msz[1], nIDm, nIDp, &req[4]) ) return false;
+  pack_VJ(src, gc_comm, f_jms, f_jps, nIDm, nIDp);
+  if ( !IsendIrecv(f_jms, f_jmr, f_jps, f_jpr, msz[1], nIDm, nIDp, &req[4]) ) return false;
 
   // Z direction
-  nIDm = comm_tbl[Z_minus];
-  nIDp = comm_tbl[Z_plus];
+  nIDm = comm_tbl[K_minus];
+  nIDp = comm_tbl[K_plus];
 
-  pack_VZ(src, gc_comm, f_zms, f_zps, nIDm, nIDp);
-  if ( !IsendIrecv(f_zms, f_zmr, f_zps, f_zpr, msz[2], nIDm, nIDp, &req[8]) ) return false;
+  pack_VK(src, gc_comm, f_kms, f_kps, nIDm, nIDp);
+  if ( !IsendIrecv(f_kms, f_kmr, f_kps, f_kpr, msz[2], nIDm, nIDp, &req[8]) ) return false;
 
   return true;
 }
@@ -82,24 +78,24 @@ bool SubDomain::Comm_V_wait_nonblocking(REAL_TYPE* dest,
   MPI_Status stat[4];
 
   //// X face ////
-  int nIDm = comm_tbl[X_minus];
-  int nIDp = comm_tbl[X_plus];
+  int nIDm = comm_tbl[I_minus];
+  int nIDp = comm_tbl[I_plus];
   if ( MPI_SUCCESS != MPI_Waitall( 4, &req[0], stat ) ) return false;
-  unpack_VX(dest, gc_comm, f_xmr, f_xpr, nIDm, nIDp);
+  unpack_VI(dest, gc_comm, f_imr, f_ipr, nIDm, nIDp);
 
 
   //// Y face ////
-  nIDm = comm_tbl[Y_minus];
-  nIDp = comm_tbl[Y_plus];
+  nIDm = comm_tbl[J_minus];
+  nIDp = comm_tbl[J_plus];
   if ( MPI_SUCCESS != MPI_Waitall( 4, &req[4], stat ) ) return false;
-  unpack_VY(dest, gc_comm, f_ymr, f_ypr, nIDm, nIDp);
+  unpack_VJ(dest, gc_comm, f_jmr, f_jpr, nIDm, nIDp);
 
 
   //// Z face ////
-  nIDm = comm_tbl[Z_minus];
-  nIDp = comm_tbl[Z_plus];
+  nIDm = comm_tbl[K_minus];
+  nIDp = comm_tbl[K_plus];
   if ( MPI_SUCCESS != MPI_Waitall( 4, &req[8], stat ) ) return false;
-  unpack_VZ(dest, gc_comm, f_zmr, f_zpr, nIDm, nIDp);
+  unpack_VK(dest, gc_comm, f_kmr, f_kpr, nIDm, nIDp);
 
   return true;
 }

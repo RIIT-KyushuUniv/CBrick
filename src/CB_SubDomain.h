@@ -166,18 +166,18 @@ protected:
 
 private:
   // Buffer for asynchronous communication
-  REAL_TYPE* f_xms;  // X- direction send
-  REAL_TYPE* f_xmr;  // X- direction recv
-  REAL_TYPE* f_xps;  // X+ direction send
-  REAL_TYPE* f_xpr;  // X+ direction recv
-  REAL_TYPE* f_yms;  // Y- direction send
-  REAL_TYPE* f_ymr;  // Y- direction recv
-  REAL_TYPE* f_yps;  // Y+ direction send
-  REAL_TYPE* f_ypr;  // Y+ direction recv
-  REAL_TYPE* f_zms;  // Z- direction send
-  REAL_TYPE* f_zmr;  // Z- direction recv
-  REAL_TYPE* f_zps;  // Z+ direction send
-  REAL_TYPE* f_zpr;  // Z+ direction recv
+  REAL_TYPE* f_ims;  // I- direction send
+  REAL_TYPE* f_imr;  // I- direction recv
+  REAL_TYPE* f_ips;  // I+ direction send
+  REAL_TYPE* f_ipr;  // I+ direction recv
+  REAL_TYPE* f_jms;  // J- direction send
+  REAL_TYPE* f_jmr;  // J- direction recv
+  REAL_TYPE* f_jps;  // J+ direction send
+  REAL_TYPE* f_jpr;  // J+ direction recv
+  REAL_TYPE* f_kms;  // K- direction send
+  REAL_TYPE* f_kmr;  // K- direction recv
+  REAL_TYPE* f_kps;  // K+ direction send
+  REAL_TYPE* f_kpr;  // K+ direction recv
 
   int buf_flag;     // バッファを確保済みのときに1
 
@@ -203,18 +203,18 @@ public:
     }
     sd = NULL;
 
-    f_xms = NULL;  // X- direction send
-    f_xmr = NULL;  // X- direction recv
-    f_xps = NULL;  // X+ direction send
-    f_xpr = NULL;  // X+ direction recv
-    f_yms = NULL;  // Y- direction send
-    f_ymr = NULL;  // Y- direction recv
-    f_yps = NULL;  // Y+ direction send
-    f_ypr = NULL;  // Y+ direction recv
-    f_zms = NULL;  // Z- direction send
-    f_zmr = NULL;  // Z- direction recv
-    f_zps = NULL;  // Z+ direction send
-    f_zpr = NULL;  // Z+ direction recv
+    f_ims = NULL;  // X- direction send
+    f_imr = NULL;  // X- direction recv
+    f_ips = NULL;  // X+ direction send
+    f_ipr = NULL;  // X+ direction recv
+    f_jms = NULL;  // Y- direction send
+    f_jmr = NULL;  // Y- direction recv
+    f_jps = NULL;  // Y+ direction send
+    f_jpr = NULL;  // Y+ direction recv
+    f_kms = NULL;  // Z- direction send
+    f_kmr = NULL;  // Z- direction recv
+    f_kps = NULL;  // Z+ direction send
+    f_kpr = NULL;  // Z+ direction recv
     buf_flag = 0;
   }
 
@@ -248,18 +248,18 @@ public:
     }
     sd = NULL;
 
-    f_xms = NULL;  // X- direction send
-    f_xmr = NULL;  // X- direction recv
-    f_xps = NULL;  // X+ direction send
-    f_xpr = NULL;  // X+ direction recv
-    f_yms = NULL;  // Y- direction send
-    f_ymr = NULL;  // Y- direction recv
-    f_yps = NULL;  // Y+ direction send
-    f_ypr = NULL;  // Y+ direction recv
-    f_zms = NULL;  // Z- direction send
-    f_zmr = NULL;  // Z- direction recv
-    f_zps = NULL;  // Z+ direction send
-    f_zpr = NULL;  // Z+ direction recv
+    f_ims = NULL;  // X- direction send
+    f_imr = NULL;  // X- direction recv
+    f_ips = NULL;  // X+ direction send
+    f_ipr = NULL;  // X+ direction recv
+    f_jms = NULL;  // Y- direction send
+    f_jmr = NULL;  // Y- direction recv
+    f_jps = NULL;  // Y+ direction send
+    f_jpr = NULL;  // Y+ direction recv
+    f_kms = NULL;  // Z- direction send
+    f_kmr = NULL;  // Z- direction recv
+    f_kps = NULL;  // Z+ direction send
+    f_kpr = NULL;  // Z+ direction recv
     buf_flag = 0;
 
 
@@ -305,18 +305,18 @@ public:
   /** デストラクタ */
   virtual ~SubDomain() {
     if ( buf_flag == 1 ) {
-      delete [] f_xms;
-      delete [] f_xmr;
-      delete [] f_xps;
-      delete [] f_xpr;
-      delete [] f_yms;
-      delete [] f_ymr;
-      delete [] f_yps;
-      delete [] f_ypr;
-      delete [] f_zms;
-      delete [] f_zmr;
-      delete [] f_zps;
-      delete [] f_zpr;
+      delete [] f_ims;
+      delete [] f_imr;
+      delete [] f_ips;
+      delete [] f_ipr;
+      delete [] f_jms;
+      delete [] f_jmr;
+      delete [] f_jps;
+      delete [] f_jpr;
+      delete [] f_kms;
+      delete [] f_kmr;
+      delete [] f_kps;
+      delete [] f_kpr;
     }
   }
 
@@ -484,42 +484,42 @@ private:
 // CB_PackingScalar.cpp
 private:
 
-  void pack_SX(const REAL_TYPE *array,
+  void pack_SI(const REAL_TYPE *array,
                const int vc_comm,
                REAL_TYPE *sendm,
                REAL_TYPE *sendp,
                const int nIDm,
                const int nIDp);
 
-  void unpack_SX(REAL_TYPE *array,
+  void unpack_SI(REAL_TYPE *array,
                  const int vc_comm,
                  const REAL_TYPE *recvm,
                  const REAL_TYPE *recvp,
                  const int nIDm,
                  const int nIDp);
 
-  void pack_SY(const REAL_TYPE *array,
+  void pack_SJ(const REAL_TYPE *array,
                const int vc_comm,
                REAL_TYPE *sendm,
                REAL_TYPE *sendp,
                const int nIDm,
                const int nIDp);
 
-  void unpack_SY(REAL_TYPE *array,
+  void unpack_SJ(REAL_TYPE *array,
                  const int vc_comm,
                  const REAL_TYPE *recvm,
                  const REAL_TYPE *recvp,
                  const int nIDm,
                  const int nIDp);
 
-  void pack_SZ(const REAL_TYPE *array,
+  void pack_SK(const REAL_TYPE *array,
                const int vc_comm,
                REAL_TYPE *sendm,
                REAL_TYPE *sendp,
                const int nIDm,
                const int nIDp);
 
-  void unpack_SZ(REAL_TYPE *array,
+  void unpack_SK(REAL_TYPE *array,
                  const int vc_comm,
                  const REAL_TYPE *recvm,
                  const REAL_TYPE *recvp,
@@ -552,42 +552,42 @@ public:
 // CB_PackingVector.cpp
 private:
 
-  void pack_VX(const REAL_TYPE *array,
+  void pack_VI(const REAL_TYPE *array,
                const int vc_comm,
                REAL_TYPE *sendm,
                REAL_TYPE *sendp,
                const int nIDm,
                const int nIDp);
 
-  void unpack_VX(REAL_TYPE *array,
+  void unpack_VI(REAL_TYPE *array,
                  const int vc_comm,
                  const REAL_TYPE *recvm,
                  const REAL_TYPE *recvp,
                  const int nIDm,
                  const int nIDp);
 
-  void pack_VY(const REAL_TYPE *array,
+  void pack_VJ(const REAL_TYPE *array,
                const int vc_comm,
                REAL_TYPE *sendm,
                REAL_TYPE *sendp,
                const int nIDm,
                const int nIDp);
 
-  void unpack_VY(REAL_TYPE *array,
+  void unpack_VJ(REAL_TYPE *array,
                  const int vc_comm,
                  const REAL_TYPE *recvm,
                  const REAL_TYPE *recvp,
                  const int nIDm,
                  const int nIDp);
 
-  void pack_VZ(const REAL_TYPE *array,
+  void pack_VK(const REAL_TYPE *array,
                const int vc_comm,
                REAL_TYPE *sendm,
                REAL_TYPE *sendp,
                const int nIDm,
                const int nIDp);
 
-  void unpack_VZ(REAL_TYPE *array,
+  void unpack_VK(REAL_TYPE *array,
                  const int vc_comm,
                  const REAL_TYPE *recvm,
                  const REAL_TYPE *recvp,

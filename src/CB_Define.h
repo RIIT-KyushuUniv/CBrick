@@ -46,12 +46,12 @@
 
 
 enum DIRection {
-  X_minus=0,
-  X_plus,
-  Y_minus,
-  Y_plus,
-  Z_minus,
-  Z_plus
+  I_minus=0,
+  I_plus,
+  J_minus,
+  J_plus,
+  K_minus,
+  K_plus
 };
 
 

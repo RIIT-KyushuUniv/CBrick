@@ -34,20 +34,20 @@ bool SubDomain::initComm(const int num_compo)
   f_sz[1] = (size[0]+2*gc) * (size[2]+2*gc) * gc * num_compo;
   f_sz[2] = (size[0]+2*gc) * (size[1]+2*gc) * gc * num_compo;
 
-  if ( !(f_xms = new REAL_TYPE [f_sz[0]]) ) return false;
-  if ( !(f_xmr = new REAL_TYPE [f_sz[0]]) ) return false;
-  if ( !(f_xps = new REAL_TYPE [f_sz[0]]) ) return false;
-  if ( !(f_xpr = new REAL_TYPE [f_sz[0]]) ) return false;
+  if ( !(f_ims = new REAL_TYPE [f_sz[0]]) ) return false;
+  if ( !(f_imr = new REAL_TYPE [f_sz[0]]) ) return false;
+  if ( !(f_ips = new REAL_TYPE [f_sz[0]]) ) return false;
+  if ( !(f_ipr = new REAL_TYPE [f_sz[0]]) ) return false;
 
-  if ( !(f_yms = new REAL_TYPE [f_sz[1]]) ) return false;
-  if ( !(f_ymr = new REAL_TYPE [f_sz[1]]) ) return false;
-  if ( !(f_yps = new REAL_TYPE [f_sz[1]]) ) return false;
-  if ( !(f_ypr = new REAL_TYPE [f_sz[1]]) ) return false;
+  if ( !(f_jms = new REAL_TYPE [f_sz[1]]) ) return false;
+  if ( !(f_jmr = new REAL_TYPE [f_sz[1]]) ) return false;
+  if ( !(f_jps = new REAL_TYPE [f_sz[1]]) ) return false;
+  if ( !(f_jpr = new REAL_TYPE [f_sz[1]]) ) return false;
 
-  if ( !(f_zms = new REAL_TYPE [f_sz[2]]) ) return false;
-  if ( !(f_zmr = new REAL_TYPE [f_sz[2]]) ) return false;
-  if ( !(f_zps = new REAL_TYPE [f_sz[2]]) ) return false;
-  if ( !(f_zpr = new REAL_TYPE [f_sz[2]]) ) return false;
+  if ( !(f_kms = new REAL_TYPE [f_sz[2]]) ) return false;
+  if ( !(f_kmr = new REAL_TYPE [f_sz[2]]) ) return false;
+  if ( !(f_kps = new REAL_TYPE [f_sz[2]]) ) return false;
+  if ( !(f_kpr = new REAL_TYPE [f_sz[2]]) ) return false;
 
   buf_flag = 1; // バッファ確保ずみ
 
@@ -76,25 +76,25 @@ bool SubDomain::Comm_S_nonblocking(REAL_TYPE* src,
   msz[2] = (size[0]+2*gc_comm) * (size[1]+2*gc_comm) * gc_comm;
 
   // X direction
-  int nIDm = comm_tbl[X_minus];
-  int nIDp = comm_tbl[X_plus];
+  int nIDm = comm_tbl[I_minus];
+  int nIDp = comm_tbl[I_plus];
 
-  pack_SX(src, gc_comm, f_xms, f_xps, nIDm, nIDp);
-  if ( !IsendIrecv(f_xms, f_xmr, f_xps, f_xpr, msz[0], nIDm, nIDp, &req[0]) ) return false;
+  pack_SI(src, gc_comm, f_ims, f_ips, nIDm, nIDp);
+  if ( !IsendIrecv(f_ims, f_imr, f_ips, f_ipr, msz[0], nIDm, nIDp, &req[0]) ) return false;
 
   // Y direction
-  nIDm = comm_tbl[Y_minus];
-  nIDp = comm_tbl[Y_plus];
+  nIDm = comm_tbl[J_minus];
+  nIDp = comm_tbl[J_plus];
 
-  pack_SY(src, gc_comm, f_yms, f_yps, nIDm, nIDp);
-  if ( !IsendIrecv(f_yms, f_ymr, f_yps, f_ypr, msz[1], nIDm, nIDp, &req[4]) ) return false;
+  pack_SJ(src, gc_comm, f_jms, f_jps, nIDm, nIDp);
+  if ( !IsendIrecv(f_jms, f_jmr, f_jps, f_jpr, msz[1], nIDm, nIDp, &req[4]) ) return false;
 
   // Z direction
-  nIDm = comm_tbl[Z_minus];
-  nIDp = comm_tbl[Z_plus];
+  nIDm = comm_tbl[K_minus];
+  nIDp = comm_tbl[K_plus];
 
-  pack_SZ(src, gc_comm, f_zms, f_zps, nIDm, nIDp);
-  if ( !IsendIrecv(f_zms, f_zmr, f_zps, f_zpr, msz[2], nIDm, nIDp, &req[8]) ) return false;
+  pack_SK(src, gc_comm, f_kms, f_kps, nIDm, nIDp);
+  if ( !IsendIrecv(f_kms, f_kmr, f_kps, f_kpr, msz[2], nIDm, nIDp, &req[8]) ) return false;
 
   return true;
 }
@@ -242,24 +242,24 @@ bool SubDomain::Comm_S_wait_nonblocking(REAL_TYPE* dest,
   MPI_Status stat[4];
 
   //// X face ////
-  int nIDm = comm_tbl[X_minus];
-  int nIDp = comm_tbl[X_plus];
+  int nIDm = comm_tbl[I_minus];
+  int nIDp = comm_tbl[I_plus];
   if ( MPI_SUCCESS != MPI_Waitall( 4, &req[0], stat ) ) return false;
-  unpack_SX(dest, gc_comm, f_xmr, f_xpr, nIDm, nIDp);
+  unpack_SI(dest, gc_comm, f_imr, f_ipr, nIDm, nIDp);
 
 
   //// Y face ////
-  nIDm = comm_tbl[Y_minus];
-  nIDp = comm_tbl[Y_plus];
+  nIDm = comm_tbl[J_minus];
+  nIDp = comm_tbl[J_plus];
   if ( MPI_SUCCESS != MPI_Waitall( 4, &req[4], stat ) ) return false;
-  unpack_SY(dest, gc_comm, f_ymr, f_ypr, nIDm, nIDp);
+  unpack_SJ(dest, gc_comm, f_jmr, f_jpr, nIDm, nIDp);
 
 
   //// Z face ////
-  nIDm = comm_tbl[Z_minus];
-  nIDp = comm_tbl[Z_plus];
+  nIDm = comm_tbl[K_minus];
+  nIDp = comm_tbl[K_plus];
   if ( MPI_SUCCESS != MPI_Waitall( 4, &req[8], stat ) ) return false;
-  unpack_SZ(dest, gc_comm, f_zmr, f_zpr, nIDm, nIDp);
+  unpack_SK(dest, gc_comm, f_kmr, f_kpr, nIDm, nIDp);
 
   return true;
 }

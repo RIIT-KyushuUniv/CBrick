@@ -6,14 +6,22 @@
 ## REVISION HISTORY
 
 ---
+- 2017-09-21 Version 0.9.7
+  - Change notation of
+    - X_minus >> I_minus, also others
+    - `f_xms >> f_ims`, `f_xps >> f_ips`, `f_yms >> f_jms`,...
+    - SX >> SI, SY >> SJ, SZ >> SK
+
+
+---
 - 2017-09-20 Version 0.9.6
-  - bug fix : registerCandidates4JK_Cell() / _Node() >>  tbl[odr].dsz[0]=G_size[0]
+  - bug fix : `registerCandidates4JK_Cell() / Node()` >>  tbl[odr].dsz[0]=G_size[0]
 
 
 ---
 - 2017-09-04 Version 0.9.5
-  - bug fix : registerCandidates() >> registerCandidates_Cell() / _Node()
-  - registerCandidates4JK_Cell() / _Node()
+  - bug fix : `registerCandidates() >> registerCandidates_Cell() / Node()`
+  - `registerCandidates4JK_Cell() / Node()`
 
 
 ---
@@ -23,7 +31,7 @@
 
 ---
 - 2017-08-31 Version 0.9.3
-  - use CMAKE_BUILD_TYPE for Debug > > define -DNDEBUG
+  - use `CMAKE_BUILD_TYPE` for Debug > > define -DNDEBUG
 
 ---
 - 2017-08-30 Version 0.9.2

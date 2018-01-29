@@ -2,7 +2,7 @@
 #
 # CBrick
 #
-# Copyright (c) 2017 Research Institute for Information Technology(RIIT),
+# Copyright (c) 2017-2018 Research Institute for Information Technology(RIIT),
 #                    Kyushu University.  All rights reserved.
 #
 ####################################################################################
@@ -43,6 +43,7 @@ elseif(CMAKE_Fortran_COMPILER_ID STREQUAL "GNU")
 elseif(CMAKE_Fortran_COMPILER_ID STREQUAL "Intel")
   set_target_properties(diff3d_d PROPERTIES COMPILE_FLAGS "-D_REAL_IS_DOUBLE_ -r8")
 elseif(CMAKE_Fortran_COMPILER_ID STREQUAL "PGI")
+  set_target_properties(diff3d_d PROPERTIES COMPILE_FLAGS "-D_REAL_IS_DOUBLE_ -r8")
 endif()
 
 set_target_properties(diff3d_d PROPERTIES LINKER_LANGUAGE CXX)

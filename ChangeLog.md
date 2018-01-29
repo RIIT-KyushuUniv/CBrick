@@ -6,6 +6,10 @@
 ## REVISION HISTORY
 
 ---
+- 2018-01-29 Version 0.9.8
+  - expire serial build
+
+---
 - 2017-09-21 Version 0.9.7
   - Change notation of
     - X_minus >> I_minus, also others
@@ -61,7 +65,7 @@
 
 ---
 - 2017-08-03 Version 0.7.3
-  - add #ifndef DISABLE_MPI for serial build of applications
+  - add #ifndef DISABLE_MPI for serial build of applications >> expired later
 
 
 ---

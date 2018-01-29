@@ -6,7 +6,7 @@
 #
 # CBrick
 #
-# Copyright (c) 2017 Research Institute for Information Technology(RIIT),
+# Copyright (c) 2017-2018 Research Institute for Information Technology(RIIT),
 #                    Kyushu University.  All rights reserved.
 #
 ####################################################################################
@@ -18,13 +18,7 @@
  * @todo sort >> k>j スレッド化のためのオプション、オプションの与え方
  */
 
-#ifndef DISABLE_MPI // CBrick自体は並列のみであるが、他のツールでインクルードして逐次ビルドする場合の処理
-  #include <mpi.h>
-#else
-  // stubとしてint型を定義
-  typedef int MPI_Comm;
-  typedef int MPI_Request;
-#endif
+#include <mpi.h>
 
 #include <string>
 #include <stdlib.h>

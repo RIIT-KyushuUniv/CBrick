@@ -2,7 +2,7 @@
 #
 # CBrick
 #
-# Copyright (c) 2017 Research Institute for Information Technology(RIIT),
+# Copyright (c) 2017-2018 Research Institute for Information Technology(RIIT),
 #                    Kyushu University.  All rights reserved.
 #
 ####################################################################################
@@ -42,30 +42,14 @@ macro (AddOptimizeOption)
     endif()
 
   elseif(CMAKE_CXX_COMPILER_ID STREQUAL "PGI")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3")
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O3")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fastsse -Mipa=fast,inline -O4 -Minfo=intensity,mp,vect")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fastsse -Mipa=fast,inline -O4 -Minfo=intensity,mp,vect")
     if (with_example)
-      set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -O3")
+      set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -fastsse -Mipa=fast,inline -O4 -Minfo=intensity,mp,vect")
     endif()
 
   else()
     message("using default option")
-  endif()
-endmacro()
-
-
-macro (AddSSE)
-  if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-    if(CMAKE_SYSTEM_NAME MATCHES "Darwin")
-      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -msse3")
-    else()
-      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native")
-    endif()
-  elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -xHost")
-
-  elseif(CMAKE_CXX_COMPILER_ID STREQUAL "PGI")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fastsse")
   endif()
 endmacro()
 

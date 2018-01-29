@@ -2,7 +2,7 @@
 #
 # CBrick
 #
-# Copyright (c) 2017 Research Institute for Information Technology(RIIT),
+# Copyright (c) 2017-2018 Research Institute for Information Technology(RIIT),
 #                    Kyushu University.  All rights reserved.
 #
 ####################################################################################
@@ -16,7 +16,7 @@ link_directories()
 
 set(cb_files CB_SubDomain.cpp
              CB_CommS.cpp
-             CB_CommV.cpp 
+             CB_CommV.cpp
              CB_PackingScalar.cpp
              CB_PackingVector.cpp)
 

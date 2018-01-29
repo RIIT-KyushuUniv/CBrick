@@ -2,7 +2,7 @@
 #
 # CBrick
 #
-# Copyright (c) 2017 Research Institute for Information Technology(RIIT),
+# Copyright (c) 2017-2018 Research Institute for Information Technology(RIIT),
 #                    Kyushu University.  All rights reserved.
 #
 ####################################################################################
@@ -53,8 +53,8 @@ set (CMAKE_INSTALL_PREFIX "${INSTALL_DIR}")
 set(CMAKE_BUILD_TYPE Release)
 
 #######
-set(PROJECT_VERSION "0.9.7")
-set(LIB_REVISION "20170921_1000")
+set(PROJECT_VERSION "0.9.8")
+set(LIB_REVISION "20180129_0100")
 #######
 
 

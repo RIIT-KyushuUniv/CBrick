@@ -9,7 +9,7 @@ A class library to help making applications on Cartesian grid, including simple 
 
 
 ## Copyright
-- Copyright (c) 2017 Research Institute for Information Technology(RIIT), Kyushu University. All rights reserved.
+- Copyright (c) 2017-2018 Research Institute for Information Technology(RIIT), Kyushu University. All rights reserved.
 
 
 ## Software Requirement
@@ -26,6 +26,7 @@ A class library to help making applications on Cartesian grid, including simple 
 $ export CB_HOME=/hogehoge
 $ mkdir build
 $ cd build
+$ export CC=mpiicc CXX=mpiicpc F90=mpiifort // if needed like this line.
 $ cmake [options] ..
 $ make
 $ sudo make install
@@ -50,25 +51,25 @@ This Cmake generates CBrick_f for float, and CBrick_d for double precision.
 >  This option makes OpenMP directives effect. Default is yes.
 
 
-`-D with_example=` {no|yes}
+`-D with_example=` {no | yes}
 
+> Specify the build of test modules.
 
 
 ## Configure Examples
 
 `$ export CB_HOME=hogehoge`
 
-### INTEL/GNU compiler
+### INTEL/GNU/PGI compiler
 
 ~~~
-$ cmake -DINSTALL_DIR=${CB_HOME}/CBrick \
-        -Denable_OPENMP=yes \
-        -Dwith_example=yes ..
+$ cmake -DINSTALL_DIR=${CB_HOME}/CBrick -Denable_OPENMP=yes -Dwith_example=yes ..
 ~~~
 
 #### Note
 In case of some Intel compiler environment, please specify environemnt variables
 `export CC=icc CXX=icpc F90=ifort FC=ifort` before compiling.
+Also, for PGI compiler, `export CC=mpicc CXX=mpic++ F90=mpif90 FC=mpif90`
 
 
 ### FUJITSU compiler / FX10, FX100, K computer on login nodes (Cross compilation) and Fujitsu TCS environment for intel PC

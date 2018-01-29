@@ -1,12 +1,8 @@
 ###################################################################################
 #
-# RIAM-COMPACT
+# CBrick
 #
-# Copyright (C) 2015-2017 Research Institute for Applied Mechanics(RIAM)
-#                       / Research Institute for Information Technology(RIIT), Kyushu University.
-# All rights reserved.
-#
-# Copyright (C) 2015-2016 Advanced Institute for Computational Science, RIKEN.
+# Copyright (C) 2017-2018 Research Institute for Information Technology(RIIT), Kyushu University.
 # All rights reserved.
 #
 ###################################################################################

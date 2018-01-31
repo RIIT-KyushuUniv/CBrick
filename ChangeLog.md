@@ -2,12 +2,24 @@
 
 ## TODO
 - padding for inner most loop
+- cell Communication
+- division mode for terrain
 
 ## REVISION HISTORY
 
 ---
+- 2018-01-30 Version 0.9.9
+  - Split packing method into Cell and Node
+  - bug fix : pack/unpack for node
+  - modify SubDomain::setDivision(), div2.cpp, div4.cpp
+  - bug fix : sortVolume
+  - bug fix : counter in registerCandidates*()
+
+
+---
 - 2018-01-29 Version 0.9.8
   - expire serial build
+
 
 ---
 - 2017-09-21 Version 0.9.7
@@ -142,7 +154,7 @@
 - 2017-07-27 Version 0.4.0
   - example/diff3d
   - add Fortran env in case of turning on example
-  - introduce div_mode, and merge findParameter() into findOptimalDivision()
+  - introduce auto_div, and merge findParameter() into findOptimalDivision()
 
 
 ---

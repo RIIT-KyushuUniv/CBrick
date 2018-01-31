@@ -79,21 +79,45 @@ bool SubDomain::Comm_S_nonblocking(REAL_TYPE* src,
   int nIDm = comm_tbl[I_minus];
   int nIDp = comm_tbl[I_plus];
 
-  pack_SI(src, gc_comm, f_ims, f_ips, nIDm, nIDp);
+  if (grid_type == "node")
+  {
+    pack_SIn(src, gc_comm, f_ims, f_ips, nIDm, nIDp);
+  }
+  else
+  {
+    pack_SI(src, gc_comm, f_ims, f_ips, nIDm, nIDp);
+  }
+
   if ( !IsendIrecv(f_ims, f_imr, f_ips, f_ipr, msz[0], nIDm, nIDp, &req[0]) ) return false;
 
   // Y direction
   nIDm = comm_tbl[J_minus];
   nIDp = comm_tbl[J_plus];
 
-  pack_SJ(src, gc_comm, f_jms, f_jps, nIDm, nIDp);
+  if (grid_type == "node")
+  {
+    pack_SJn(src, gc_comm, f_jms, f_jps, nIDm, nIDp);
+  }
+  else
+  {
+    pack_SJ(src, gc_comm, f_jms, f_jps, nIDm, nIDp);
+  }
+
   if ( !IsendIrecv(f_jms, f_jmr, f_jps, f_jpr, msz[1], nIDm, nIDp, &req[4]) ) return false;
 
   // Z direction
   nIDm = comm_tbl[K_minus];
   nIDp = comm_tbl[K_plus];
 
-  pack_SK(src, gc_comm, f_kms, f_kps, nIDm, nIDp);
+  if (grid_type == "node")
+  {
+    pack_SKn(src, gc_comm, f_kms, f_kps, nIDm, nIDp);
+  }
+  else
+  {
+    pack_SK(src, gc_comm, f_kms, f_kps, nIDm, nIDp);
+  }
+
   if ( !IsendIrecv(f_kms, f_kmr, f_kps, f_kpr, msz[2], nIDm, nIDp, &req[8]) ) return false;
 
   return true;
@@ -245,21 +269,42 @@ bool SubDomain::Comm_S_wait_nonblocking(REAL_TYPE* dest,
   int nIDm = comm_tbl[I_minus];
   int nIDp = comm_tbl[I_plus];
   if ( MPI_SUCCESS != MPI_Waitall( 4, &req[0], stat ) ) return false;
-  unpack_SI(dest, gc_comm, f_imr, f_ipr, nIDm, nIDp);
+  if (grid_type == "node")
+  {
+    unpack_SIn(dest, gc_comm, f_imr, f_ipr, nIDm, nIDp);
+  }
+  else
+  {
+    unpack_SI(dest, gc_comm, f_imr, f_ipr, nIDm, nIDp);
+  }
 
 
   //// Y face ////
   nIDm = comm_tbl[J_minus];
   nIDp = comm_tbl[J_plus];
   if ( MPI_SUCCESS != MPI_Waitall( 4, &req[4], stat ) ) return false;
-  unpack_SJ(dest, gc_comm, f_jmr, f_jpr, nIDm, nIDp);
+  if (grid_type == "node")
+  {
+    unpack_SJn(dest, gc_comm, f_jmr, f_jpr, nIDm, nIDp);
+  }
+  else
+  {
+    unpack_SJ(dest, gc_comm, f_jmr, f_jpr, nIDm, nIDp);
+  }
 
 
   //// Z face ////
   nIDm = comm_tbl[K_minus];
   nIDp = comm_tbl[K_plus];
   if ( MPI_SUCCESS != MPI_Waitall( 4, &req[8], stat ) ) return false;
-  unpack_SK(dest, gc_comm, f_kmr, f_kpr, nIDm, nIDp);
+  if (grid_type == "node")
+  {
+    unpack_SKn(dest, gc_comm, f_kmr, f_kpr, nIDm, nIDp);
+  }
+  else
+  {
+    unpack_SK(dest, gc_comm, f_kmr, f_kpr, nIDm, nIDp);
+  }
 
   return true;
 }

@@ -36,14 +36,14 @@ REAL_TYPE* alloc_real(const size_t sz)
 // @brief print usage
 void usage()
 {
-  printf("Usage:\n");
-
-  printf("\t$ mpirun -np n diff3d config_file\n\n");
+  printf("Usage for N procs. :\n");
+  printf("\t$ mpirun -np N ./diff3d config_file\n");
+  printf("\tor\n");
+  printf("\t$ mpiexec -n N ./diff3d config_file\n\n");
   printf("\tContents of config_file\n");
   printf("\tnx;       Number of cells for x-dir.\n");
   printf("\tny;       Number of cells for y-dir.\n");
   printf("\tnz;       Number of cells for z-dir.\n");
-  printf("\tDivMode;  Division mode (0-IJK, 1-JK).\n");
   printf("\tXdiv;     Number of division for x-dir.\n");
   printf("\tYdiv;     Number of division for y-dir.\n");
   printf("\tZdiv;     Number of division for z-dir.\n");
@@ -51,7 +51,7 @@ void usage()
   printf("\talpha;    Coefficient of diffusion (non-dimensional)\n");
   printf("\tlaststep; Time step to calculate\n");
   printf("\tfileout;  Interval for writing a file\n");
-  printf("\tcomm.;    Communication mode (0-blocking, 1-nonblocking)\n\n");
+  printf("\tDivMode;  Division mode (0-IJK, 1-JK).\n");
 }
 
 
@@ -99,7 +99,6 @@ bool read_config(Phys_Param* p,
 
     fscanf(fp, "%d %s", &c->laststep, buf);
     fscanf(fp, "%d %s", &c->fileout, buf);
-    fscanf(fp, "%d %s", &c->blocking, buf);
     fscanf(fp, "%d %s", &c->div_mode, buf);
 
     fclose(fp);
@@ -130,13 +129,6 @@ bool read_config(Phys_Param* p,
     printf("\talpha= %10.6e ; Coefficient of diffusion (non-dimensional)\n", p->alpha);
     printf("\tlaststep = %8d ; Time step to calculate\n", c->laststep);
     printf("\tfileout  = %8d ; Interval for writing a file\n\n", c->fileout);
-    printf("\tComm.    = ");
-    if ( c->blocking == 0) {
-      printf("blocking\n\n");
-    }
-    else {
-      printf("non-blocking\n\n");
-    }
   } // Hostonly
 
 
@@ -148,7 +140,7 @@ bool read_config(Phys_Param* p,
   }
 
   int* cntl=NULL;
-  if ( !(cntl= new int[10]) ) {
+  if ( !(cntl= new int[9]) ) {
     printf("fail to allocate memory\n");
     return false;
   }
@@ -167,8 +159,7 @@ bool read_config(Phys_Param* p,
     cntl[5] = div[2];
     cntl[6] = c->laststep;
     cntl[7] = c->fileout;
-    cntl[8] = c->blocking;
-    cntl[9] = c->div_mode;
+    cntl[8] = c->div_mode;
 
   }
 
@@ -188,7 +179,7 @@ bool read_config(Phys_Param* p,
 
   MPI_Barrier(MPI_COMM_WORLD);
 
-  MPI_Bcast(cntl, 10, MPI_INT, 0, MPI_COMM_WORLD);
+  MPI_Bcast(cntl, 9, MPI_INT, 0, MPI_COMM_WORLD);
 
   m_sz[0]     = cntl[0];
   m_sz[1]     = cntl[1];
@@ -198,8 +189,7 @@ bool read_config(Phys_Param* p,
   div[2]      = cntl[5];
   c->laststep = cntl[6];
   c->fileout  = cntl[7];
-  c->blocking = cntl[8];
-  c->div_mode = cntl[9];
+  c->div_mode = cntl[8];
 
 
   // release buffer

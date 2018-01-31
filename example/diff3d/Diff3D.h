@@ -29,7 +29,6 @@ typedef struct {
 typedef struct {
   int laststep; ///< Number of steps to calculate
   int fileout;  ///< Interval to output to a file
-  int blocking; ///< 0-blocking, 1-nonblocking
   int div_mode; ///< 0-IJK, 1-JK
 } Cntl_Param;
 

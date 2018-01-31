@@ -8,5 +8,4 @@
 1.0 alpha
 500 laststep
 100 fileout
-1 nonblocking
 0 JKdivision

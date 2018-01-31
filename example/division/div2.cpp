@@ -28,7 +28,7 @@ int main(int argc, char * argv[]) {
     return -1;
   }
 
-  int m_sz[3], np, myrank, m_dv[3];
+  int m_sz[3], np, myRank, m_dv[3];
   int proc_grp = 0;
   int gc = 1;      // ガイドセル幅=1
   int div_mode=0;
@@ -45,9 +45,9 @@ int main(int argc, char * argv[]) {
   // Initialize MPI
   MPI_Init(&argc, &argv);
   MPI_Comm_size(MPI_COMM_WORLD, &np);
-  MPI_Comm_rank(MPI_COMM_WORLD, &myrank);
+  MPI_Comm_rank(MPI_COMM_WORLD, &myRank);
 
-  if (myrank==0) printf("%d x %d x %d / %d\n", m_sz[0], m_sz[1], m_sz[2], np);
+  Hostonly_ printf("%d x %d x %d / %d\n", m_sz[0], m_sz[1], m_sz[2], np);
 
   if (m_dv[0]*m_dv[1]*m_dv[2] != np) {
     printf("\tThe number of proceees does not agree with the div[] size.\n");
@@ -55,14 +55,27 @@ int main(int argc, char * argv[]) {
   }
 
   // priorityはデフォルト
-  SubDomain D(m_sz, gc, np, myrank, proc_grp, MPI_COMM_WORLD, "cell", "Cindex");
-  D.setDivision(m_dv);
+  SubDomain D(m_sz, gc, np, myRank, proc_grp, MPI_COMM_WORLD, "cell", "Cindex");
+  if ( !D.setDivision(m_dv) )
+  {
+    MPI_Barrier(MPI_COMM_WORLD);
+    exit(-1);
+  }
 
-  if ( !D.findOptimalDivision(div_mode) ) MPI_Abort(MPI_COMM_WORLD, -1);
+  if ( !D.findOptimalDivision(div_mode) )
+  {
+    MPI_Barrier(MPI_COMM_WORLD);
+    exit(-1);
+  }
 
-  if ( !D.createRankTable() ) MPI_Abort(MPI_COMM_WORLD, -1);
+  if ( !D.createRankTable() )
+  {
+    MPI_Barrier(MPI_COMM_WORLD);
+    exit(-1);
+  }
 
   MPI_Finalize();
+  Hostonly_ printf("Successfully terminated.\n\n");
 
   return 0;
 }

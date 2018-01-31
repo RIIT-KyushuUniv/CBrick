@@ -17,8 +17,10 @@ link_directories()
 set(cb_files CB_SubDomain.cpp
              CB_CommS.cpp
              CB_CommV.cpp
-             CB_PackingScalar.cpp
-             CB_PackingVector.cpp)
+             CB_PackingScalarCell.cpp
+             CB_PackingVectorCell.cpp
+             CB_PackingScalarNode.cpp
+             CB_PackingVectorNode.cpp)
 
 
 ## float

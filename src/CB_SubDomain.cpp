@@ -68,8 +68,8 @@ bool SubDomain::findParameter()
   // printout
   Hostonly_ {
     fprintf(fp, "\nDivision parameter\n");
-    fprintf(fp, ": div_x div_y div_z : default size(x,y,z) :   mod(x,y,z)\n");
-    fprintf(fp, ": %5d %5d %5d :   %5d %5d %5d : %4d %4d %4d\n",
+    fprintf(fp, " div_x div_y div_z : default size(x,y,z) :   mod(x,y,z)\n");
+    fprintf(fp, " %5d %5d %5d :   %5d %5d %5d : %4d %4d %4d\n",
            G_div[0], G_div[1], G_div[2],
            tbl.dsz[0], tbl.dsz[1], tbl.dsz[2],
            tbl.mod[0], tbl.mod[1], tbl.mod[2]);
@@ -167,14 +167,14 @@ bool SubDomain::findParameter()
 
 
 /*
- * @fn findOptimalDivision
+ * @fn findOptimalDivision()
  * @brief 最適な分割数を見つける
- * @param [in] terrain_mode {0-IJK分割、デフォルト、1-JK分割}
+ * @param [in] terrain_mode {0-IJK分割:デフォルト、1-JK分割}
  * @retval true-success, false-fail
  */
 bool SubDomain::findOptimalDivision(int terrain_mode)
 {
-  if (div_mode == 1) return findParameter();
+  if (auto_div == SPEC) return findParameter();
 
 
   FILE* fp=NULL;
@@ -246,7 +246,7 @@ bool SubDomain::findOptimalDivision(int terrain_mode)
   // printout
   Hostonly_ {
     fprintf(fp, "\nCandidates of division\n");
-    fprintf(fp, " No : div_x div_y div_z : default size(x,y,z) :   mod(x,y,z)\n");
+    fprintf(fp, " No : div_x div_y div_z : default size(x,y,z) :   mod(x, y, z)\n");
     for (int i=0; i<tbl_size; i++) {
       fprintf(fp, "%3d : %5d %5d %5d :   %5d %5d %5d : %4d %4d %4d\n",
            i,
@@ -268,15 +268,11 @@ bool SubDomain::findOptimalDivision(int terrain_mode)
            tbl[c].div[0], tbl[c].div[1], tbl[c].div[2],
            tbl[c].dsz[0], tbl[c].dsz[1], tbl[c].dsz[2],
            tbl[c].mod[0], tbl[c].mod[1], tbl[c].mod[2]);
-#endif
 
-    int pin[3];
-
-#ifndef NDEBUG
     Hostonly_ fprintf(fp, "\tRank :     (s_x, s_y, s_z) :        vol          srf         sxy\n");
 #endif
 
-
+    int pin[3];
 
 #pragma omp single
     for (int k=0; k<tbl[c].div[2]; k++) {
@@ -498,6 +494,7 @@ int SubDomain::getNumCandidates4JK()
 void SubDomain::registerCandidates_Cell(cntl_tbl* tbl)
 {
   int odr=0;
+  int c=0;
   int np = numProc;
 
 #pragma omp single
@@ -530,7 +527,8 @@ void SubDomain::registerCandidates_Cell(cntl_tbl* tbl)
           tbl[odr].div[1]= j;
           tbl[odr].div[2]= k;
 
-          tbl[odr].org_idx = odr++; // 作成時のリストの順番を記録
+          tbl[odr].org_idx = c++; // 作成時のリストの順番を記録
+          odr++;
         }
       }
     }
@@ -557,6 +555,7 @@ void SubDomain::registerCandidates_Cell(cntl_tbl* tbl)
 void SubDomain::registerCandidates_Node(cntl_tbl* tbl)
 {
   int odr=0;
+  int c=0;
   int np = numProc;
 
 #pragma omp single
@@ -596,7 +595,8 @@ void SubDomain::registerCandidates_Node(cntl_tbl* tbl)
           tbl[odr].div[1]= j;
           tbl[odr].div[2]= k;
 
-          tbl[odr].org_idx = odr++; // 作成時のリストの順番を記録
+          tbl[odr].org_idx = c++; // 作成時のリストの順番を記録
+          odr++;
         }
       }
     }
@@ -613,6 +613,7 @@ void SubDomain::registerCandidates_Node(cntl_tbl* tbl)
 void SubDomain::registerCandidates4JK_Cell(cntl_tbl* tbl)
 {
   int odr=0;
+  int c=0;
   int np = numProc;
   const int a = (grid_type == "node") ? 1 : 0;
   const int gsize[3] = {G_size[0]+a, G_size[1]+a, G_size[2]+a};
@@ -644,7 +645,8 @@ void SubDomain::registerCandidates4JK_Cell(cntl_tbl* tbl)
         tbl[odr].div[1]= j;
         tbl[odr].div[2]= k;
 
-        tbl[odr].org_idx = odr++; // 作成時のリストの順番を記録
+        tbl[odr].org_idx = c++; // 作成時のリストの順番を記録
+        odr++;
       }
     }
   }
@@ -660,6 +662,7 @@ void SubDomain::registerCandidates4JK_Cell(cntl_tbl* tbl)
 void SubDomain::registerCandidates4JK_Node(cntl_tbl* tbl)
 {
   int odr=0;
+  int c=0;
   int np = numProc;
   const int i = 1;
 
@@ -694,7 +697,8 @@ void SubDomain::registerCandidates4JK_Node(cntl_tbl* tbl)
         tbl[odr].div[1]= j;
         tbl[odr].div[2]= k;
 
-        tbl[odr].org_idx = odr++; // 作成時のリストの順番を記録
+        tbl[odr].org_idx = c++; // 作成時のリストの順番を記録
+        odr++;
       }
     }
   }
@@ -871,7 +875,7 @@ int SubDomain::sortVolume(cntl_tbl* t, const int tbl_sz, FILE* fp)
   }
 
 #pragma omp single
-  for (int i=0; i<tbl_sz; i++)
+  for (int i=0; i<tbl_sz-1; i++)
   {
     for (int j=tbl_sz-1; j>i; j--)
     {

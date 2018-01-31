@@ -25,6 +25,10 @@
 #include "CB_Define.h"
 #include "CB_Version.h"
 
+// 分割モード auto_div
+#define AUTO 0
+#define SPEC 1
+
 // ワーク用の構造体
 typedef struct {
   int sz[3];  ///< サブドメインのサイズ
@@ -79,7 +83,7 @@ public:
     score = new score_tbl[num_array];
   }
 
-  // コンストラクタ　cntl_tbl p = src; からの自動変換に利用
+  // コンストラクタ cntl_tbl p = src; からの自動変換に利用
   cntl_tbl(const cntl_tbl& src) {
     for (int i=0; i<3; i++) {
       dsz[i] = src.dsz[i];
@@ -149,8 +153,8 @@ public:
   int head[3];          ///< 開始インデクス（グローバルインデクス）
   int comm_tbl[6];      ///< 隣接ブロックのランク番号
   int halo_width;       ///< ガイドセル幅
-  int ranking_opt;      ///< ランキングのオプション　（0=cubical, default, 1=vector）
-  int div_mode;         ///< 分割モード (0=自動、1=指定)
+  int ranking_opt;      ///< ランキングのオプション（0=cubical, default, 1=vector）
+  int auto_div;         ///< 分割モード (AUTO, SPEC)
   int f_index;          ///< Findex (0-OFF, 1-ON) @note 関連するところは head index
 
 
@@ -177,14 +181,14 @@ private:
 
 
 public:
-  // デフォルト　コンストラクタ
+  // デフォルト コンストラクタ
   SubDomain() {
     procGrp = -1;
     myRank  = -1;
     numProc = 1;
     halo_width = 0;
     ranking_opt = 0;
-    div_mode = 0;
+    auto_div = AUTO;
     f_index = 0;
 
     for (int i=0; i<NOFACE; i++) comm_tbl[i] = -1;
@@ -229,7 +233,7 @@ public:
     numProc = 1;
     halo_width = 0;
     ranking_opt = 0;
-    div_mode = 0;
+    auto_div = AUTO;
     f_index = 0;
 
     for (int i=0; i<NOFACE; i++) comm_tbl[i] = -1;
@@ -324,7 +328,7 @@ public:
   // @param [in] mode {0-IJK分割、デフォルト、1-JK分割}
   bool findOptimalDivision(int terrain_mode=0);
 
-  // @brief 　Global > Local　インデクス変換
+  // @brief Global > Local　インデクス変換
   bool G2L_index(const int* Gi, int* Li);
 
   /*
@@ -338,15 +342,16 @@ public:
     G_div[1] = m_dv[1];
     G_div[2] = m_dv[2];
 
-    if ( G_div[0]>G_size[0] && G_div[1]>G_size[1] && G_div[2]>G_size[2] ) {
-      printf("\tG_div[] size is our of range.\n");
+    if ( G_div[0]>G_size[0] || G_div[1]>G_size[1] || G_div[2]>G_size[2] ) {
+      Hostonly_ printf("\nERROR :  G_div[] value is greater than G_size[].\n\n");
       return false;
     }
 
-    div_mode = 1;
+    auto_div = SPEC;
 
     return true;
   }
+
 
   bool setSubDomain(int m_gsz[],
                     int m_halo,
@@ -373,7 +378,7 @@ public:
       // ok
     }
     else {
-      printf("Error : Invalid grid type [%s]\n", m_type.c_str());
+      Hostonly_ printf("Error : Invalid grid type [%s]\n", m_type.c_str());
       return false;
     }
 
@@ -384,7 +389,7 @@ public:
       f_index = 0;
     }
     else {
-      printf("Error : Invalid Index type [%s]\n", m_idxtyp.c_str());
+      Hostonly_ printf("Error : Invalid Index type [%s]\n", m_idxtyp.c_str());
       return false;
     }
 
@@ -475,7 +480,7 @@ private:
                   MPI_Request *req);
 
 
-// CB_PackingScalar.cpp
+// CB_PackingScalarCell.cpp
 private:
 
   void pack_SI(const REAL_TYPE *array,
@@ -520,6 +525,50 @@ private:
                  const int nIDm,
                  const int nIDp);
 
+  // CB_PackingScalarNode.cpp
+  private:
+
+    void pack_SIn(const REAL_TYPE *array,
+                 const int vc_comm,
+                 REAL_TYPE *sendm,
+                 REAL_TYPE *sendp,
+                 const int nIDm,
+                 const int nIDp);
+
+    void unpack_SIn(REAL_TYPE *array,
+                   const int vc_comm,
+                   const REAL_TYPE *recvm,
+                   const REAL_TYPE *recvp,
+                   const int nIDm,
+                   const int nIDp);
+
+    void pack_SJn(const REAL_TYPE *array,
+                 const int vc_comm,
+                 REAL_TYPE *sendm,
+                 REAL_TYPE *sendp,
+                 const int nIDm,
+                 const int nIDp);
+
+    void unpack_SJn(REAL_TYPE *array,
+                   const int vc_comm,
+                   const REAL_TYPE *recvm,
+                   const REAL_TYPE *recvp,
+                   const int nIDm,
+                   const int nIDp);
+
+    void pack_SKn(const REAL_TYPE *array,
+                 const int vc_comm,
+                 REAL_TYPE *sendm,
+                 REAL_TYPE *sendp,
+                 const int nIDm,
+                 const int nIDp);
+
+    void unpack_SKn(REAL_TYPE *array,
+                   const int vc_comm,
+                   const REAL_TYPE *recvm,
+                   const REAL_TYPE *recvp,
+                   const int nIDm,
+                   const int nIDp);
 
 
 // CB_CommV.cpp
@@ -543,7 +592,7 @@ public:
                                MPI_Request *req);
 
 
-// CB_PackingVector.cpp
+// CB_PackingVectorCell.cpp
 private:
 
   void pack_VI(const REAL_TYPE *array,
@@ -588,6 +637,50 @@ private:
                  const int nIDm,
                  const int nIDp);
 
+  // CB_PackingVectorNode.cpp
+  private:
+
+    void pack_VIn(const REAL_TYPE *array,
+                 const int vc_comm,
+                 REAL_TYPE *sendm,
+                 REAL_TYPE *sendp,
+                 const int nIDm,
+                 const int nIDp);
+
+    void unpack_VIn(REAL_TYPE *array,
+                   const int vc_comm,
+                   const REAL_TYPE *recvm,
+                   const REAL_TYPE *recvp,
+                   const int nIDm,
+                   const int nIDp);
+
+    void pack_VJn(const REAL_TYPE *array,
+                 const int vc_comm,
+                 REAL_TYPE *sendm,
+                 REAL_TYPE *sendp,
+                 const int nIDm,
+                 const int nIDp);
+
+    void unpack_VJn(REAL_TYPE *array,
+                   const int vc_comm,
+                   const REAL_TYPE *recvm,
+                   const REAL_TYPE *recvp,
+                   const int nIDm,
+                   const int nIDp);
+
+    void pack_VKn(const REAL_TYPE *array,
+                 const int vc_comm,
+                 REAL_TYPE *sendm,
+                 REAL_TYPE *sendp,
+                 const int nIDm,
+                 const int nIDp);
+
+    void unpack_VKn(REAL_TYPE *array,
+                   const int vc_comm,
+                   const REAL_TYPE *recvm,
+                   const REAL_TYPE *recvp,
+                   const int nIDm,
+                   const int nIDp);
 };
 
 #endif // _CB_SUBDOMAIN_H_

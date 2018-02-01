@@ -22,8 +22,7 @@ ix = sz(1)
 jx = sz(2)
 kx = sz(3)
 
-!$OMP PARALLEL FIRSTPRIVATE(ix, jx, kx, g)
-!$OMP DO SCHEDULE(static) COLLAPSE(2)
+!$OMP PARALLEL DO SCHEDULE(static) COLLAPSE(3)
 do k=1-g, kx+g
 do j=1-g, jx+g
 do i=1-g, ix+g
@@ -32,8 +31,7 @@ do i=1-g, ix+g
 end do
 end do
 end do
-!$OMP END DO
-!$OMP END PARALLEL
+!$OMP END PARALLEL DO
 
 return
 end subroutine initialize
@@ -64,10 +62,7 @@ kx = sz(3)
 c = alpha*dt/(dh*dh)
 res = 0.0
 
-!$OMP PARALLEL FIRSTPRIVATE(ix, jx, kx, c) &
-!$OMP PRIVATE(q0, delta) &
-!$OMP REDUCTION(+:res)
-
+!$OMP PARALLEL PRIVATE(q0, delta) REDUCTION(+:res)
 !$OMP DO SCHEDULE(static) COLLAPSE(2)
 do k=1, kx
 do j=1, jx
@@ -85,8 +80,7 @@ end do
 !$OMP END DO
 !$OMP END PARALLEL
 
-!$OMP PARALLEL FIRSTPRIVATE(ix, jx, kx)
-!$OMP DO SCHEDULE(static) COLLAPSE(2)
+!$OMP PARALLEL DO SCHEDULE(static) COLLAPSE(2)
 do k=1, kx
 do j=1, jx
 do i=1, ix
@@ -94,8 +88,7 @@ do i=1, ix
 end do
 end do
 end do
-!$OMP END DO
-!$OMP END PARALLEL
+!$OMP END PARALLEL DO
 
 return
 end subroutine euler_explicit

@@ -1319,7 +1319,7 @@ bool SubDomain::createRankTable()
 
 
 /*
- * @brief Global > Local　インデクス変換
+ * @brief Global > Local インデクス変換
  * @param [in]   Gi   Global index
  * @param [out]  Li   Local index
  * @retval true-自領域内に存在

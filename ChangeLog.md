@@ -2,10 +2,13 @@
 
 ## TODO
 - padding for inner most loop
-- cell Communication
-- division mode for terrain
+- MPIでdiff3dの残差の値が異なる
 
 ## REVISION HISTORY
+
+---
+- 2018-01-31 Version 0.9.10
+  - diff3dのfloatとdoubleのモジュールビルドは、現在のCMakeLists.txtでは、floatのC++オブジェクトにdoubleのFortranオブジェクトがリンクされてしまう。floatのみをビルドする。doubleはfloatをコメントアウトすればよいはず。
 
 ---
 - 2018-01-30 Version 0.9.9

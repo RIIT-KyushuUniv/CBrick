@@ -116,7 +116,7 @@ bool read_config(Phys_Param* p,
     printf("\tDivMode =      %s\n", (c->div_mode==0)?"IJK":"JK");
 
     if (div[0]*div[1]*div[2] == 0) {
-      printf("\tNumber of division is not specified\n");
+      printf("\tSelect auto division\n");
     }
     else {
       printf("\tXdiv = %4d ;         Number of division for x-dir.\n", div[0]);
@@ -176,9 +176,7 @@ bool read_config(Phys_Param* p,
   p->alpha = param[2];
 
 
-
   MPI_Barrier(MPI_COMM_WORLD);
-
   MPI_Bcast(cntl, 9, MPI_INT, 0, MPI_COMM_WORLD);
 
   m_sz[0]     = cntl[0];
@@ -212,7 +210,7 @@ int main(int argc, char * argv[])
   int np=0;         ///< Number of processes
   int myRank=-1;    ///< Rank number
   int proc_grp = 0; ///< プロセスグループ番号
-  int mode=0;       ///< 0-serial, 1-parallel
+  int is_serial=0;  ///< 0-serial, 1-parallel
   int gc = 1;       ///< ガイドセル幅=1
   int div_type=0;   ///< 分割指定 (0-自動、1-指定)
 
@@ -226,7 +224,7 @@ int main(int argc, char * argv[])
   MPI_Comm_size(MPI_COMM_WORLD, &np);
   MPI_Comm_rank(MPI_COMM_WORLD, &myRank);
 
-  if ( np > 1 ) mode = 1;
+  if ( np > 1 ) is_serial = 1;
 
   // Check command line arguments
   if ( argc != 2) {
@@ -247,6 +245,7 @@ int main(int argc, char * argv[])
   // config file
   if ( !read_config(&P_phys, &P_cntl, dsz, m_dv, argv[1], myRank) )
   {
+    MPI_Barrier(MPI_COMM_WORLD);
     MPI_Finalize();
     return 1;
   }
@@ -265,8 +264,17 @@ int main(int argc, char * argv[])
   // 分割数指定
   if (div_type == 1) D.setDivision(m_dv);
 
-  if ( !D.findOptimalDivision(P_cntl.div_mode) ) MPI_Abort(MPI_COMM_WORLD, -1);
-  if ( !D.createRankTable() ) MPI_Abort(MPI_COMM_WORLD, -1);
+  if ( !D.findOptimalDivision(P_cntl.div_mode) )
+  {
+    MPI_Barrier(MPI_COMM_WORLD);
+    exit(-1);
+  }
+
+  if ( !D.createRankTable() )
+  {
+    MPI_Barrier(MPI_COMM_WORLD);
+    exit(-1);
+  }
 
 
   // origin of each SubDomain, Fortran Index
@@ -275,7 +283,7 @@ int main(int argc, char * argv[])
   P_phys.org[2] = origin[2] + (D.head[2]-1)*P_phys.dh;
 
 
-  int lsz[3]={0,0,0}; //サブドメインサイズ
+  int lsz[3]={0,0,0}; // サブドメインサイズ
   lsz[0] = D.size[0];
   lsz[1] = D.size[1];
   lsz[2] = D.size[2];
@@ -310,7 +318,6 @@ int main(int argc, char * argv[])
   D.Comm_S_wait_nonblocking(w, gc, req);
 
 
-
   REAL_TYPE time = 0.0;
   REAL_TYPE res;
 
@@ -330,7 +337,6 @@ int main(int argc, char * argv[])
 
     D.Comm_S_nonblocking(q, gc, req);
     D.Comm_S_wait_nonblocking(q, gc, req);
-
 
     // time marching
     res = 0.0;

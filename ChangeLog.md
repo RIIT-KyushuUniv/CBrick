@@ -7,6 +7,11 @@
 ## REVISION HISTORY
 
 ---
+- 2018-02-08 Version 0.9.11
+  - bug fix:CB_Define.hとCB_Pack.hのマクロの修正 _VC >> (_VC)
+
+
+---
 - 2018-01-31 Version 0.9.10
   - diff3dのfloatとdoubleのモジュールビルドは、現在のCMakeLists.txtでは、floatのC++オブジェクトにdoubleのFortranオブジェクトがリンクされてしまう。floatのみをビルドする。doubleはfloatをコメントアウトすればよいはず。
 

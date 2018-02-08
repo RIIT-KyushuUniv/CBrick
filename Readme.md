@@ -56,6 +56,12 @@ This Cmake generates CBrick_f for float, and CBrick_d for double precision.
 > Specify the build of test modules.
 
 
+`-D with_MPI=` {yes | no}
+
+> Specify the parallel / serial version.
+
+
+
 ## Configure Examples
 
 `$ export CB_HOME=hogehoge`

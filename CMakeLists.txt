@@ -21,6 +21,8 @@
 #
 # -D with_example= {no|yes}
 #
+# -D with_MPI= {yes | no}
+#
 
 cmake_minimum_required(VERSION 2.6)
 
@@ -30,7 +32,7 @@ cmake_minimum_required(VERSION 2.6)
 #######
 
 option(enable_OPENMP "Enable OpenMP" "OFF")
-
+option(with_MPI "Enable MPI" "ON")
 
 #######
 # Project setting
@@ -53,8 +55,8 @@ set (CMAKE_INSTALL_PREFIX "${INSTALL_DIR}")
 set(CMAKE_BUILD_TYPE Release)
 
 #######
-set(PROJECT_VERSION "0.9.10")
-set(LIB_REVISION "20180131_2300")
+set(PROJECT_VERSION "0.9.11")
+set(LIB_REVISION "20180208_1430")
 #######
 
 

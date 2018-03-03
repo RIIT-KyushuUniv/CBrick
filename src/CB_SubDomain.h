@@ -110,16 +110,16 @@ public:
  */
 class SubdomainInfo {
 public:
-  int sz[3];    ///< サブドメインの要素数
-  int hd[3];    ///< サブドメインのヘッドインデクス（グローバル）
-  int cm[6];    ///< 隣接ランクID
+  int sz[3];      ///< サブドメインの要素数
+  int hd[3];      ///< サブドメインのヘッドインデクス（グローバル）
+  int cm[NOFACE]; ///< 隣接ランクID
 
   SubdomainInfo() {
     for (int i=0; i<3; i++) {
       sz[i] = 0;
       hd[i] = -1;
     }
-    for (int i=0; i<6; i++) cm[i] = -1;
+    for (int i=0; i<NOFACE; i++) cm[i] = -1;
   }
 
   virtual ~SubdomainInfo() {}
@@ -130,7 +130,8 @@ public:
       sz[i] = src.sz[i];
       hd[i] = src.hd[i];
     }
-    for (int i=0; i<6; i++) {
+
+    for (int i=0; i<NOFACE; i++) {
       cm[i] = src.cm[i];
     }
   }
@@ -151,7 +152,7 @@ public:
   int G_size[3];        ///< 全領域の要素数 (Global, Non-dimensional)
   int size[3];          ///< 各サブドメインの要素数 (Local, Non-dimensional
   int head[3];          ///< 開始インデクス（グローバルインデクス）
-  int comm_tbl[6];      ///< 隣接ブロックのランク番号
+  int comm_tbl[NOFACE]; ///< 隣接ブロックのランク番号
   int halo_width;       ///< ガイドセル幅
   int ranking_opt;      ///< ランキングのオプション（0=cubical, default, 1=vector）
   int auto_div;         ///< 分割モード (AUTO, SPEC)
@@ -176,6 +177,12 @@ private:
   REAL_TYPE* f_kmr;  // K- direction recv
   REAL_TYPE* f_kps;  // K+ direction send
   REAL_TYPE* f_kpr;  // K+ direction recv
+#ifdef _DIAGONAL_COMM
+  REAL_TYPE* f_es;   // edge send
+  REAL_TYPE* f_er;   // edge recv
+  REAL_TYPE* f_cs;   // corner send
+  REAL_TYPE* f_cr;   // corner recv
+#endif
 
   int buf_flag;     // バッファを確保済みのときに1
 
@@ -213,6 +220,12 @@ public:
     f_kmr = NULL;  // Z- direction recv
     f_kps = NULL;  // Z+ direction send
     f_kpr = NULL;  // Z+ direction recv
+#ifdef _DIAGONAL_COMM
+    f_es  = NULL;  // edge send
+    f_er  = NULL;  // edge recv
+    f_cs  = NULL;  // corner send
+    f_cr  = NULL;  // corner recv
+#endif
     buf_flag = 0;
   }
 
@@ -258,6 +271,12 @@ public:
     f_kmr = NULL;  // Z- direction recv
     f_kps = NULL;  // Z+ direction send
     f_kpr = NULL;  // Z+ direction recv
+#ifdef _DIAGONAL_COMM
+    f_es  = NULL;  // edge send
+    f_er  = NULL;  // edge recv
+    f_cs  = NULL;  // corner send
+    f_cr  = NULL;  // corner recv
+#endif
     buf_flag = 0;
 
 
@@ -315,6 +334,12 @@ public:
       delete [] f_kmr;
       delete [] f_kps;
       delete [] f_kpr;
+#ifdef _DIAGONAL_COMM
+      delete [] f_es;
+      delete [] f_er;
+      delete [] f_cs;
+      delete [] f_cr;
+#endif
     }
   }
 
@@ -525,6 +550,28 @@ private:
                  const int nIDm,
                  const int nIDp);
 
+  bool pack_SE(REAL_TYPE *array,
+               const int vc_comm,
+               REAL_TYPE *sendbuf,
+               REAL_TYPE *recvbuf,
+               MPI_Request *req);
+
+  void unpack_SE(REAL_TYPE *array,
+                 const int vc_comm,
+                 const REAL_TYPE *recvbuf);
+
+  bool pack_SC(REAL_TYPE *array,
+               const int vc_comm,
+               REAL_TYPE *sendbuf,
+               REAL_TYPE *recvbuf,
+               MPI_Request *req);
+
+  void unpack_SC(REAL_TYPE *array,
+                 const int vc_comm,
+                 const REAL_TYPE *recvbuf);
+
+
+
   // CB_PackingScalarNode.cpp
   private:
 
@@ -569,6 +616,26 @@ private:
                    const REAL_TYPE *recvp,
                    const int nIDm,
                    const int nIDp);
+
+  bool pack_SEn(REAL_TYPE *array,
+               const int vc_comm,
+               REAL_TYPE *sendbuf,
+               REAL_TYPE *recvbuf,
+               MPI_Request *req);
+
+  void unpack_SEn(REAL_TYPE *array,
+                 const int vc_comm,
+                 const REAL_TYPE *recvbuf);
+
+  bool pack_SCn(REAL_TYPE *array,
+               const int vc_comm,
+               REAL_TYPE *sendbuf,
+               REAL_TYPE *recvbuf,
+               MPI_Request *req);
+
+  void unpack_SCn(REAL_TYPE *array,
+                 const int vc_comm,
+                 const REAL_TYPE *recvbuf);
 
 
 // CB_CommV.cpp
@@ -637,6 +704,26 @@ private:
                  const int nIDm,
                  const int nIDp);
 
+  bool pack_VE(REAL_TYPE *array,
+               const int vc_comm,
+               REAL_TYPE *sendbuf,
+               REAL_TYPE *recvbuf,
+               MPI_Request *req);
+
+  void unpack_VE(REAL_TYPE *array,
+                 const int vc_comm,
+                 const REAL_TYPE *recvbuf);
+
+  bool pack_VC(REAL_TYPE *array,
+               const int vc_comm,
+               REAL_TYPE *sendbuf,
+               REAL_TYPE *recvbuf,
+               MPI_Request *req);
+
+  void unpack_VC(REAL_TYPE *array,
+                 const int vc_comm,
+                 const REAL_TYPE *recvbuf);
+
   // CB_PackingVectorNode.cpp
   private:
 
@@ -681,6 +768,27 @@ private:
                    const REAL_TYPE *recvp,
                    const int nIDm,
                    const int nIDp);
+
+  bool pack_VEn(REAL_TYPE *array,
+               const int vc_comm,
+               REAL_TYPE *sendbuf,
+               REAL_TYPE *recvbuf,
+               MPI_Request *req);
+
+  void unpack_VEn(REAL_TYPE *array,
+                 const int vc_comm,
+                 const REAL_TYPE *recvbuf);
+
+  bool pack_VCn(REAL_TYPE *array,
+               const int vc_comm,
+               REAL_TYPE *sendbuf,
+               REAL_TYPE *recvbuf,
+               MPI_Request *req);
+
+  void unpack_VCn(REAL_TYPE *array,
+                 const int vc_comm,
+                 const REAL_TYPE *recvbuf);
+
 };
 
 #endif // _CB_SUBDOMAIN_H_

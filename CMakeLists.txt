@@ -17,11 +17,13 @@
 #
 # -D INSTALL_DIR=install_directory
 #
-# -D enable_OPENMP=(no|yes)
+# -D enable_OPENMP=(no | yes)
 #
-# -D with_example= {no|yes}
+# -D with_example= {no | yes}
 #
 # -D with_MPI= {yes | no}
+#
+# -D with_Diagonal={no | yes}
 #
 
 cmake_minimum_required(VERSION 2.6)
@@ -33,6 +35,7 @@ cmake_minimum_required(VERSION 2.6)
 
 option(enable_OPENMP "Enable OpenMP" "OFF")
 option(with_MPI "Enable MPI" "ON")
+option(with_Diagonal "Enable Diagonal communication" "OFF")
 
 #######
 # Project setting
@@ -55,8 +58,8 @@ set (CMAKE_INSTALL_PREFIX "${INSTALL_DIR}")
 set(CMAKE_BUILD_TYPE Release)
 
 #######
-set(PROJECT_VERSION "0.9.11")
-set(LIB_REVISION "20180208_1430")
+set(PROJECT_VERSION "1.0.0")
+set(LIB_REVISION "20180303_1430")
 #######
 
 
@@ -89,6 +92,11 @@ if (enable_OPENMP STREQUAL "yes")
   checkOpenMP()
 endif()
 
+# Diagonal communication
+if (with_Diagonal)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D_DIAGONAL_COMM")
+endif()
+
 
 #######
 # Display options
@@ -106,6 +114,7 @@ endif()
 
 message( STATUS "OpenMP support        : "      ${enable_OPENMP})
 message( STATUS "Example               : "      ${with_example})
+message( STATUS "Diagonal comm         : "      ${with_Diagonal})
 message(" ")
 
 

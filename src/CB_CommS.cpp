@@ -30,9 +30,12 @@ bool SubDomain::initComm(const int num_compo)
 
   // バッファ領域としては、最大値で確保しておく
   int f_sz[3];
-  f_sz[0] = (size[1]+2*gc) * (size[2]+2*gc) * gc * num_compo;
-  f_sz[1] = (size[0]+2*gc) * (size[2]+2*gc) * gc * num_compo;
-  f_sz[2] = (size[0]+2*gc) * (size[1]+2*gc) * gc * num_compo;
+//  f_sz[0] = (size[1]+2*gc) * (size[2]+2*gc) * gc * num_compo;
+//  f_sz[1] = (size[0]+2*gc) * (size[2]+2*gc) * gc * num_compo;
+//  f_sz[2] = (size[0]+2*gc) * (size[1]+2*gc) * gc * num_compo;
+  f_sz[0] = size[1] * size[2] * gc * num_compo;
+  f_sz[1] = size[0] * size[2] * gc * num_compo;
+  f_sz[2] = size[0] * size[1] * gc * num_compo;
 
   if ( !(f_ims = new REAL_TYPE [f_sz[0]]) ) return false;
   if ( !(f_imr = new REAL_TYPE [f_sz[0]]) ) return false;
@@ -48,6 +51,21 @@ bool SubDomain::initComm(const int num_compo)
   if ( !(f_kmr = new REAL_TYPE [f_sz[2]]) ) return false;
   if ( !(f_kps = new REAL_TYPE [f_sz[2]]) ) return false;
   if ( !(f_kpr = new REAL_TYPE [f_sz[2]]) ) return false;
+
+#ifdef _DIAGONAL_COMM
+  // edge
+  size_t lx = size[0] * gc * gc * num_compo;
+  size_t ly = size[1] * gc * gc * num_compo;
+  size_t lz = size[2] * gc * gc * num_compo;
+  size_t le = lx*4 + ly*4 + lz*4;
+  if ( !(f_es = new REAL_TYPE[le]) ) return false;
+  if ( !(f_er = new REAL_TYPE[le]) ) return false;
+
+  // corner
+  size_t lc = gc * gc * gc * num_compo * 8;
+  if ( !(f_cs = new REAL_TYPE[lc]) ) return false;
+  if ( !(f_cr = new REAL_TYPE[lc]) ) return false;
+#endif
 
   buf_flag = 1; // バッファ確保ずみ
 
@@ -67,13 +85,16 @@ bool SubDomain::Comm_S_nonblocking(REAL_TYPE* src,
                                    MPI_Request *req)
 {
   // Communication identifier
-  for (int i=0; i<12; i++) req[i] = MPI_REQUEST_NULL;
+  for (int i=0; i<NOFACE*2; i++) req[i] = MPI_REQUEST_NULL;
 
   // 実際に送受信するメッセージサイズ
   int msz[3];
-  msz[0] = (size[1]+2*gc_comm) * (size[2]+2*gc_comm) * gc_comm;
-  msz[1] = (size[0]+2*gc_comm) * (size[2]+2*gc_comm) * gc_comm;
-  msz[2] = (size[0]+2*gc_comm) * (size[1]+2*gc_comm) * gc_comm;
+//  msz[0] = (size[1]+2*gc_comm) * (size[2]+2*gc_comm) * gc_comm;
+//  msz[1] = (size[0]+2*gc_comm) * (size[2]+2*gc_comm) * gc_comm;
+//  msz[2] = (size[0]+2*gc_comm) * (size[1]+2*gc_comm) * gc_comm;
+  msz[0] = size[1] * size[2] * gc_comm;
+  msz[1] = size[0] * size[2] * gc_comm;
+  msz[2] = size[0] * size[1] * gc_comm;
 
   // X direction
   int nIDm = comm_tbl[I_minus];
@@ -119,6 +140,28 @@ bool SubDomain::Comm_S_nonblocking(REAL_TYPE* src,
   }
 
   if ( !IsendIrecv(f_kms, f_kmr, f_kps, f_kpr, msz[2], nIDm, nIDp, &req[8]) ) return false;
+
+#ifdef _DIAGONAL_COMM
+  // edge
+  if (grid_type == "node")
+  {
+    if( !pack_SEn(src, gc_comm, f_es, f_er, req) ) return false;
+  }
+  else
+  {
+    if( !pack_SE(src, gc_comm, f_es, f_er, req) ) return false;
+  }
+
+  // corner
+  if (grid_type == "node")
+  {
+    if( !pack_SCn(src, gc_comm, f_cs, f_cr, req) ) return false;
+  }
+  else
+  {
+    if( !pack_SC(src, gc_comm, f_cs, f_cr, req) ) return false;
+  }
+#endif
 
   return true;
 }
@@ -263,7 +306,11 @@ bool SubDomain::Comm_S_wait_nonblocking(REAL_TYPE* dest,
                                         const int gc_comm,
                                         MPI_Request *req)
 {
+#ifndef _DIAGONAL_COMM
   MPI_Status stat[4];
+#else
+  MPI_Status stat[24];
+#endif
 
   //// X face ////
   int nIDm = comm_tbl[I_minus];
@@ -305,6 +352,30 @@ bool SubDomain::Comm_S_wait_nonblocking(REAL_TYPE* dest,
   {
     unpack_SK(dest, gc_comm, f_kmr, f_kpr, nIDm, nIDp);
   }
+
+#ifdef _DIAGONAL_COMM
+  //// edge ////
+  if ( MPI_SUCCESS != MPI_Waitall( 24, &req[12], stat ) ) return false;
+  if (grid_type == "node")
+  {
+    unpack_SEn(dest, gc_comm, f_er);
+  }
+  else
+  {
+    unpack_SE(dest, gc_comm, f_er);
+  }
+
+  //// corner ////
+  if ( MPI_SUCCESS != MPI_Waitall( 16, &req[36], stat ) ) return false;
+  if (grid_type == "node")
+  {
+    unpack_SCn(dest, gc_comm, f_cr);
+  }
+  else
+  {
+    unpack_SC(dest, gc_comm, f_cr);
+  }
+#endif
 
   return true;
 }

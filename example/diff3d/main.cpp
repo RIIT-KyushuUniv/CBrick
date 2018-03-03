@@ -304,8 +304,8 @@ int main(int argc, char * argv[])
   D.initComm(1);
 
   // Communication identifier for nonblocking
-  MPI_Request req[12];
-  for (int i=0; i<12; i++) req[i] = MPI_REQUEST_NULL;
+  MPI_Request req[NOFACE*2];
+  for (int i=0; i<NOFACE*2; i++) req[i] = MPI_REQUEST_NULL;
 
   // initialization
   initialize_(lsz, &gc, q, w);

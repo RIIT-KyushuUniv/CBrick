@@ -39,7 +39,11 @@
 
 #define _SIZE_DOUBLE_ 8
 
+#ifndef _DIAGONAL_COMM
 #define NOFACE 6
+#else
+#define NOFACE 26
+#endif
 
 #define ON 1
 #define OFF 0
@@ -51,7 +55,31 @@ enum DIRection {
   J_minus,
   J_plus,
   K_minus,
-  K_plus
+  K_plus,
+#ifdef _DIAGONAL_COMM
+  // edge
+  E_mYmZ,
+  E_pYmZ,
+  E_mYpZ,
+  E_pYpZ,
+  E_mXmZ,
+  E_pXmZ,
+  E_mXpZ,
+  E_pXpZ,
+  E_mXmY,
+  E_pXmY,
+  E_mXpY,
+  E_pXpY,
+  // corner
+  C_mXmYmZ,
+  C_pXmYmZ,
+  C_mXpYmZ,
+  C_pXpYmZ,
+  C_mXmYpZ,
+  C_pXmYpZ,
+  C_mXpYpZ,
+  C_pXpYpZ,
+#endif
 };
 
 

@@ -10,3 +10,5 @@
 add_subdirectory(division)
 
 add_subdirectory(diff3d)
+
+add_subdirectory(commtest)

@@ -7,9 +7,135 @@
 ## REVISION HISTORY
 
 ---
+- 2018-03-03 Version 1.0.0
+  1. 斜め方向通信の実装
+    - エッジ、コーナーの斜め方向通信を実装。
+    - 斜め方向通信を有効にする場合、コンパイルオプションに`-D_DIAGONAL_COMM`を追加
+    - cmake実行時のオプション
+
+  2. CB_Define.h
+    - NOFACE、enum DIRectionの修正斜め方向フラグを追加（エッジ12、コーナー8）
+
+  3. CB_SubDomain.h/cpp
+    - (1) 隣接数配列サイズの変更
+      - [6]で宣言されていた配列を[NOFACE]での宣言に変更（int cm[6] -> int cm[NOFACE]等
+    ループもNOFACEで回すように修正
+
+    - (2) 斜め方向袖通信バッファの宣言
+      - エッジ、コーナー用の袖通信バッファの宣言を追加
+      ~~~
+      REAL_TYPE* f_es;   // edge send
+      REAL_TYPE* f_er;   // edge recv
+      REAL_TYPE* f_cs;   // corner send
+      REAL_TYPE* f_cr;   // corner recv
+      ~~~
+
+    - (3) 斜め方向の通信テーブル作成（createRankTable関数）
+    sd[m].cmに斜め方向（エッジ、コーナー）ランクを追加。
+
+    - (4) 斜め方向袖通信関数の宣言追加
+      - パックとisend/irecv
+      ~~~
+      bool pack_SE();  スカラー、エッジ、セル
+      bool pack_SEn(); スカラー、エッジ、ノード
+      bool pack_SC();  スカラー、コーナー、セル
+      bool pack_SCn(); スカラー、コーナー、ノード
+      bool pack_VE();  ベクター、エッジ、セル
+      bool pack_VEn(); ベクター、エッジ、ノード
+      bool pack_VC();  ベクター、コーナー、セル
+      bool pack_VCn(); ベクター、コーナー、ノード
+      ~~~
+
+      - 展開
+      ~~~
+      void unpack_SE();  スカラー、エッジ、セル
+      void unpack_SEn(); スカラー、エッジ、ノード
+      void unpack_SC();  スカラー、コーナー、セル
+      void unpack_SCn(); スカラー、コーナー、ノード
+      void unpack_VE();  ベクター、エッジ、セル
+      void unpack_VEn(); ベクター、エッジ、ノード
+      void unpack_VC();  ベクター、コーナー、セル
+      void unpack_VCn(); ベクター、コーナー、ノード
+      ~~~
+
+  4. CB_CommS.cpp
+    - (1) initComm関数
+      - 通常（面）袖通信のバッファサイズ変更
+      - 通信方向の横方向の袖を通信しないよう調整
+      ~~~
+      f_sz[0] = size[1] * size[2] * gc * num_compo;
+      f_sz[1] = size[0] * size[2] * gc * num_compo;
+      f_sz[2] = size[0] * size[1] * gc * num_compo;
+      ~~~
+
+      - 斜め方向通信用送受信バッファの確保（initComm関数）
+
+    - (2) Comm_S_nonblocking関数
+      - req配列初期化ループ回転数の変更
+        - [12]から[NOFACE*2]に変更
+
+      - 通常（面）袖通信の通信サイズ変更
+        - 通信方向の横方向の袖を通信しないよう調整
+      ~~~
+      msz[0] = size[1] * size[2] * gc_comm;
+      msz[1] = size[0] * size[2] * gc_comm;
+      msz[2] = size[0] * size[1] * gc_comm;
+      ~~~
+
+      - 斜め方向袖通信関数のコール
+        - pack_SE()、pack_SEn()、pack_SC()、pack_SCn()をコール
+
+    - (3) Comm_S_wait_nonblocking関数
+      - wait用のMPI_Status配列のサイズ変更
+      - [4]から[24]に変更（エッジの送受信時に12*2=24が最大数として必要なため）
+      - 斜め方向袖通信のwaitと展開処理関数のコール追加
+      - `unpack_SE(), unpack_SEn(), unpack_SC(), unpack_SCn()`をコール
+      - (1)以外はCB_CommV.cppも同様の修正
+
+  5. CB_Pack.h
+    - (1) 面データのインデクス計算マクロの修正
+      - 通信方向に横方向の袖を通信しないため、計算式を修正（_IDX_SI等）
+
+  6. CB_PackingScalarCell.cpp
+    - (1) 通常（面）袖通信の横方向袖の通信削除
+      - 通信方向の横方向の袖を通信しないよう調整
+      ~~~
+      for( int k=0; k<kmax; k++ ){
+      for( int j=0; j<jmax; j++ ){
+      for( int i=0; i<vc_comm; i++ ){
+      ~~~
+
+    - (2) 斜め方向パック、通信、展開処理関数の実体追加
+      - 上記3.(4)の処理関数を追加
+
+      - 以下のソースファイルも同様の修正
+      ~~~
+      CB_PackingScalarNode.cpp
+      CB_PackingVectorCell.cpp
+      CB_PackingVectorNode.cpp
+      ~~~
+
+  7. example/diff3d/main.cpp
+    - MPI_Request配列のサイズ変更
+    - 配列サイズを[12]から[NOFACE*2]に変更
+    - `MPI_Request req[NOFACE*2]`
+
+  8. 袖通信テスト用のサンプルプログラムを追加
+    - 以下に追加
+    ~~~
+    example/commtest
+    example/CMakeFiles.txtも修正
+    ~~~
+   - 本サンプルプログラムを用いて、スカラー、ベクター、ノード、セルの斜め方向袖通信が正しく行われていることを確認。
+
+
+---
 - 2018-02-08 Version 0.9.11
   - bug fix:CB_Define.hとCB_Pack.hのマクロの修正 _VC >> (_VC)
-
+    1. CB_Define.h
+     - 3次元->1次元インデクス変換マクロの引数が計算式で渡された際に、正しく計算されない問題を修正。_IDX_S3D等
+    2. CB_Pack.h
+      - バッファへのインデクス変換マクロの引数が計算式で渡された際に、正しく計算されない問題を修正。_IDX_SI等
 
 ---
 - 2018-01-31 Version 0.9.10

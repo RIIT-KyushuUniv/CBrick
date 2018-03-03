@@ -60,6 +60,9 @@ This Cmake generates CBrick_f for float, and CBrick_d for double precision.
 
 > Specify the parallel / serial version.
 
+`-D with_Diagonal=` {no | yes}
+
+> Specify diagonal communication.
 
 
 ## Configure Examples
@@ -69,7 +72,7 @@ This Cmake generates CBrick_f for float, and CBrick_d for double precision.
 ### INTEL/GNU/PGI compiler
 
 ~~~
-$ cmake -DINSTALL_DIR=${CB_HOME}/CBrick -Denable_OPENMP=yes -Dwith_example=yes ..
+$ cmake -DINSTALL_DIR=${CB_HOME}/CBrick -Denable_OPENMP=yes -Dwith_example=yes -Dwith_Diagonal=yes ..
 ~~~
 
 #### Note

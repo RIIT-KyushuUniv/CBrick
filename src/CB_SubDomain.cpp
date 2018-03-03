@@ -1267,6 +1267,30 @@ bool SubDomain::createRankTable()
         sd[m].cm[J_plus]  = rt[_IDX_S3D(i  , j+1, k  , nx, ny, 1)];
         sd[m].cm[K_minus] = rt[_IDX_S3D(i  , j  , k-1, nx, ny, 1)];
         sd[m].cm[K_plus]  = rt[_IDX_S3D(i  , j  , k+1, nx, ny, 1)];
+#ifdef _DIAGONAL_COMM
+        // edge
+        sd[m].cm[E_mYmZ] = rt[_IDX_S3D(i  , j-1, k-1, nx, ny, 1)];
+        sd[m].cm[E_pYmZ] = rt[_IDX_S3D(i  , j+1, k-1, nx, ny, 1)];
+        sd[m].cm[E_mYpZ] = rt[_IDX_S3D(i  , j-1, k+1, nx, ny, 1)];
+        sd[m].cm[E_pYpZ] = rt[_IDX_S3D(i  , j+1, k+1, nx, ny, 1)];
+        sd[m].cm[E_mXmZ] = rt[_IDX_S3D(i-1, j  , k-1, nx, ny, 1)];
+        sd[m].cm[E_pXmZ] = rt[_IDX_S3D(i+1, j  , k-1, nx, ny, 1)];
+        sd[m].cm[E_mXpZ] = rt[_IDX_S3D(i-1, j  , k+1, nx, ny, 1)];
+        sd[m].cm[E_pXpZ] = rt[_IDX_S3D(i+1, j  , k+1, nx, ny, 1)];
+        sd[m].cm[E_mXmY] = rt[_IDX_S3D(i-1, j-1, k  , nx, ny, 1)];
+        sd[m].cm[E_pXmY] = rt[_IDX_S3D(i+1, j-1, k  , nx, ny, 1)];
+        sd[m].cm[E_mXpY] = rt[_IDX_S3D(i-1, j+1, k  , nx, ny, 1)];
+        sd[m].cm[E_pXpY] = rt[_IDX_S3D(i+1, j+1, k  , nx, ny, 1)];
+        // point
+        sd[m].cm[C_mXmYmZ] = rt[_IDX_S3D(i-1, j-1, k-1, nx, ny, 1)];
+        sd[m].cm[C_pXmYmZ] = rt[_IDX_S3D(i+1, j-1, k-1, nx, ny, 1)];
+        sd[m].cm[C_mXpYmZ] = rt[_IDX_S3D(i-1, j+1, k-1, nx, ny, 1)];
+        sd[m].cm[C_pXpYmZ] = rt[_IDX_S3D(i+1, j+1, k-1, nx, ny, 1)];
+        sd[m].cm[C_mXmYpZ] = rt[_IDX_S3D(i-1, j-1, k+1, nx, ny, 1)];
+        sd[m].cm[C_pXmYpZ] = rt[_IDX_S3D(i+1, j-1, k+1, nx, ny, 1)];
+        sd[m].cm[C_mXpYpZ] = rt[_IDX_S3D(i-1, j+1, k+1, nx, ny, 1)];
+        sd[m].cm[C_pXpYpZ] = rt[_IDX_S3D(i+1, j+1, k+1, nx, ny, 1)];
+#endif
       }
     }
   }
@@ -1306,6 +1330,29 @@ bool SubDomain::createRankTable()
                 s->cm[0], s->cm[1], s->cm[2],
                 s->cm[3], s->cm[4], s->cm[5]);
       }
+
+#ifdef _DIAGONAL_COMM
+      fprintf(fp, "\n==================\n");
+      fprintf(fp,"\tGenerate Rank Table (edge)\n\n");
+      fprintf(fp, "    Rank :   E_mYmZ   E_pYmZ   E_mYpZ   E_pYpZ   E_mXmZ   E_pXmZ   E_mXpZ   E_pXpZ   E_mXmY   E_pXmY   E_mXpY   E_pXpY\n");
+      for (int i=0; i<numProc; i++)
+      {
+        SubdomainInfo* s = &sd[i];
+        fprintf(fp, "%8d : %8d %8d %8d %8d %8d %8d %8d %8d %8d %8d %8d %8d\n", i,
+                s->cm[ 6], s->cm[ 7], s->cm[ 8], s->cm[ 9], s->cm[10], s->cm[11],
+                s->cm[12], s->cm[13], s->cm[14], s->cm[15], s->cm[16], s->cm[17]);
+      }
+
+      fprintf(fp, "\n==================\n");
+      fprintf(fp,"\tGenerate Rank Table (point)\n\n");
+      fprintf(fp, "    Rank :  P_mXmYmZ P_pXmYmZ P_mXpYmZ P_pXpYmZ P_mXmYpZ P_pXmYpZ P_mXpYpZ P_pXpYpZ\n");
+      for (int i=0; i<numProc; i++)
+      {
+        SubdomainInfo* s = &sd[i];
+        fprintf(fp, "%8d : %8d %8d %8d %8d %8d %8d %8d %8d\n", i,
+                s->cm[18], s->cm[19], s->cm[20], s->cm[21], s->cm[22], s->cm[23], s->cm[24], s->cm[25]);
+      }
+#endif
 
       fclose(fp);
     }

@@ -28,13 +28,16 @@ bool SubDomain::Comm_V_nonblocking(REAL_TYPE* src,
                                    MPI_Request *req)
 {
   // Communication identifier
-  for (int i=0; i<12; i++) req[i] = MPI_REQUEST_NULL;
+  for (int i=0; i<NOFACE*2; i++) req[i] = MPI_REQUEST_NULL;
 
   // 実際に送受信するメッセージサイズ
   int msz[3];
-  msz[0] = (size[1]+2*gc_comm) * (size[2]+2*gc_comm) * gc_comm;
-  msz[1] = (size[0]+2*gc_comm) * (size[2]+2*gc_comm) * gc_comm;
-  msz[2] = (size[0]+2*gc_comm) * (size[1]+2*gc_comm) * gc_comm;
+//msz[0] = (size[1]+2*gc_comm) * (size[2]+2*gc_comm) * gc_comm;
+//msz[1] = (size[0]+2*gc_comm) * (size[2]+2*gc_comm) * gc_comm;
+//msz[2] = (size[0]+2*gc_comm) * (size[1]+2*gc_comm) * gc_comm;
+  msz[0] = (size[1]) * (size[2]) * gc_comm * 3;
+  msz[1] = (size[0]) * (size[2]) * gc_comm * 3;
+  msz[2] = (size[0]) * (size[1]) * gc_comm * 3;
 
   // X direction
   int nIDm = comm_tbl[I_minus];
@@ -81,6 +84,28 @@ bool SubDomain::Comm_V_nonblocking(REAL_TYPE* src,
 
   if ( !IsendIrecv(f_kms, f_kmr, f_kps, f_kpr, msz[2], nIDm, nIDp, &req[8]) ) return false;
 
+#ifdef _DIAGONAL_COMM
+  // edge
+  if (grid_type == "node")
+  {
+    if( !pack_VEn(src, gc_comm, f_es, f_er, req) ) return false;
+  }
+  else
+  {
+    if( !pack_VE(src, gc_comm, f_es, f_er, req) ) return false;
+  }
+
+  // corner
+  if (grid_type == "node")
+  {
+    if( !pack_VCn(src, gc_comm, f_cs, f_cr, req) ) return false;
+  }
+  else
+  {
+    if( !pack_VC(src, gc_comm, f_cs, f_cr, req) ) return false;
+  }
+#endif
+
   return true;
 }
 
@@ -97,7 +122,11 @@ bool SubDomain::Comm_V_wait_nonblocking(REAL_TYPE* dest,
                                         const int gc_comm,
                                         MPI_Request *req)
 {
+#ifndef _DIAGONAL_COMM
   MPI_Status stat[4];
+#else
+  MPI_Status stat[24];
+#endif
 
   //// X face ////
   int nIDm = comm_tbl[I_minus];
@@ -141,6 +170,30 @@ bool SubDomain::Comm_V_wait_nonblocking(REAL_TYPE* dest,
   {
     unpack_VK(dest, gc_comm, f_kmr, f_kpr, nIDm, nIDp);
   }
+
+#ifdef _DIAGONAL_COMM
+  //// edge ////
+  if ( MPI_SUCCESS != MPI_Waitall( 24, &req[12], stat ) ) return false;
+  if (grid_type == "node")
+  {
+    unpack_VEn(dest, gc_comm, f_er);
+  }
+  else
+  {
+    unpack_VE(dest, gc_comm, f_er);
+  }
+
+  //// corner ////
+  if ( MPI_SUCCESS != MPI_Waitall( 16, &req[36], stat ) ) return false;
+  if (grid_type == "node")
+  {
+    unpack_VCn(dest, gc_comm, f_cr);
+  }
+  else
+  {
+    unpack_VC(dest, gc_comm, f_cr);
+  }
+#endif
 
   return true;
 }

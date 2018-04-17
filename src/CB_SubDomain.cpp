@@ -1406,3 +1406,19 @@ bool SubDomain::G2L_index(const int* Gi, int* Li)
 
   return true;
 }
+
+
+// @brief Global > Local インデクス変換 のコンポーネントのみ
+// @param [in]   Gi   Global index
+// @param [out]  Li   Local index
+// @param [in]   c    component [0-2]
+// @retval true-自領域内に存在
+bool SubDomain::G2L_index(const int Gi, int& Li, const int c)
+{
+  int a = f_index; // 1(F), 0(C)
+
+  Li = Gi - head[c] + a;
+  if( Li < a || Li > size[c] + a-1 ) return false;
+
+  return true;
+}

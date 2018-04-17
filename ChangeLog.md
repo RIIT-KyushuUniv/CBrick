@@ -7,6 +7,11 @@
 ## REVISION HISTORY
 
 ---
+- 2018-03-18 Version 1.0.1
+  - bool G2L_index(const int Gi, int* Li, const int c)
+
+
+---
 - 2018-03-03 Version 1.0.0
   1. 斜め方向通信の実装
     - エッジ、コーナーの斜め方向通信を実装。

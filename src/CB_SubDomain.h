@@ -353,8 +353,11 @@ public:
   // @param [in] mode {0-IJK分割、デフォルト、1-JK分割}
   bool findOptimalDivision(int terrain_mode=0);
 
-  // @brief Global > Local　インデクス変換
+  // @brief Global > Localインデクス変換
   bool G2L_index(const int* Gi, int* Li);
+
+  // @brief Global > Localインデクス変換 コンポーネントのみ
+  bool G2L_index(const int Gi, int& Li, const int c);
 
   /*
    * @brief 分割数をセットする

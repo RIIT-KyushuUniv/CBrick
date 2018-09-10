@@ -429,6 +429,18 @@ public:
     return true;
   }
 
+public:
+  // @brief subdomainの分割パラメータ領域サイズを返す
+  // @param [in] m     sdのインデクス（ランク番号に相当）
+  // @param [out] m_sz ランクmの分割数
+  void getSubDomainSize(const int m, int m_sz[3])
+  {
+    m_sz[0] = sd[m].sz[0];
+    m_sz[1] = sd[m].sz[1];
+    m_sz[2] = sd[m].sz[2];
+  }
+
+
 private:
 
   // @brief SubDomainInfoクラスの確保

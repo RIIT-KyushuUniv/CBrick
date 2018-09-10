@@ -7,6 +7,11 @@
 ## REVISION HISTORY
 
 ---
+- 2018-09-09 Version 1.0.2
+  - void getSubDomainSize(const int m, int m_sz[3])
+
+
+---
 - 2018-03-18 Version 1.0.1
   - bool G2L_index(const int Gi, int* Li, const int c)
 

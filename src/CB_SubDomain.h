@@ -440,6 +440,16 @@ public:
     m_sz[2] = sd[m].sz[2];
   }
 
+  // @brief subdomainの分割パラメータ領域ヘッダを返す
+  // @param [in] m     sdのインデクス（ランク番号に相当）
+  // @param [out] m_sz ランクmのhead[]
+  void getSubDomainHead(const int m, int m_sz[3])
+  {
+    m_sz[0] = sd[m].hd[0];
+    m_sz[1] = sd[m].hd[1];
+    m_sz[2] = sd[m].hd[2];
+  }
+
 
 private:
 

@@ -7,6 +7,11 @@
 ## REVISION HISTORY
 
 ---
+- 2018-09-11 Version 1.0.3
+  - void getSubDomainHead(const int m, int m_sz[3])
+
+
+---
 - 2018-09-09 Version 1.0.2
   - void getSubDomainSize(const int m, int m_sz[3])
 

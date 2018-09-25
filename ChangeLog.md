@@ -7,6 +7,11 @@
 ## REVISION HISTORY
 
 ---
+- 2018-09-25 Version 1.0.6
+  - checkOpenMPマクロを明示的に変更
+
+
+---
 - 2018-09-25 Version 1.0.5
   - Intel_F_TCS option
 

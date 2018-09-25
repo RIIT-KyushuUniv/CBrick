@@ -13,7 +13,14 @@
 
 
 macro (AddOptimizeOption)
-  if (USE_F_TCS STREQUAL "YES")
+  if (TARGET_ARCH STREQUAL "INTEL_F_TCS")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Kfast,parallel,optmsg=2 -V -Xg")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Kfast,parallel,optmsg=2 -V -Xg")
+    if (with_example)
+      set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -Cpp -Kfast,optmsg=2 -V -Qt")
+    endif()
+
+  elseif (USE_F_TCS STREQUAL "YES")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Kfast,ocl,preex,simd=2,array_private,parallel,optmsg=2 -V -Nsrc -x0 -Xg")
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Kfast,ocl,preex,simd=2,array_private,parallel,optmsg=2 -V -Nsrc -x0 -Xg")
     # -Xg   : gcc compatible flag
@@ -58,6 +65,9 @@ macro (FreeForm)
   if(CMAKE_Fortran_COMPILER MATCHES ".*frtpx$")
     #set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS}")
 
+  elseif(TARGET_ARCH STREQUAL "INTEL_F_TCS")
+    set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -Free")
+
   elseif(CMAKE_Fortran_COMPILER_ID STREQUAL "GNU")
     set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -ffree-form")
 
@@ -90,7 +100,7 @@ endmacro()
 
 macro(checkOpenMP)
   if(enable_OPENMP)
-    if(CMAKE_CXX_COMPILER MATCHES ".*FCCpx$")
+    if(USE_F_TCS STREQUAL "YES")
       set(OpenMP_C_FLAGS "-Kopenmp")
       set(OpenMP_CXX_FLAGS "-Kopenmp")
       if (with_example)

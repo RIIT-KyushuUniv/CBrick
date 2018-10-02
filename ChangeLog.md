@@ -7,6 +7,11 @@
 ## REVISION HISTORY
 
 ---
+- 2018-10-02 Version 1.1.0
+  - Bug fix: CB_CommS/V.cpp, MPI_Status stat[24] >> 26
+
+
+---
 - 2018-09-25 Version 1.0.6
   - checkOpenMPマクロを明示的に変更
 

@@ -125,7 +125,7 @@ bool SubDomain::Comm_V_wait_nonblocking(REAL_TYPE* dest,
 #ifndef _DIAGONAL_COMM
   MPI_Status stat[4];
 #else
-  MPI_Status stat[24];
+  MPI_Status stat[26];
 #endif
 
   //// X face ////

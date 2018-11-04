@@ -6,6 +6,11 @@
 ## REVISION HISTORY
 
 ---
+- 2018-11-02 Version 1.2.0
+  - 通信部分をComm classへ分離、IJK > KJIへ対応のため
+
+  
+---
 - 2018-11-02 Version 1.1.1
   - beautify
   - rename functions >> packing

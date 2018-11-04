@@ -11,11 +11,10 @@
 
 /*
  * @file   CB_PackingScalarNode.cpp
- * @brief  SubDomain class
+ * @brief  BrickComm class
  */
 
-#include "CB_SubDomain.h"
-#include "CB_Pack.h"
+#include "CB_Comm.h"
 
 /*
  * @brief pack send data for I direction
@@ -26,7 +25,7 @@
  * @param [in]  nIDm    Rank number of I- direction
  * @param [in]  nIDp    Rank number of I+ direction
  */
-void SubDomain::pack_SXnode(const REAL_TYPE *array,
+void BrickComm::pack_SXnode(const REAL_TYPE *array,
                         const int vc_comm,
                         REAL_TYPE *sendm,
                         REAL_TYPE *sendp,
@@ -73,7 +72,7 @@ void SubDomain::pack_SXnode(const REAL_TYPE *array,
  * @param [in]  nIDm    Rank number of I- direction
  * @param [in]  nIDp    Rank number of I+ direction
  */
-void SubDomain::unpack_SXnode(REAL_TYPE *array,
+void BrickComm::unpack_SXnode(REAL_TYPE *array,
                           const int vc_comm,
                           const REAL_TYPE *recvm,
                           const REAL_TYPE *recvp,
@@ -119,7 +118,7 @@ void SubDomain::unpack_SXnode(REAL_TYPE *array,
  * @param [in]  nIDm    Rank number of J- direction
  * @param [in]  nIDp    Rank number of J+ direction
  */
-void SubDomain::pack_SYnode(const REAL_TYPE *array,
+void BrickComm::pack_SYnode(const REAL_TYPE *array,
                         const int vc_comm,
                         REAL_TYPE *sendm,
                         REAL_TYPE *sendp,
@@ -166,7 +165,7 @@ void SubDomain::pack_SYnode(const REAL_TYPE *array,
  * @param [in]  nIDm    Rank number of J- direction
  * @param [in]  nIDp    Rank number of J+ direction
  */
-void SubDomain::unpack_SYnode(REAL_TYPE *array,
+void BrickComm::unpack_SYnode(REAL_TYPE *array,
                           const int vc_comm,
                           const REAL_TYPE *recvm,
                           const REAL_TYPE *recvp,
@@ -213,7 +212,7 @@ void SubDomain::unpack_SYnode(REAL_TYPE *array,
  * @param [in]  nIDm    Rank number of K- direction
  * @param [in]  nIDp    Rank number of K+ direction
  */
-void SubDomain::pack_SZnode(const REAL_TYPE *array,
+void BrickComm::pack_SZnode(const REAL_TYPE *array,
                         const int vc_comm,
                         REAL_TYPE *sendm,
                         REAL_TYPE *sendp,
@@ -260,7 +259,7 @@ void SubDomain::pack_SZnode(const REAL_TYPE *array,
  * @param [in]  nIDm    Rank number of K- direction
  * @param [in]  nIDp    Rank number of K+ direction
  */
-void SubDomain::unpack_SZnode(REAL_TYPE *array,
+void BrickComm::unpack_SZnode(REAL_TYPE *array,
                           const int vc_comm,
                           const REAL_TYPE *recvm,
                           const REAL_TYPE *recvp,
@@ -306,7 +305,7 @@ void SubDomain::unpack_SZnode(REAL_TYPE *array,
  * @param [out] req      Array of MPI request
  * @retval true-success, false-fail
  */
-bool SubDomain::pack_SEnode(REAL_TYPE *array,
+bool BrickComm::pack_SEnode(REAL_TYPE *array,
                          const int vc_comm,
                          REAL_TYPE *sendbuf,
                          REAL_TYPE *recvbuf,
@@ -577,7 +576,7 @@ bool SubDomain::pack_SEnode(REAL_TYPE *array,
  * @param [in]  vc_comm  number of guide cell layer to be sent
  * @param [in]  recvbuf  recv buffer
  */
-void SubDomain::unpack_SEnode(REAL_TYPE *array,
+void BrickComm::unpack_SEnode(REAL_TYPE *array,
                            const int vc_comm,
                            const REAL_TYPE *recvbuf)
 {
@@ -782,7 +781,7 @@ void SubDomain::unpack_SEnode(REAL_TYPE *array,
  * @param [out] req      Array of MPI request
  * @retval true-success, false-fail
  */
-bool SubDomain::pack_SCnode(REAL_TYPE *array,
+bool BrickComm::pack_SCnode(REAL_TYPE *array,
                          const int vc_comm,
                          REAL_TYPE *sendbuf,
                          REAL_TYPE *recvbuf,
@@ -937,7 +936,7 @@ bool SubDomain::pack_SCnode(REAL_TYPE *array,
  * @param [in]  vc_comm  number of guide cell layer to be sent
  * @param [in]  recvbuf  recv buffer
  */
-void SubDomain::unpack_SCnode(REAL_TYPE *array,
+void BrickComm::unpack_SCnode(REAL_TYPE *array,
                            const int vc_comm,
                            const REAL_TYPE *recvbuf)
 {

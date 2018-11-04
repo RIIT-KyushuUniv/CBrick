@@ -11,11 +11,10 @@
 
 /*
  * @file   CB_PackingVectorNode.cpp
- * @brief  SubDomain class
+ * @brief  BrickComm class
  */
 
-#include "CB_SubDomain.h"
-#include "CB_Pack.h"
+#include "CB_Comm.h"
 
 
 /*
@@ -27,7 +26,7 @@
  * @param [in]  nIDm    Rank number of I- direction
  * @param [in]  nIDp    Rank number of I+ direction
  */
-void SubDomain::pack_VXnode(const REAL_TYPE *array,
+void BrickComm::pack_VXnode(const REAL_TYPE *array,
                         const int vc_comm,
                         REAL_TYPE *sendm,
                         REAL_TYPE *sendp,
@@ -78,7 +77,7 @@ void SubDomain::pack_VXnode(const REAL_TYPE *array,
  * @param [in]  nIDm    Rank number of I- direction
  * @param [in]  nIDp    Rank number of I+ direction
  */
-void SubDomain::unpack_VXnode(REAL_TYPE *array,
+void BrickComm::unpack_VXnode(REAL_TYPE *array,
                           const int vc_comm,
                           const REAL_TYPE *recvm,
                           const REAL_TYPE *recvp,
@@ -128,7 +127,7 @@ void SubDomain::unpack_VXnode(REAL_TYPE *array,
  * @param [in]  nIDm    Rank number of J- direction
  * @param [in]  nIDp    Rank number of J+ direction
  */
-void SubDomain::pack_VYnode(const REAL_TYPE *array,
+void BrickComm::pack_VYnode(const REAL_TYPE *array,
                         const int vc_comm,
                         REAL_TYPE *sendm,
                         REAL_TYPE *sendp,
@@ -179,7 +178,7 @@ void SubDomain::pack_VYnode(const REAL_TYPE *array,
  * @param [in]  nIDm    Rank number of J- direction
  * @param [in]  nIDp    Rank number of J+ direction
  */
-void SubDomain::unpack_VYnode(REAL_TYPE *array,
+void BrickComm::unpack_VYnode(REAL_TYPE *array,
                           const int vc_comm,
                           const REAL_TYPE *recvm,
                           const REAL_TYPE *recvp,
@@ -230,7 +229,7 @@ void SubDomain::unpack_VYnode(REAL_TYPE *array,
  * @param [in]  nIDm    Rank number of K- direction
  * @param [in]  nIDp    Rank number of K+ direction
  */
-void SubDomain::pack_VZnode(const REAL_TYPE *array,
+void BrickComm::pack_VZnode(const REAL_TYPE *array,
                         const int vc_comm,
                         REAL_TYPE *sendm,
                         REAL_TYPE *sendp,
@@ -281,7 +280,7 @@ void SubDomain::pack_VZnode(const REAL_TYPE *array,
  * @param [in]  nIDm    Rank number of K- direction
  * @param [in]  nIDp    Rank number of K+ direction
  */
-void SubDomain::unpack_VZnode(REAL_TYPE *array,
+void BrickComm::unpack_VZnode(REAL_TYPE *array,
                           const int vc_comm,
                           const REAL_TYPE *recvm,
                           const REAL_TYPE *recvp,
@@ -331,7 +330,7 @@ void SubDomain::unpack_VZnode(REAL_TYPE *array,
  * @param [out] req      Array of MPI request
  * @retval true-success, false-fail
  */
-bool SubDomain::pack_VEnode(REAL_TYPE *array,
+bool BrickComm::pack_VEnode(REAL_TYPE *array,
                          const int vc_comm,
                          REAL_TYPE *sendbuf,
                          REAL_TYPE *recvbuf,
@@ -626,7 +625,7 @@ bool SubDomain::pack_VEnode(REAL_TYPE *array,
  * @param [in]  vc_comm  number of guide cell layer to be sent
  * @param [in]  recvbuf  recv buffer
  */
-void SubDomain::unpack_VEnode(REAL_TYPE *array,
+void BrickComm::unpack_VEnode(REAL_TYPE *array,
                            const int vc_comm,
                            const REAL_TYPE *recvbuf)
 {
@@ -855,7 +854,7 @@ void SubDomain::unpack_VEnode(REAL_TYPE *array,
  * @param [out] req      Array of MPI request
  * @retval true-success, false-fail
  */
-bool SubDomain::pack_VCnode(REAL_TYPE *array,
+bool BrickComm::pack_VCnode(REAL_TYPE *array,
                          const int vc_comm,
                          REAL_TYPE *sendbuf,
                          REAL_TYPE *recvbuf,
@@ -1026,7 +1025,7 @@ bool SubDomain::pack_VCnode(REAL_TYPE *array,
  * @param [in]  vc_comm  number of guide cell layer to be sent
  * @param [in]  recvbuf  recv buffer
  */
-void SubDomain::unpack_VCnode(REAL_TYPE *array,
+void BrickComm::unpack_VCnode(REAL_TYPE *array,
                            const int vc_comm,
                            const REAL_TYPE *recvbuf)
 {

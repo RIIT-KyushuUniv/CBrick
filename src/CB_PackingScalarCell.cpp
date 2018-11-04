@@ -11,11 +11,10 @@
 
 /*
  * @file   CB_PackingScalarCell.cpp
- * @brief  SubDomain class
+ * @brief  BrickComm class
  */
 
-#include "CB_SubDomain.h"
-#include "CB_Pack.h"
+#include "CB_Comm.h"
 
 
 /*
@@ -27,7 +26,7 @@
  * @param [in]  nIDm    Rank number of I- direction
  * @param [in]  nIDp    Rank number of I+ direction
  */
-void SubDomain::pack_SXcell(const REAL_TYPE *array,
+void BrickComm::pack_SXcell(const REAL_TYPE *array,
                         const int vc_comm,
                         REAL_TYPE *sendm,
                         REAL_TYPE *sendp,
@@ -74,7 +73,7 @@ void SubDomain::pack_SXcell(const REAL_TYPE *array,
  * @param [in]  nIDm    Rank number of I- direction
  * @param [in]  nIDp    Rank number of I+ direction
  */
-void SubDomain::unpack_SXcell(REAL_TYPE *array,
+void BrickComm::unpack_SXcell(REAL_TYPE *array,
                           const int vc_comm,
                           const REAL_TYPE *recvm,
                           const REAL_TYPE *recvp,
@@ -120,7 +119,7 @@ void SubDomain::unpack_SXcell(REAL_TYPE *array,
  * @param [in]  nIDm    Rank number of J- direction
  * @param [in]  nIDp    Rank number of J+ direction
  */
-void SubDomain::pack_SYcell(const REAL_TYPE *array,
+void BrickComm::pack_SYcell(const REAL_TYPE *array,
                         const int vc_comm,
                         REAL_TYPE *sendm,
                         REAL_TYPE *sendp,
@@ -167,7 +166,7 @@ void SubDomain::pack_SYcell(const REAL_TYPE *array,
  * @param [in]  nIDm    Rank number of J- direction
  * @param [in]  nIDp    Rank number of J+ direction
  */
-void SubDomain::unpack_SYcell(REAL_TYPE *array,
+void BrickComm::unpack_SYcell(REAL_TYPE *array,
                           const int vc_comm,
                           const REAL_TYPE *recvm,
                           const REAL_TYPE *recvp,
@@ -214,7 +213,7 @@ void SubDomain::unpack_SYcell(REAL_TYPE *array,
  * @param [in]  nIDm    Rank number of K- direction
  * @param [in]  nIDp    Rank number of K+ direction
  */
-void SubDomain::pack_SZcell(const REAL_TYPE *array,
+void BrickComm::pack_SZcell(const REAL_TYPE *array,
                         const int vc_comm,
                         REAL_TYPE *sendm,
                         REAL_TYPE *sendp,
@@ -261,7 +260,7 @@ void SubDomain::pack_SZcell(const REAL_TYPE *array,
  * @param [in]  nIDm    Rank number of K- direction
  * @param [in]  nIDp    Rank number of K+ direction
  */
-void SubDomain::unpack_SZcell(REAL_TYPE *array,
+void BrickComm::unpack_SZcell(REAL_TYPE *array,
                           const int vc_comm,
                           const REAL_TYPE *recvm,
                           const REAL_TYPE *recvp,
@@ -307,7 +306,7 @@ void SubDomain::unpack_SZcell(REAL_TYPE *array,
  * @param [out] req      Array of MPI request
  * @retval true-success, false-fail
  */
-bool SubDomain::pack_SEcell(REAL_TYPE *array,
+bool BrickComm::pack_SEcell(REAL_TYPE *array,
                         const int vc_comm,
                         REAL_TYPE *sendbuf,
                         REAL_TYPE *recvbuf,
@@ -578,7 +577,7 @@ bool SubDomain::pack_SEcell(REAL_TYPE *array,
  * @param [in]  vc_comm  number of guide cell layer to be sent
  * @param [in]  recvbuf  recv buffer
  */
-void SubDomain::unpack_SEcell(REAL_TYPE *array,
+void BrickComm::unpack_SEcell(REAL_TYPE *array,
                           const int vc_comm,
                           const REAL_TYPE *recvbuf)
 {
@@ -783,7 +782,7 @@ void SubDomain::unpack_SEcell(REAL_TYPE *array,
  * @param [out] req      Array of MPI request
  * @retval true-success, false-fail
  */
-bool SubDomain::pack_SCcell(REAL_TYPE *array,
+bool BrickComm::pack_SCcell(REAL_TYPE *array,
                         const int vc_comm,
                         REAL_TYPE *sendbuf,
                         REAL_TYPE *recvbuf,
@@ -938,7 +937,7 @@ bool SubDomain::pack_SCcell(REAL_TYPE *array,
  * @param [in]  vc_comm  number of guide cell layer to be sent
  * @param [in]  recvbuf  recv buffer
  */
-void SubDomain::unpack_SCcell(REAL_TYPE *array,
+void BrickComm::unpack_SCcell(REAL_TYPE *array,
                           const int vc_comm,
                           const REAL_TYPE *recvbuf)
 {

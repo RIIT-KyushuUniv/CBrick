@@ -11,63 +11,10 @@
 
 /*
  * @file   CB_CommS.cpp
- * @brief  SubDomain class
+ * @brief  BrickComm class
  */
 
-#include "CB_SubDomain.h"
-
-/*
- * @fn initComm()
- * @brief 通信バッファの確保
- */
-bool SubDomain::initComm(const int num_compo)
-{
-  int gc = halo_width;
-
-  if (size[0]==0 || size[1]==0 || size[2]==0 || gc==0 || num_compo==0) {
-    return false;
-  }
-
-  // バッファ領域としては、最大値で確保しておく
-  int f_sz[3];
-  f_sz[0] = size[1] * size[2] * gc * num_compo;
-  f_sz[1] = size[0] * size[2] * gc * num_compo;
-  f_sz[2] = size[0] * size[1] * gc * num_compo;
-
-  if ( !(f_ims = new REAL_TYPE [f_sz[0]]) ) return false;
-  if ( !(f_imr = new REAL_TYPE [f_sz[0]]) ) return false;
-  if ( !(f_ips = new REAL_TYPE [f_sz[0]]) ) return false;
-  if ( !(f_ipr = new REAL_TYPE [f_sz[0]]) ) return false;
-
-  if ( !(f_jms = new REAL_TYPE [f_sz[1]]) ) return false;
-  if ( !(f_jmr = new REAL_TYPE [f_sz[1]]) ) return false;
-  if ( !(f_jps = new REAL_TYPE [f_sz[1]]) ) return false;
-  if ( !(f_jpr = new REAL_TYPE [f_sz[1]]) ) return false;
-
-  if ( !(f_kms = new REAL_TYPE [f_sz[2]]) ) return false;
-  if ( !(f_kmr = new REAL_TYPE [f_sz[2]]) ) return false;
-  if ( !(f_kps = new REAL_TYPE [f_sz[2]]) ) return false;
-  if ( !(f_kpr = new REAL_TYPE [f_sz[2]]) ) return false;
-
-#ifdef _DIAGONAL_COMM
-  // edge
-  size_t lx = size[0] * gc * gc * num_compo;
-  size_t ly = size[1] * gc * gc * num_compo;
-  size_t lz = size[2] * gc * gc * num_compo;
-  size_t le = lx*4 + ly*4 + lz*4;
-  if ( !(f_es = new REAL_TYPE[le]) ) return false;
-  if ( !(f_er = new REAL_TYPE[le]) ) return false;
-
-  // corner
-  size_t lc = gc * gc * gc * num_compo * 8;
-  if ( !(f_cs = new REAL_TYPE[lc]) ) return false;
-  if ( !(f_cr = new REAL_TYPE[lc]) ) return false;
-#endif
-
-  buf_flag = 1; // バッファ確保ずみ
-
-  return true;
-}
+#include "CB_Comm.h"
 
 
 /*
@@ -77,7 +24,7 @@ bool SubDomain::initComm(const int num_compo)
  * @param [in,out]  req     MPI_Request
  * @retval true-success, false-fail
  */
-bool SubDomain::Comm_S_nonblocking(REAL_TYPE* src,
+bool BrickComm::Comm_S_nonblocking(REAL_TYPE* src,
                                    const int gc_comm,
                                    MPI_Request *req)
 {
@@ -174,7 +121,7 @@ bool SubDomain::Comm_S_nonblocking(REAL_TYPE* src,
  * @param [out] req  Array of MPI request
  * @retval true-success, false-fail
  */
-bool SubDomain::IsendIrecv(REAL_TYPE* ms,
+bool BrickComm::IsendIrecv(REAL_TYPE* ms,
                            REAL_TYPE* mr,
                            REAL_TYPE* ps,
                            REAL_TYPE* pr,
@@ -296,7 +243,7 @@ bool SubDomain::IsendIrecv(REAL_TYPE* ms,
  * @param [out]     req     Array of MPI request
  * @retval true-success, false-fail
  */
-bool SubDomain::Comm_S_wait_nonblocking(REAL_TYPE* dest,
+bool BrickComm::Comm_S_wait_nonblocking(REAL_TYPE* dest,
                                         const int gc_comm,
                                         MPI_Request *req)
 {

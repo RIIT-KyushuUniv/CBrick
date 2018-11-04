@@ -20,7 +20,8 @@ set(cb_files CB_SubDomain.cpp
              CB_PackingScalarCell.cpp
              CB_PackingVectorCell.cpp
              CB_PackingScalarNode.cpp
-             CB_PackingVectorNode.cpp)
+             CB_PackingVectorNode.cpp
+   )
 
 
 ## float
@@ -41,5 +42,7 @@ install(FILES
         ${PROJECT_BINARY_DIR}/src/CB_Version.h
         ${PROJECT_SOURCE_DIR}/src/CB_SubDomain.h
         ${PROJECT_SOURCE_DIR}/src/CB_Define.h
+        ${PROJECT_SOURCE_DIR}/src/CB_Comm.h
+        ${PROJECT_SOURCE_DIR}/src/CB_Pack.h
         DESTINATION include)
 ###

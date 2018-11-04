@@ -11,10 +11,10 @@
 
 /*
  * @file   CB_CommV.cpp
- * @brief  SubDomain class
+ * @brief  BrickComm class
  */
 
-#include "CB_SubDomain.h"
+#include "CB_Comm.h"
 
 /*
  * @brief ベクトル変数のノンブロッキング通信
@@ -23,7 +23,7 @@
  * @param [in,out]  req     MPI_Request
  * @retval true-success, false-fail
  */
-bool SubDomain::Comm_V_nonblocking(REAL_TYPE* src,
+bool BrickComm::Comm_V_nonblocking(REAL_TYPE* src,
                                    const int gc_comm,
                                    MPI_Request *req)
 {
@@ -32,9 +32,9 @@ bool SubDomain::Comm_V_nonblocking(REAL_TYPE* src,
 
   // 実際に送受信するメッセージサイズ
   int msz[3];
-  msz[0] = (size[1]) * (size[2]) * gc_comm * 3;
-  msz[1] = (size[0]) * (size[2]) * gc_comm * 3;
-  msz[2] = (size[0]) * (size[1]) * gc_comm * 3;
+  msz[0] = size[1] * size[2] * gc_comm * 3;
+  msz[1] = size[0] * size[2] * gc_comm * 3;
+  msz[2] = size[0] * size[1] * gc_comm * 3;
 
   // X direction
   int nIDm = comm_tbl[I_minus];
@@ -115,7 +115,7 @@ bool SubDomain::Comm_V_nonblocking(REAL_TYPE* src,
  * @param [out]     req     Array of MPI request
  * @retval true-success, false-fail
  */
-bool SubDomain::Comm_V_wait_nonblocking(REAL_TYPE* dest,
+bool BrickComm::Comm_V_wait_nonblocking(REAL_TYPE* dest,
                                         const int gc_comm,
                                         MPI_Request *req)
 {

@@ -27,7 +27,7 @@
  * @param [in]  nIDm    Rank number of I- direction
  * @param [in]  nIDp    Rank number of I+ direction
  */
-void SubDomain::pack_VIn(const REAL_TYPE *array,
+void SubDomain::pack_VXnode(const REAL_TYPE *array,
                         const int vc_comm,
                         REAL_TYPE *sendm,
                         REAL_TYPE *sendp,
@@ -43,9 +43,6 @@ void SubDomain::pack_VIn(const REAL_TYPE *array,
   {
 #pragma omp parallel for collapse(3)
     for (int l=0; l<3; l++) {
-//    for( int k=0-vc_comm; k<kmax+vc_comm; k++ ){
-//      for( int j=0-vc_comm; j<jmax+vc_comm; j++ ){
-//        for( int i=1; i<=vc_comm; i++ ){
       for( int k=0; k<kmax; k++ ){
         for( int j=0; j<jmax; j++ ){
           for( int i=1; i<=vc_comm; i++ ){
@@ -60,9 +57,6 @@ void SubDomain::pack_VIn(const REAL_TYPE *array,
   {
 #pragma omp parallel for collapse(3)
     for (int l=0; l<3; l++) {
-//    for( int k=0-vc_comm; k<kmax+vc_comm; k++ ){
-//      for( int j=0-vc_comm; j<jmax+vc_comm; j++ ){
-//        for( int i=imax-vc_comm; i<imax; i++ ){
       for( int k=0; k<kmax; k++ ){
         for( int j=0; j<jmax; j++ ){
           for( int i=imax-vc_comm; i<imax; i++ ){
@@ -84,7 +78,7 @@ void SubDomain::pack_VIn(const REAL_TYPE *array,
  * @param [in]  nIDm    Rank number of I- direction
  * @param [in]  nIDp    Rank number of I+ direction
  */
-void SubDomain::unpack_VIn(REAL_TYPE *array,
+void SubDomain::unpack_VXnode(REAL_TYPE *array,
                           const int vc_comm,
                           const REAL_TYPE *recvm,
                           const REAL_TYPE *recvp,
@@ -100,9 +94,6 @@ void SubDomain::unpack_VIn(REAL_TYPE *array,
   {
 #pragma omp parallel for collapse(3)
     for (int l=0; l<3; l++) {
-//    for( int k=0-vc_comm; k<kmax+vc_comm; k++ ){
-//      for( int j=0-vc_comm; j<jmax+vc_comm; j++ ){
-//        for( int i=1-vc_comm; i<1; i++ ){
       for( int k=0; k<kmax; k++ ){
         for( int j=0; j<jmax; j++ ){
           for( int i=1-vc_comm; i<1; i++ ){
@@ -117,9 +108,6 @@ void SubDomain::unpack_VIn(REAL_TYPE *array,
   {
 #pragma omp parallel for collapse(3)
     for (int l=0; l<3; l++) {
-//    for( int k=0-vc_comm; k<kmax+vc_comm; k++ ){
-//      for( int j=0-vc_comm; j<jmax+vc_comm; j++ ){
-//        for( int i=imax; i<imax+vc_comm; i++ ){
       for( int k=0; k<kmax; k++ ){
         for( int j=0; j<jmax; j++ ){
           for( int i=imax; i<imax+vc_comm; i++ ){
@@ -140,7 +128,7 @@ void SubDomain::unpack_VIn(REAL_TYPE *array,
  * @param [in]  nIDm    Rank number of J- direction
  * @param [in]  nIDp    Rank number of J+ direction
  */
-void SubDomain::pack_VJn(const REAL_TYPE *array,
+void SubDomain::pack_VYnode(const REAL_TYPE *array,
                         const int vc_comm,
                         REAL_TYPE *sendm,
                         REAL_TYPE *sendp,
@@ -156,9 +144,6 @@ void SubDomain::pack_VJn(const REAL_TYPE *array,
   {
 #pragma omp parallel for collapse(3)
     for (int l=0; l<3; l++) {
-//    for( int k=0-vc_comm; k<kmax+vc_comm; k++ ){
-//      for( int j=1; j<=vc_comm; j++ ){
-//        for( int i=0-vc_comm; i<imax+vc_comm; i++ ){
       for( int k=0; k<kmax; k++ ){
         for( int j=1; j<=vc_comm; j++ ){
           for( int i=0; i<imax; i++ ){
@@ -173,9 +158,6 @@ void SubDomain::pack_VJn(const REAL_TYPE *array,
   {
 #pragma omp parallel for collapse(3)
     for (int l=0; l<3; l++) {
-//    for( int k=0-vc_comm; k<kmax+vc_comm; k++ ){
-//      for( int j=jmax-vc_comm; j<jmax; j++ ){
-//        for( int i=0-vc_comm; i<imax+vc_comm; i++ ){
       for( int k=0; k<kmax; k++ ){
         for( int j=jmax-vc_comm; j<jmax; j++ ){
           for( int i=0; i<imax; i++ ){
@@ -197,7 +179,7 @@ void SubDomain::pack_VJn(const REAL_TYPE *array,
  * @param [in]  nIDm    Rank number of J- direction
  * @param [in]  nIDp    Rank number of J+ direction
  */
-void SubDomain::unpack_VJn(REAL_TYPE *array,
+void SubDomain::unpack_VYnode(REAL_TYPE *array,
                           const int vc_comm,
                           const REAL_TYPE *recvm,
                           const REAL_TYPE *recvp,
@@ -213,9 +195,6 @@ void SubDomain::unpack_VJn(REAL_TYPE *array,
   {
 #pragma omp parallel for collapse(3)
     for (int l=0; l<3; l++) {
-//    for( int k=0-vc_comm; k<kmax+vc_comm; k++ ){
-//      for( int j=1-vc_comm; j<1; j++ ){
-//        for( int i=0-vc_comm; i<imax+vc_comm; i++ ){
       for( int k=0; k<kmax; k++ ){
         for( int j=1-vc_comm; j<1; j++ ){
           for( int i=0; i<imax; i++ ){
@@ -230,9 +209,6 @@ void SubDomain::unpack_VJn(REAL_TYPE *array,
   {
 #pragma omp parallel for collapse(3)
     for (int l=0; l<3; l++) {
-//    for( int k=0-vc_comm; k<kmax+vc_comm; k++ ){
-//      for( int j=jmax; j<jmax+vc_comm; j++ ){
-//        for( int i=0-vc_comm; i<imax+vc_comm; i++ ){
       for( int k=0; k<kmax; k++ ){
         for( int j=jmax; j<jmax+vc_comm; j++ ){
           for( int i=0; i<imax; i++ ){
@@ -254,7 +230,7 @@ void SubDomain::unpack_VJn(REAL_TYPE *array,
  * @param [in]  nIDm    Rank number of K- direction
  * @param [in]  nIDp    Rank number of K+ direction
  */
-void SubDomain::pack_VKn(const REAL_TYPE *array,
+void SubDomain::pack_VZnode(const REAL_TYPE *array,
                         const int vc_comm,
                         REAL_TYPE *sendm,
                         REAL_TYPE *sendp,
@@ -270,9 +246,6 @@ void SubDomain::pack_VKn(const REAL_TYPE *array,
   {
 #pragma omp parallel for collapse(3)
     for (int l=0; l<3; l++) {
-//    for( int k=1; k<=vc_comm; k++ ){
-//      for( int j=0-vc_comm; j<jmax+vc_comm; j++ ){
-//        for( int i=0-vc_comm; i<imax+vc_comm; i++ ){
       for( int k=1; k<=vc_comm; k++ ){
         for( int j=0; j<jmax; j++ ){
           for( int i=0; i<imax; i++ ){
@@ -287,9 +260,6 @@ void SubDomain::pack_VKn(const REAL_TYPE *array,
   {
 #pragma omp parallel for collapse(3)
     for (int l=0; l<3; l++) {
-//    for( int k=kmax-vc_comm; k<kmax; k++ ){
-//      for( int j=0-vc_comm; j<jmax+vc_comm; j++ ){
-//        for( int i=0-vc_comm; i<imax+vc_comm; i++ ){
       for( int k=kmax-vc_comm; k<kmax; k++ ){
         for( int j=0; j<jmax; j++ ){
           for( int i=0; i<imax; i++ ){
@@ -311,7 +281,7 @@ void SubDomain::pack_VKn(const REAL_TYPE *array,
  * @param [in]  nIDm    Rank number of K- direction
  * @param [in]  nIDp    Rank number of K+ direction
  */
-void SubDomain::unpack_VKn(REAL_TYPE *array,
+void SubDomain::unpack_VZnode(REAL_TYPE *array,
                           const int vc_comm,
                           const REAL_TYPE *recvm,
                           const REAL_TYPE *recvp,
@@ -327,9 +297,6 @@ void SubDomain::unpack_VKn(REAL_TYPE *array,
   {
 #pragma omp parallel for collapse(3)
     for (int l=0; l<3; l++) {
-//    for( int k=1-vc_comm; k<1; k++ ){
-//      for( int j=0-vc_comm; j<jmax+vc_comm; j++ ){
-//        for( int i=0-vc_comm; i<imax+vc_comm; i++ ){
       for( int k=1-vc_comm; k<1; k++ ){
         for( int j=0; j<jmax; j++ ){
           for( int i=0; i<imax; i++ ){
@@ -344,9 +311,6 @@ void SubDomain::unpack_VKn(REAL_TYPE *array,
   {
 #pragma omp parallel for collapse(3)
     for (int l=0; l<3; l++) {
-//    for( int k=kmax; k<kmax+vc_comm; k++ ){
-//      for( int j=0-vc_comm; j<jmax+vc_comm; j++ ){
-//        for( int i=0-vc_comm; i<imax+vc_comm; i++ ){
       for( int k=kmax; k<kmax+vc_comm; k++ ){
         for( int j=0; j<jmax; j++ ){
           for( int i=0; i<imax; i++ ){
@@ -367,7 +331,7 @@ void SubDomain::unpack_VKn(REAL_TYPE *array,
  * @param [out] req      Array of MPI request
  * @retval true-success, false-fail
  */
-bool SubDomain::pack_VEn(REAL_TYPE *array,
+bool SubDomain::pack_VEnode(REAL_TYPE *array,
                          const int vc_comm,
                          REAL_TYPE *sendbuf,
                          REAL_TYPE *recvbuf,
@@ -662,7 +626,7 @@ bool SubDomain::pack_VEn(REAL_TYPE *array,
  * @param [in]  vc_comm  number of guide cell layer to be sent
  * @param [in]  recvbuf  recv buffer
  */
-void SubDomain::unpack_VEn(REAL_TYPE *array,
+void SubDomain::unpack_VEnode(REAL_TYPE *array,
                            const int vc_comm,
                            const REAL_TYPE *recvbuf)
 {
@@ -891,7 +855,7 @@ void SubDomain::unpack_VEn(REAL_TYPE *array,
  * @param [out] req      Array of MPI request
  * @retval true-success, false-fail
  */
-bool SubDomain::pack_VCn(REAL_TYPE *array,
+bool SubDomain::pack_VCnode(REAL_TYPE *array,
                          const int vc_comm,
                          REAL_TYPE *sendbuf,
                          REAL_TYPE *recvbuf,
@@ -1062,7 +1026,7 @@ bool SubDomain::pack_VCn(REAL_TYPE *array,
  * @param [in]  vc_comm  number of guide cell layer to be sent
  * @param [in]  recvbuf  recv buffer
  */
-void SubDomain::unpack_VCn(REAL_TYPE *array,
+void SubDomain::unpack_VCnode(REAL_TYPE *array,
                            const int vc_comm,
                            const REAL_TYPE *recvbuf)
 {

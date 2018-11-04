@@ -1,10 +1,15 @@
 # CBrick
 
 ## TODO
-- padding for inner most loop
 - MPIでdiff3dの残差の値が異なる
 
 ## REVISION HISTORY
+
+---
+- 2018-11-02 Version 1.1.1
+  - beautify
+  - rename functions >> packing
+
 
 ---
 - 2018-10-02 Version 1.1.0
@@ -73,25 +78,25 @@
       - パックとisend/irecv
       ~~~
       bool pack_SE();  スカラー、エッジ、セル
-      bool pack_SEn(); スカラー、エッジ、ノード
+      bool pack_SE(); スカラー、エッジ、ノード
       bool pack_SC();  スカラー、コーナー、セル
-      bool pack_SCn(); スカラー、コーナー、ノード
+      bool pack_SC(); スカラー、コーナー、ノード
       bool pack_VE();  ベクター、エッジ、セル
-      bool pack_VEn(); ベクター、エッジ、ノード
+      bool pack_VE(); ベクター、エッジ、ノード
       bool pack_VC();  ベクター、コーナー、セル
-      bool pack_VCn(); ベクター、コーナー、ノード
+      bool pack_VC(); ベクター、コーナー、ノード
       ~~~
 
       - 展開
       ~~~
       void unpack_SE();  スカラー、エッジ、セル
-      void unpack_SEn(); スカラー、エッジ、ノード
+      void unpack_SE(); スカラー、エッジ、ノード
       void unpack_SC();  スカラー、コーナー、セル
-      void unpack_SCn(); スカラー、コーナー、ノード
+      void unpack_SC(); スカラー、コーナー、ノード
       void unpack_VE();  ベクター、エッジ、セル
-      void unpack_VEn(); ベクター、エッジ、ノード
+      void unpack_VE(); ベクター、エッジ、ノード
       void unpack_VC();  ベクター、コーナー、セル
-      void unpack_VCn(); ベクター、コーナー、ノード
+      void unpack_VC(); ベクター、コーナー、ノード
       ~~~
 
   4. CB_CommS.cpp
@@ -119,13 +124,13 @@
       ~~~
 
       - 斜め方向袖通信関数のコール
-        - pack_SE()、pack_SEn()、pack_SC()、pack_SCn()をコール
+        - pack_SE()、pack_SEnode()、pack_SC()、pack_SCnode()をコール
 
     - (3) Comm_S_wait_nonblocking関数
       - wait用のMPI_Status配列のサイズ変更
       - [4]から[24]に変更（エッジの送受信時に12*2=24が最大数として必要なため）
       - 斜め方向袖通信のwaitと展開処理関数のコール追加
-      - `unpack_SE(), unpack_SEn(), unpack_SC(), unpack_SCn()`をコール
+      - `unpack_SE(), unpack_SEnode(), unpack_SC(), unpack_SCnode()`をコール
       - (1)以外はCB_CommV.cppも同様の修正
 
   5. CB_Pack.h

@@ -142,28 +142,27 @@ public:
  * サブドメイン情報保持クラス
  */
 class SubDomain {
-public:
-  int procGrp;          ///< プロセスグループ番号
-  int myRank;           ///< 自ノードのランク番号
-  int numProc;          ///< 全ランク数
-  MPI_Comm mpi_comm;    ///< MPI コミュニケーター
 
+protected:
   int G_div[3];         ///< 各軸方向の領域分割数
   int G_size[3];        ///< 全領域の要素数 (Global, Non-dimensional)
   int size[3];          ///< 各サブドメインの要素数 (Local, Non-dimensional
   int head[3];          ///< 開始インデクス（グローバルインデクス）
   int comm_tbl[NOFACE]; ///< 隣接ブロックのランク番号
-  int halo_width;       ///< ガイドセル幅
-  int ranking_opt;      ///< ランキングのオプション（0=cubical, default, 1=vector）
-  int auto_div;         ///< 分割モード (AUTO, SPEC)
-  int f_index;          ///< Findex (0-OFF, 1-ON) @note 関連するところは head index
 
-
-protected:
   std::string grid_type;///< "cell" or "node"
   SubdomainInfo* sd;    ///< 全サブドメインの分割要素数配列
 
 private:
+  MPI_Comm mpi_comm;    ///< MPI コミュニケーター
+  int procGrp;          ///< プロセスグループ番号
+  int myRank;           ///< 自ノードのランク番号
+  int halo_width;       ///< ガイドセル幅
+  int auto_div;         ///< 分割モード (AUTO, SPEC)
+  int f_index;          ///< Findex (0-OFF, 1-ON) @note 関連するところは head index
+  int numProc;          ///< 全ランク数
+  int ranking_opt;      ///< ランキングのオプション（0=cubical, default, 1=vector）
+
   // Buffer for asynchronous communication
   REAL_TYPE* f_ims;  // I- direction send
   REAL_TYPE* f_imr;  // I- direction recv
@@ -241,45 +240,6 @@ public:
             std::string m_idxtyp,
             int priority=0) {
 
-    procGrp = -1;
-    myRank  = -1;
-    numProc = 1;
-    halo_width = 0;
-    ranking_opt = 0;
-    auto_div = AUTO;
-    f_index = 0;
-
-    for (int i=0; i<NOFACE; i++) comm_tbl[i] = -1;
-
-    for (int i=0; i<3; i++) {
-      head[i]       = 0;
-      size[i]       = 0;
-      G_size[i]     = 0;
-      G_div[i]      = 0;
-    }
-    sd = NULL;
-
-    f_ims = NULL;  // X- direction send
-    f_imr = NULL;  // X- direction recv
-    f_ips = NULL;  // X+ direction send
-    f_ipr = NULL;  // X+ direction recv
-    f_jms = NULL;  // Y- direction send
-    f_jmr = NULL;  // Y- direction recv
-    f_jps = NULL;  // Y+ direction send
-    f_jpr = NULL;  // Y+ direction recv
-    f_kms = NULL;  // Z- direction send
-    f_kmr = NULL;  // Z- direction recv
-    f_kps = NULL;  // Z+ direction send
-    f_kpr = NULL;  // Z+ direction recv
-#ifdef _DIAGONAL_COMM
-    f_es  = NULL;  // edge send
-    f_er  = NULL;  // edge recv
-    f_cs  = NULL;  // corner send
-    f_cr  = NULL;  // corner recv
-#endif
-    buf_flag = 0;
-
-
     this->G_size[0]   = m_gsz[0];
     this->G_size[1]   = m_gsz[1];
     this->G_size[2]   = m_gsz[2];
@@ -314,8 +274,6 @@ public:
 
     if ( numProc < 1 ) Exit(-1);
     if ( !(sd=allocateSD()) ) Exit(-1);
-
-    buf_flag = 0;
   }
 
 
@@ -429,7 +387,50 @@ public:
     return true;
   }
 
-public:
+
+  // @brief 領域の分割数を返す
+  // @param [out] m_sz 分割数
+  void getGlobalDivision(int* m_sz)
+  {
+    m_sz[0] = G_div[0];
+    m_sz[1] = G_div[1];
+    m_sz[2] = G_div[2];
+  }
+
+  // @brief 全計算領域の要素数を返す
+  // @param [out] m_sz 要素数
+  void getGlobalSize(int* m_sz)
+  {
+    m_sz[0] = G_size[0];
+    m_sz[1] = G_size[1];
+    m_sz[2] = G_size[2];
+  }
+
+  // @brief 部分領域の要素数を返す
+  // @param [out] m_sz 要素数
+  void getLocalSize(int* m_sz)
+  {
+    m_sz[0] = size[0];
+    m_sz[1] = size[1];
+    m_sz[2] = size[2];
+  }
+
+  // @brief 自領域の先頭インデクスを返す
+  // @param [out] m_sz ランクmのhead[]
+  void getLocalHead(int* m_sz)
+  {
+    m_sz[0] = head[0];
+    m_sz[1] = head[1];
+    m_sz[2] = head[2];
+  }
+
+  // @brief 通信テーブルを返す
+  // @param [out] m_tbl 通信テーブル
+  void getCommTable(int* m_tbl)
+  {
+    for (int i=0; i<NOFACE; i++) m_tbl[i] = comm_tbl[i];
+  }
+
   // @brief subdomainの分割パラメータ領域サイズを返す
   // @param [in] m     sdのインデクス（ランク番号に相当）
   // @param [out] m_sz ランクmの分割数
@@ -533,65 +534,65 @@ private:
 // CB_PackingScalarCell.cpp
 private:
 
-  void pack_SI(const REAL_TYPE *array,
+  void pack_SXcell(const REAL_TYPE *array,
                const int vc_comm,
                REAL_TYPE *sendm,
                REAL_TYPE *sendp,
                const int nIDm,
                const int nIDp);
 
-  void unpack_SI(REAL_TYPE *array,
+  void unpack_SXcell(REAL_TYPE *array,
                  const int vc_comm,
                  const REAL_TYPE *recvm,
                  const REAL_TYPE *recvp,
                  const int nIDm,
                  const int nIDp);
 
-  void pack_SJ(const REAL_TYPE *array,
+  void pack_SYcell(const REAL_TYPE *array,
                const int vc_comm,
                REAL_TYPE *sendm,
                REAL_TYPE *sendp,
                const int nIDm,
                const int nIDp);
 
-  void unpack_SJ(REAL_TYPE *array,
+  void unpack_SYcell(REAL_TYPE *array,
                  const int vc_comm,
                  const REAL_TYPE *recvm,
                  const REAL_TYPE *recvp,
                  const int nIDm,
                  const int nIDp);
 
-  void pack_SK(const REAL_TYPE *array,
+  void pack_SZcell(const REAL_TYPE *array,
                const int vc_comm,
                REAL_TYPE *sendm,
                REAL_TYPE *sendp,
                const int nIDm,
                const int nIDp);
 
-  void unpack_SK(REAL_TYPE *array,
+  void unpack_SZcell(REAL_TYPE *array,
                  const int vc_comm,
                  const REAL_TYPE *recvm,
                  const REAL_TYPE *recvp,
                  const int nIDm,
                  const int nIDp);
 
-  bool pack_SE(REAL_TYPE *array,
+  bool pack_SEcell(REAL_TYPE *array,
                const int vc_comm,
                REAL_TYPE *sendbuf,
                REAL_TYPE *recvbuf,
                MPI_Request *req);
 
-  void unpack_SE(REAL_TYPE *array,
+  void unpack_SEcell(REAL_TYPE *array,
                  const int vc_comm,
                  const REAL_TYPE *recvbuf);
 
-  bool pack_SC(REAL_TYPE *array,
+  bool pack_SCcell(REAL_TYPE *array,
                const int vc_comm,
                REAL_TYPE *sendbuf,
                REAL_TYPE *recvbuf,
                MPI_Request *req);
 
-  void unpack_SC(REAL_TYPE *array,
+  void unpack_SCcell(REAL_TYPE *array,
                  const int vc_comm,
                  const REAL_TYPE *recvbuf);
 
@@ -600,65 +601,65 @@ private:
   // CB_PackingScalarNode.cpp
   private:
 
-    void pack_SIn(const REAL_TYPE *array,
+    void pack_SXnode(const REAL_TYPE *array,
                  const int vc_comm,
                  REAL_TYPE *sendm,
                  REAL_TYPE *sendp,
                  const int nIDm,
                  const int nIDp);
 
-    void unpack_SIn(REAL_TYPE *array,
+    void unpack_SXnode(REAL_TYPE *array,
                    const int vc_comm,
                    const REAL_TYPE *recvm,
                    const REAL_TYPE *recvp,
                    const int nIDm,
                    const int nIDp);
 
-    void pack_SJn(const REAL_TYPE *array,
+    void pack_SYnode(const REAL_TYPE *array,
                  const int vc_comm,
                  REAL_TYPE *sendm,
                  REAL_TYPE *sendp,
                  const int nIDm,
                  const int nIDp);
 
-    void unpack_SJn(REAL_TYPE *array,
+    void unpack_SYnode(REAL_TYPE *array,
                    const int vc_comm,
                    const REAL_TYPE *recvm,
                    const REAL_TYPE *recvp,
                    const int nIDm,
                    const int nIDp);
 
-    void pack_SKn(const REAL_TYPE *array,
+    void pack_SZnode(const REAL_TYPE *array,
                  const int vc_comm,
                  REAL_TYPE *sendm,
                  REAL_TYPE *sendp,
                  const int nIDm,
                  const int nIDp);
 
-    void unpack_SKn(REAL_TYPE *array,
+    void unpack_SZnode(REAL_TYPE *array,
                    const int vc_comm,
                    const REAL_TYPE *recvm,
                    const REAL_TYPE *recvp,
                    const int nIDm,
                    const int nIDp);
 
-  bool pack_SEn(REAL_TYPE *array,
+  bool pack_SEnode(REAL_TYPE *array,
                const int vc_comm,
                REAL_TYPE *sendbuf,
                REAL_TYPE *recvbuf,
                MPI_Request *req);
 
-  void unpack_SEn(REAL_TYPE *array,
+  void unpack_SEnode(REAL_TYPE *array,
                  const int vc_comm,
                  const REAL_TYPE *recvbuf);
 
-  bool pack_SCn(REAL_TYPE *array,
+  bool pack_SCnode(REAL_TYPE *array,
                const int vc_comm,
                REAL_TYPE *sendbuf,
                REAL_TYPE *recvbuf,
                MPI_Request *req);
 
-  void unpack_SCn(REAL_TYPE *array,
+  void unpack_SCnode(REAL_TYPE *array,
                  const int vc_comm,
                  const REAL_TYPE *recvbuf);
 
@@ -687,130 +688,130 @@ public:
 // CB_PackingVectorCell.cpp
 private:
 
-  void pack_VI(const REAL_TYPE *array,
+  void pack_VXcell(const REAL_TYPE *array,
                const int vc_comm,
                REAL_TYPE *sendm,
                REAL_TYPE *sendp,
                const int nIDm,
                const int nIDp);
 
-  void unpack_VI(REAL_TYPE *array,
+  void unpack_VXcell(REAL_TYPE *array,
                  const int vc_comm,
                  const REAL_TYPE *recvm,
                  const REAL_TYPE *recvp,
                  const int nIDm,
                  const int nIDp);
 
-  void pack_VJ(const REAL_TYPE *array,
+  void pack_VYcell(const REAL_TYPE *array,
                const int vc_comm,
                REAL_TYPE *sendm,
                REAL_TYPE *sendp,
                const int nIDm,
                const int nIDp);
 
-  void unpack_VJ(REAL_TYPE *array,
+  void unpack_VYcell(REAL_TYPE *array,
                  const int vc_comm,
                  const REAL_TYPE *recvm,
                  const REAL_TYPE *recvp,
                  const int nIDm,
                  const int nIDp);
 
-  void pack_VK(const REAL_TYPE *array,
+  void pack_VZcell(const REAL_TYPE *array,
                const int vc_comm,
                REAL_TYPE *sendm,
                REAL_TYPE *sendp,
                const int nIDm,
                const int nIDp);
 
-  void unpack_VK(REAL_TYPE *array,
+  void unpack_VZcell(REAL_TYPE *array,
                  const int vc_comm,
                  const REAL_TYPE *recvm,
                  const REAL_TYPE *recvp,
                  const int nIDm,
                  const int nIDp);
 
-  bool pack_VE(REAL_TYPE *array,
+  bool pack_VEcell(REAL_TYPE *array,
                const int vc_comm,
                REAL_TYPE *sendbuf,
                REAL_TYPE *recvbuf,
                MPI_Request *req);
 
-  void unpack_VE(REAL_TYPE *array,
+  void unpack_VEcell(REAL_TYPE *array,
                  const int vc_comm,
                  const REAL_TYPE *recvbuf);
 
-  bool pack_VC(REAL_TYPE *array,
+  bool pack_VCcell(REAL_TYPE *array,
                const int vc_comm,
                REAL_TYPE *sendbuf,
                REAL_TYPE *recvbuf,
                MPI_Request *req);
 
-  void unpack_VC(REAL_TYPE *array,
+  void unpack_VCcell(REAL_TYPE *array,
                  const int vc_comm,
                  const REAL_TYPE *recvbuf);
 
   // CB_PackingVectorNode.cpp
   private:
 
-    void pack_VIn(const REAL_TYPE *array,
+    void pack_VXnode(const REAL_TYPE *array,
                  const int vc_comm,
                  REAL_TYPE *sendm,
                  REAL_TYPE *sendp,
                  const int nIDm,
                  const int nIDp);
 
-    void unpack_VIn(REAL_TYPE *array,
+    void unpack_VXnode(REAL_TYPE *array,
                    const int vc_comm,
                    const REAL_TYPE *recvm,
                    const REAL_TYPE *recvp,
                    const int nIDm,
                    const int nIDp);
 
-    void pack_VJn(const REAL_TYPE *array,
+    void pack_VYnode(const REAL_TYPE *array,
                  const int vc_comm,
                  REAL_TYPE *sendm,
                  REAL_TYPE *sendp,
                  const int nIDm,
                  const int nIDp);
 
-    void unpack_VJn(REAL_TYPE *array,
+    void unpack_VYnode(REAL_TYPE *array,
                    const int vc_comm,
                    const REAL_TYPE *recvm,
                    const REAL_TYPE *recvp,
                    const int nIDm,
                    const int nIDp);
 
-    void pack_VKn(const REAL_TYPE *array,
+    void pack_VZnode(const REAL_TYPE *array,
                  const int vc_comm,
                  REAL_TYPE *sendm,
                  REAL_TYPE *sendp,
                  const int nIDm,
                  const int nIDp);
 
-    void unpack_VKn(REAL_TYPE *array,
+    void unpack_VZnode(REAL_TYPE *array,
                    const int vc_comm,
                    const REAL_TYPE *recvm,
                    const REAL_TYPE *recvp,
                    const int nIDm,
                    const int nIDp);
 
-  bool pack_VEn(REAL_TYPE *array,
+  bool pack_VEnode(REAL_TYPE *array,
                const int vc_comm,
                REAL_TYPE *sendbuf,
                REAL_TYPE *recvbuf,
                MPI_Request *req);
 
-  void unpack_VEn(REAL_TYPE *array,
+  void unpack_VEnode(REAL_TYPE *array,
                  const int vc_comm,
                  const REAL_TYPE *recvbuf);
 
-  bool pack_VCn(REAL_TYPE *array,
+  bool pack_VCnode(REAL_TYPE *array,
                const int vc_comm,
                REAL_TYPE *sendbuf,
                REAL_TYPE *recvbuf,
                MPI_Request *req);
 
-  void unpack_VCn(REAL_TYPE *array,
+  void unpack_VCnode(REAL_TYPE *array,
                  const int vc_comm,
                  const REAL_TYPE *recvbuf);
 

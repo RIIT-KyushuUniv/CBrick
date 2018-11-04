@@ -32,9 +32,6 @@ bool SubDomain::Comm_V_nonblocking(REAL_TYPE* src,
 
   // 実際に送受信するメッセージサイズ
   int msz[3];
-//msz[0] = (size[1]+2*gc_comm) * (size[2]+2*gc_comm) * gc_comm;
-//msz[1] = (size[0]+2*gc_comm) * (size[2]+2*gc_comm) * gc_comm;
-//msz[2] = (size[0]+2*gc_comm) * (size[1]+2*gc_comm) * gc_comm;
   msz[0] = (size[1]) * (size[2]) * gc_comm * 3;
   msz[1] = (size[0]) * (size[2]) * gc_comm * 3;
   msz[2] = (size[0]) * (size[1]) * gc_comm * 3;
@@ -45,11 +42,11 @@ bool SubDomain::Comm_V_nonblocking(REAL_TYPE* src,
 
   if (grid_type == "node")
   {
-    pack_VIn(src, gc_comm, f_ims, f_ips, nIDm, nIDp);
+    pack_VXnode(src, gc_comm, f_ims, f_ips, nIDm, nIDp);
   }
   else
   {
-    pack_VI(src, gc_comm, f_ims, f_ips, nIDm, nIDp);
+    pack_VXcell(src, gc_comm, f_ims, f_ips, nIDm, nIDp);
   }
 
   if ( !IsendIrecv(f_ims, f_imr, f_ips, f_ipr, msz[0], nIDm, nIDp, &req[0]) ) return false;
@@ -60,11 +57,11 @@ bool SubDomain::Comm_V_nonblocking(REAL_TYPE* src,
 
   if (grid_type == "node")
   {
-    pack_VJn(src, gc_comm, f_jms, f_jps, nIDm, nIDp);
+    pack_VYnode(src, gc_comm, f_jms, f_jps, nIDm, nIDp);
   }
   else
   {
-    pack_VJ(src, gc_comm, f_jms, f_jps, nIDm, nIDp);
+    pack_VYcell(src, gc_comm, f_jms, f_jps, nIDm, nIDp);
   }
 
   if ( !IsendIrecv(f_jms, f_jmr, f_jps, f_jpr, msz[1], nIDm, nIDp, &req[4]) ) return false;
@@ -75,11 +72,11 @@ bool SubDomain::Comm_V_nonblocking(REAL_TYPE* src,
 
   if (grid_type == "node")
   {
-    pack_VKn(src, gc_comm, f_kms, f_kps, nIDm, nIDp);
+    pack_VZnode(src, gc_comm, f_kms, f_kps, nIDm, nIDp);
   }
   else
   {
-    pack_VK(src, gc_comm, f_kms, f_kps, nIDm, nIDp);
+    pack_VZcell(src, gc_comm, f_kms, f_kps, nIDm, nIDp);
   }
 
   if ( !IsendIrecv(f_kms, f_kmr, f_kps, f_kpr, msz[2], nIDm, nIDp, &req[8]) ) return false;
@@ -88,21 +85,21 @@ bool SubDomain::Comm_V_nonblocking(REAL_TYPE* src,
   // edge
   if (grid_type == "node")
   {
-    if( !pack_VEn(src, gc_comm, f_es, f_er, req) ) return false;
+    if( !pack_VEnode(src, gc_comm, f_es, f_er, req) ) return false;
   }
   else
   {
-    if( !pack_VE(src, gc_comm, f_es, f_er, req) ) return false;
+    if( !pack_VEcell(src, gc_comm, f_es, f_er, req) ) return false;
   }
 
   // corner
   if (grid_type == "node")
   {
-    if( !pack_VCn(src, gc_comm, f_cs, f_cr, req) ) return false;
+    if( !pack_VCnode(src, gc_comm, f_cs, f_cr, req) ) return false;
   }
   else
   {
-    if( !pack_VC(src, gc_comm, f_cs, f_cr, req) ) return false;
+    if( !pack_VCcell(src, gc_comm, f_cs, f_cr, req) ) return false;
   }
 #endif
 
@@ -134,11 +131,11 @@ bool SubDomain::Comm_V_wait_nonblocking(REAL_TYPE* dest,
   if ( MPI_SUCCESS != MPI_Waitall( 4, &req[0], stat ) ) return false;
   if (grid_type == "node")
   {
-    unpack_VIn(dest, gc_comm, f_imr, f_ipr, nIDm, nIDp);
+    unpack_VXnode(dest, gc_comm, f_imr, f_ipr, nIDm, nIDp);
   }
   else
   {
-    unpack_VI(dest, gc_comm, f_imr, f_ipr, nIDm, nIDp);
+    unpack_VXcell(dest, gc_comm, f_imr, f_ipr, nIDm, nIDp);
   }
 
 
@@ -149,11 +146,11 @@ bool SubDomain::Comm_V_wait_nonblocking(REAL_TYPE* dest,
   if ( MPI_SUCCESS != MPI_Waitall( 4, &req[4], stat ) ) return false;
   if (grid_type == "node")
   {
-    unpack_VJn(dest, gc_comm, f_jmr, f_jpr, nIDm, nIDp);
+    unpack_VYnode(dest, gc_comm, f_jmr, f_jpr, nIDm, nIDp);
   }
   else
   {
-    unpack_VJ(dest, gc_comm, f_jmr, f_jpr, nIDm, nIDp);
+    unpack_VYcell(dest, gc_comm, f_jmr, f_jpr, nIDm, nIDp);
   }
 
 
@@ -164,11 +161,11 @@ bool SubDomain::Comm_V_wait_nonblocking(REAL_TYPE* dest,
   if ( MPI_SUCCESS != MPI_Waitall( 4, &req[8], stat ) ) return false;
   if (grid_type == "node")
   {
-    unpack_VKn(dest, gc_comm, f_kmr, f_kpr, nIDm, nIDp);
+    unpack_VZnode(dest, gc_comm, f_kmr, f_kpr, nIDm, nIDp);
   }
   else
   {
-    unpack_VK(dest, gc_comm, f_kmr, f_kpr, nIDm, nIDp);
+    unpack_VZcell(dest, gc_comm, f_kmr, f_kpr, nIDm, nIDp);
   }
 
 #ifdef _DIAGONAL_COMM
@@ -176,22 +173,22 @@ bool SubDomain::Comm_V_wait_nonblocking(REAL_TYPE* dest,
   if ( MPI_SUCCESS != MPI_Waitall( 24, &req[12], stat ) ) return false;
   if (grid_type == "node")
   {
-    unpack_VEn(dest, gc_comm, f_er);
+    unpack_VEnode(dest, gc_comm, f_er);
   }
   else
   {
-    unpack_VE(dest, gc_comm, f_er);
+    unpack_VEcell(dest, gc_comm, f_er);
   }
 
   //// corner ////
   if ( MPI_SUCCESS != MPI_Waitall( 16, &req[36], stat ) ) return false;
   if (grid_type == "node")
   {
-    unpack_VCn(dest, gc_comm, f_cr);
+    unpack_VCnode(dest, gc_comm, f_cr);
   }
   else
   {
-    unpack_VC(dest, gc_comm, f_cr);
+    unpack_VCcell(dest, gc_comm, f_cr);
   }
 #endif
 

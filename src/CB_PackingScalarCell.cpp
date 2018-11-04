@@ -27,7 +27,7 @@
  * @param [in]  nIDm    Rank number of I- direction
  * @param [in]  nIDp    Rank number of I+ direction
  */
-void SubDomain::pack_SI(const REAL_TYPE *array,
+void SubDomain::pack_SXcell(const REAL_TYPE *array,
                         const int vc_comm,
                         REAL_TYPE *sendm,
                         REAL_TYPE *sendp,
@@ -42,9 +42,6 @@ void SubDomain::pack_SI(const REAL_TYPE *array,
   if( nIDm >= 0 )
   {
 #pragma omp parallel for collapse(2)
-//  for( int k=0-vc_comm; k<kmax+vc_comm; k++ ){
-//    for( int j=0-vc_comm; j<jmax+vc_comm; j++ ){
-//      for( int i=0; i<vc_comm; i++ ){
     for( int k=0; k<kmax; k++ ){
       for( int j=0; j<jmax; j++ ){
         for( int i=0; i<vc_comm; i++ ){
@@ -57,9 +54,6 @@ void SubDomain::pack_SI(const REAL_TYPE *array,
   if( nIDp >= 0 )
   {
 #pragma omp parallel for collapse(2)
-//  for( int k=0-vc_comm; k<kmax+vc_comm; k++ ){
-//    for( int j=0-vc_comm; j<jmax+vc_comm; j++ ){
-//      for( int i=imax-vc_comm; i<imax; i++ ){
     for( int k=0; k<kmax; k++ ){
       for( int j=0; j<jmax; j++ ){
         for( int i=imax-vc_comm; i<imax; i++ ){
@@ -80,7 +74,7 @@ void SubDomain::pack_SI(const REAL_TYPE *array,
  * @param [in]  nIDm    Rank number of I- direction
  * @param [in]  nIDp    Rank number of I+ direction
  */
-void SubDomain::unpack_SI(REAL_TYPE *array,
+void SubDomain::unpack_SXcell(REAL_TYPE *array,
                           const int vc_comm,
                           const REAL_TYPE *recvm,
                           const REAL_TYPE *recvp,
@@ -95,9 +89,6 @@ void SubDomain::unpack_SI(REAL_TYPE *array,
   if( nIDm >= 0 )
   {
 #pragma omp parallel for collapse(2)
-//  for( int k=0-vc_comm; k<kmax+vc_comm; k++ ){
-//    for( int j=0-vc_comm; j<jmax+vc_comm; j++ ){
-//      for( int i=0-vc_comm; i<0; i++ ){
     for( int k=0; k<kmax; k++ ){
       for( int j=0; j<jmax; j++ ){
         for( int i=0-vc_comm; i<0; i++ ){
@@ -110,9 +101,6 @@ void SubDomain::unpack_SI(REAL_TYPE *array,
   if( nIDp >= 0 )
   {
 #pragma omp parallel for collapse(2)
-//  for( int k=0-vc_comm; k<kmax+vc_comm; k++ ){
-//    for( int j=0-vc_comm; j<jmax+vc_comm; j++ ){
-//      for( int i=imax; i<imax+vc_comm; i++ ){
     for( int k=0; k<kmax; k++ ){
       for( int j=0; j<jmax; j++ ){
         for( int i=imax; i<imax+vc_comm; i++ ){
@@ -132,7 +120,7 @@ void SubDomain::unpack_SI(REAL_TYPE *array,
  * @param [in]  nIDm    Rank number of J- direction
  * @param [in]  nIDp    Rank number of J+ direction
  */
-void SubDomain::pack_SJ(const REAL_TYPE *array,
+void SubDomain::pack_SYcell(const REAL_TYPE *array,
                         const int vc_comm,
                         REAL_TYPE *sendm,
                         REAL_TYPE *sendp,
@@ -147,9 +135,6 @@ void SubDomain::pack_SJ(const REAL_TYPE *array,
   if( nIDm >= 0 )
   {
 #pragma omp parallel for collapse(2)
-//  for( int k=0-vc_comm; k<kmax+vc_comm; k++ ){
-//    for( int j=0; j<vc_comm; j++ ){
-//      for( int i=0-vc_comm; i<imax+vc_comm; i++ ){
     for( int k=0; k<kmax; k++ ){
       for( int j=0; j<vc_comm; j++ ){
         for( int i=0; i<imax; i++ ){
@@ -162,9 +147,6 @@ void SubDomain::pack_SJ(const REAL_TYPE *array,
   if( nIDp >= 0 )
   {
 #pragma omp parallel for collapse(2)
-//  for( int k=0-vc_comm; k<kmax+vc_comm; k++ ){
-//    for( int j=jmax-vc_comm; j<jmax; j++ ){
-//      for( int i=0-vc_comm; i<imax+vc_comm; i++ ){
     for( int k=0; k<kmax; k++ ){
       for( int j=jmax-vc_comm; j<jmax; j++ ){
         for( int i=0; i<imax; i++ ){
@@ -185,7 +167,7 @@ void SubDomain::pack_SJ(const REAL_TYPE *array,
  * @param [in]  nIDm    Rank number of J- direction
  * @param [in]  nIDp    Rank number of J+ direction
  */
-void SubDomain::unpack_SJ(REAL_TYPE *array,
+void SubDomain::unpack_SYcell(REAL_TYPE *array,
                           const int vc_comm,
                           const REAL_TYPE *recvm,
                           const REAL_TYPE *recvp,
@@ -200,9 +182,6 @@ void SubDomain::unpack_SJ(REAL_TYPE *array,
   if( nIDm >= 0 )
   {
 #pragma omp parallel for collapse(2)
-//  for( int k=0-vc_comm; k<kmax+vc_comm; k++ ){
-//    for( int j=0-vc_comm; j<0; j++ ){
-//      for( int i=0-vc_comm; i<imax+vc_comm; i++ ){
     for( int k=0; k<kmax; k++ ){
       for( int j=0-vc_comm; j<0; j++ ){
         for( int i=0; i<imax; i++ ){
@@ -215,9 +194,6 @@ void SubDomain::unpack_SJ(REAL_TYPE *array,
   if( nIDp >= 0 )
   {
 #pragma omp parallel for collapse(2)
-//  for( int k=0-vc_comm; k<kmax+vc_comm; k++ ){
-//    for( int j=jmax; j<jmax+vc_comm; j++ ){
-//      for( int i=0-vc_comm; i<imax+vc_comm; i++ ){
     for( int k=0; k<kmax; k++ ){
       for( int j=jmax; j<jmax+vc_comm; j++ ){
         for( int i=0; i<imax; i++ ){
@@ -238,7 +214,7 @@ void SubDomain::unpack_SJ(REAL_TYPE *array,
  * @param [in]  nIDm    Rank number of K- direction
  * @param [in]  nIDp    Rank number of K+ direction
  */
-void SubDomain::pack_SK(const REAL_TYPE *array,
+void SubDomain::pack_SZcell(const REAL_TYPE *array,
                         const int vc_comm,
                         REAL_TYPE *sendm,
                         REAL_TYPE *sendp,
@@ -253,9 +229,6 @@ void SubDomain::pack_SK(const REAL_TYPE *array,
   if( nIDm >= 0 )
   {
 #pragma omp parallel for collapse(2)
-//  for( int k=0; k<vc_comm; k++ ){
-//    for( int j=0-vc_comm; j<jmax+vc_comm; j++ ){
-//      for( int i=0-vc_comm; i<imax+vc_comm; i++ ){
     for( int k=0; k<vc_comm; k++ ){
       for( int j=0; j<jmax; j++ ){
         for( int i=0; i<imax; i++ ){
@@ -268,9 +241,6 @@ void SubDomain::pack_SK(const REAL_TYPE *array,
   if( nIDp >= 0 )
   {
 #pragma omp parallel for collapse(2)
-//  for( int k=kmax-vc_comm; k<kmax; k++ ){
-//    for( int j=0-vc_comm; j<jmax+vc_comm; j++ ){
-//      for( int i=0-vc_comm; i<imax+vc_comm; i++ ){
     for( int k=kmax-vc_comm; k<kmax; k++ ){
       for( int j=0; j<jmax; j++ ){
         for( int i=0; i<imax; i++ ){
@@ -291,7 +261,7 @@ void SubDomain::pack_SK(const REAL_TYPE *array,
  * @param [in]  nIDm    Rank number of K- direction
  * @param [in]  nIDp    Rank number of K+ direction
  */
-void SubDomain::unpack_SK(REAL_TYPE *array,
+void SubDomain::unpack_SZcell(REAL_TYPE *array,
                           const int vc_comm,
                           const REAL_TYPE *recvm,
                           const REAL_TYPE *recvp,
@@ -306,9 +276,6 @@ void SubDomain::unpack_SK(REAL_TYPE *array,
   if( nIDm >= 0 )
   {
 #pragma omp parallel for collapse(2)
-//  for( int k=0-vc_comm; k<0; k++ ){
-//    for( int j=0-vc_comm; j<jmax+vc_comm; j++ ){
-//      for( int i=0-vc_comm; i<imax+vc_comm; i++ ){
     for( int k=0-vc_comm; k<0; k++ ){
       for( int j=0; j<jmax; j++ ){
         for( int i=0; i<imax; i++ ){
@@ -321,9 +288,6 @@ void SubDomain::unpack_SK(REAL_TYPE *array,
   if( nIDp >= 0 )
   {
 #pragma omp parallel for collapse(2)
-//  for( int k=kmax; k<kmax+vc_comm; k++ ){
-//    for( int j=0-vc_comm; j<jmax+vc_comm; j++ ){
-//      for( int i=0-vc_comm; i<imax+vc_comm; i++ ){
     for( int k=kmax; k<kmax+vc_comm; k++ ){
       for( int j=0; j<jmax; j++ ){
         for( int i=0; i<imax; i++ ){
@@ -343,7 +307,7 @@ void SubDomain::unpack_SK(REAL_TYPE *array,
  * @param [out] req      Array of MPI request
  * @retval true-success, false-fail
  */
-bool SubDomain::pack_SE(REAL_TYPE *array,
+bool SubDomain::pack_SEcell(REAL_TYPE *array,
                         const int vc_comm,
                         REAL_TYPE *sendbuf,
                         REAL_TYPE *recvbuf,
@@ -614,7 +578,7 @@ bool SubDomain::pack_SE(REAL_TYPE *array,
  * @param [in]  vc_comm  number of guide cell layer to be sent
  * @param [in]  recvbuf  recv buffer
  */
-void SubDomain::unpack_SE(REAL_TYPE *array,
+void SubDomain::unpack_SEcell(REAL_TYPE *array,
                           const int vc_comm,
                           const REAL_TYPE *recvbuf)
 {
@@ -819,7 +783,7 @@ void SubDomain::unpack_SE(REAL_TYPE *array,
  * @param [out] req      Array of MPI request
  * @retval true-success, false-fail
  */
-bool SubDomain::pack_SC(REAL_TYPE *array,
+bool SubDomain::pack_SCcell(REAL_TYPE *array,
                         const int vc_comm,
                         REAL_TYPE *sendbuf,
                         REAL_TYPE *recvbuf,
@@ -974,7 +938,7 @@ bool SubDomain::pack_SC(REAL_TYPE *array,
  * @param [in]  vc_comm  number of guide cell layer to be sent
  * @param [in]  recvbuf  recv buffer
  */
-void SubDomain::unpack_SC(REAL_TYPE *array,
+void SubDomain::unpack_SCcell(REAL_TYPE *array,
                           const int vc_comm,
                           const REAL_TYPE *recvbuf)
 {

@@ -377,13 +377,13 @@ HIDE_IN_BODY_DOCS      = NO
 
 INTERNAL_DOCS          = NO
 
-# If the CASE_SENSE_NAMES tag is set to NO then Doxygen will only generate
+# If the CASE_SEnodeSE_NAMES tag is set to NO then Doxygen will only generate
 # file names in lower-case letters. If set to YES upper-case letters are also
 # allowed. This is useful if you have classes or files whose names only differ
 # in case and if your file system supports case sensitive file names. Windows
 # and Mac users are advised to set this option to NO.
 
-CASE_SENSE_NAMES       = NO
+CASE_SEnodeSE_NAMES       = NO
 
 # If the HIDE_SCOPE_NAMES tag is set to NO (the default) then Doxygen
 # will show members with their full class and namespace scopes in the

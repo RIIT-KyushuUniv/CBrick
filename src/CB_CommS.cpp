@@ -30,9 +30,6 @@ bool SubDomain::initComm(const int num_compo)
 
   // バッファ領域としては、最大値で確保しておく
   int f_sz[3];
-//  f_sz[0] = (size[1]+2*gc) * (size[2]+2*gc) * gc * num_compo;
-//  f_sz[1] = (size[0]+2*gc) * (size[2]+2*gc) * gc * num_compo;
-//  f_sz[2] = (size[0]+2*gc) * (size[1]+2*gc) * gc * num_compo;
   f_sz[0] = size[1] * size[2] * gc * num_compo;
   f_sz[1] = size[0] * size[2] * gc * num_compo;
   f_sz[2] = size[0] * size[1] * gc * num_compo;
@@ -89,9 +86,6 @@ bool SubDomain::Comm_S_nonblocking(REAL_TYPE* src,
 
   // 実際に送受信するメッセージサイズ
   int msz[3];
-//  msz[0] = (size[1]+2*gc_comm) * (size[2]+2*gc_comm) * gc_comm;
-//  msz[1] = (size[0]+2*gc_comm) * (size[2]+2*gc_comm) * gc_comm;
-//  msz[2] = (size[0]+2*gc_comm) * (size[1]+2*gc_comm) * gc_comm;
   msz[0] = size[1] * size[2] * gc_comm;
   msz[1] = size[0] * size[2] * gc_comm;
   msz[2] = size[0] * size[1] * gc_comm;
@@ -102,11 +96,11 @@ bool SubDomain::Comm_S_nonblocking(REAL_TYPE* src,
 
   if (grid_type == "node")
   {
-    pack_SIn(src, gc_comm, f_ims, f_ips, nIDm, nIDp);
+    pack_SXnode(src, gc_comm, f_ims, f_ips, nIDm, nIDp);
   }
   else
   {
-    pack_SI(src, gc_comm, f_ims, f_ips, nIDm, nIDp);
+    pack_SXcell(src, gc_comm, f_ims, f_ips, nIDm, nIDp);
   }
 
   if ( !IsendIrecv(f_ims, f_imr, f_ips, f_ipr, msz[0], nIDm, nIDp, &req[0]) ) return false;
@@ -117,11 +111,11 @@ bool SubDomain::Comm_S_nonblocking(REAL_TYPE* src,
 
   if (grid_type == "node")
   {
-    pack_SJn(src, gc_comm, f_jms, f_jps, nIDm, nIDp);
+    pack_SYnode(src, gc_comm, f_jms, f_jps, nIDm, nIDp);
   }
   else
   {
-    pack_SJ(src, gc_comm, f_jms, f_jps, nIDm, nIDp);
+    pack_SYcell(src, gc_comm, f_jms, f_jps, nIDm, nIDp);
   }
 
   if ( !IsendIrecv(f_jms, f_jmr, f_jps, f_jpr, msz[1], nIDm, nIDp, &req[4]) ) return false;
@@ -132,11 +126,11 @@ bool SubDomain::Comm_S_nonblocking(REAL_TYPE* src,
 
   if (grid_type == "node")
   {
-    pack_SKn(src, gc_comm, f_kms, f_kps, nIDm, nIDp);
+    pack_SZnode(src, gc_comm, f_kms, f_kps, nIDm, nIDp);
   }
   else
   {
-    pack_SK(src, gc_comm, f_kms, f_kps, nIDm, nIDp);
+    pack_SZcell(src, gc_comm, f_kms, f_kps, nIDm, nIDp);
   }
 
   if ( !IsendIrecv(f_kms, f_kmr, f_kps, f_kpr, msz[2], nIDm, nIDp, &req[8]) ) return false;
@@ -145,21 +139,21 @@ bool SubDomain::Comm_S_nonblocking(REAL_TYPE* src,
   // edge
   if (grid_type == "node")
   {
-    if( !pack_SEn(src, gc_comm, f_es, f_er, req) ) return false;
+    if( !pack_SEnode(src, gc_comm, f_es, f_er, req) ) return false;
   }
   else
   {
-    if( !pack_SE(src, gc_comm, f_es, f_er, req) ) return false;
+    if( !pack_SEcell(src, gc_comm, f_es, f_er, req) ) return false;
   }
 
   // corner
   if (grid_type == "node")
   {
-    if( !pack_SCn(src, gc_comm, f_cs, f_cr, req) ) return false;
+    if( !pack_SCnode(src, gc_comm, f_cs, f_cr, req) ) return false;
   }
   else
   {
-    if( !pack_SC(src, gc_comm, f_cs, f_cr, req) ) return false;
+    if( !pack_SCcell(src, gc_comm, f_cs, f_cr, req) ) return false;
   }
 #endif
 
@@ -318,11 +312,11 @@ bool SubDomain::Comm_S_wait_nonblocking(REAL_TYPE* dest,
   if ( MPI_SUCCESS != MPI_Waitall( 4, &req[0], stat ) ) return false;
   if (grid_type == "node")
   {
-    unpack_SIn(dest, gc_comm, f_imr, f_ipr, nIDm, nIDp);
+    unpack_SXnode(dest, gc_comm, f_imr, f_ipr, nIDm, nIDp);
   }
   else
   {
-    unpack_SI(dest, gc_comm, f_imr, f_ipr, nIDm, nIDp);
+    unpack_SXcell(dest, gc_comm, f_imr, f_ipr, nIDm, nIDp);
   }
 
 
@@ -332,11 +326,11 @@ bool SubDomain::Comm_S_wait_nonblocking(REAL_TYPE* dest,
   if ( MPI_SUCCESS != MPI_Waitall( 4, &req[4], stat ) ) return false;
   if (grid_type == "node")
   {
-    unpack_SJn(dest, gc_comm, f_jmr, f_jpr, nIDm, nIDp);
+    unpack_SYnode(dest, gc_comm, f_jmr, f_jpr, nIDm, nIDp);
   }
   else
   {
-    unpack_SJ(dest, gc_comm, f_jmr, f_jpr, nIDm, nIDp);
+    unpack_SYcell(dest, gc_comm, f_jmr, f_jpr, nIDm, nIDp);
   }
 
 
@@ -346,11 +340,11 @@ bool SubDomain::Comm_S_wait_nonblocking(REAL_TYPE* dest,
   if ( MPI_SUCCESS != MPI_Waitall( 4, &req[8], stat ) ) return false;
   if (grid_type == "node")
   {
-    unpack_SKn(dest, gc_comm, f_kmr, f_kpr, nIDm, nIDp);
+    unpack_SZnode(dest, gc_comm, f_kmr, f_kpr, nIDm, nIDp);
   }
   else
   {
-    unpack_SK(dest, gc_comm, f_kmr, f_kpr, nIDm, nIDp);
+    unpack_SZcell(dest, gc_comm, f_kmr, f_kpr, nIDm, nIDp);
   }
 
 #ifdef _DIAGONAL_COMM
@@ -358,22 +352,22 @@ bool SubDomain::Comm_S_wait_nonblocking(REAL_TYPE* dest,
   if ( MPI_SUCCESS != MPI_Waitall( 24, &req[12], stat ) ) return false;
   if (grid_type == "node")
   {
-    unpack_SEn(dest, gc_comm, f_er);
+    unpack_SEnode(dest, gc_comm, f_er);
   }
   else
   {
-    unpack_SE(dest, gc_comm, f_er);
+    unpack_SEcell(dest, gc_comm, f_er);
   }
 
   //// corner ////
   if ( MPI_SUCCESS != MPI_Waitall( 16, &req[36], stat ) ) return false;
   if (grid_type == "node")
   {
-    unpack_SCn(dest, gc_comm, f_cr);
+    unpack_SCnode(dest, gc_comm, f_cr);
   }
   else
   {
-    unpack_SC(dest, gc_comm, f_cr);
+    unpack_SCcell(dest, gc_comm, f_cr);
   }
 #endif
 

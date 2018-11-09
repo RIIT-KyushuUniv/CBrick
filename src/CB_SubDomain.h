@@ -406,6 +406,8 @@ private:
 
   int getNumCandidates();
 
+  int getNumCandidates4IJ();
+
   int getNumCandidates4JK();
 
   void getSize(cntl_tbl* t, const int* in, const int m);
@@ -417,6 +419,10 @@ private:
   void registerCandidates_Cell(cntl_tbl* t);
 
   void registerCandidates_Node(cntl_tbl* t);
+
+  void registerCandidates4IJ_Cell(cntl_tbl* tbl);
+
+  void registerCandidates4IJ_Node(cntl_tbl* tbl);
 
   void registerCandidates4JK_Cell(cntl_tbl* tbl);
 

@@ -169,7 +169,7 @@ bool SubDomain::findParameter()
 /*
  * @fn findOptimalDivision()
  * @brief 最適な分割数を見つける
- * @param [in] terrain_mode {0-IJK分割:デフォルト、1-JK分割}
+ * @param [in] terrain_mode {0-IJK分割:デフォルト、1-IJ分割, 2-JK分割}
  * @retval true-success, false-fail
  */
 bool SubDomain::findOptimalDivision(int terrain_mode)
@@ -190,11 +190,18 @@ bool SubDomain::findOptimalDivision(int terrain_mode)
 
   // 候補の数を因数分解的に数え上げる
   int tbl_size;
+  if (terrain_mode == 0) {
+    tbl_size = getNumCandidates();
+  }
   if (terrain_mode == 1) {
+    tbl_size = getNumCandidates4IJ();
+  }
+  else if (terrain_mode == 2) {
     tbl_size = getNumCandidates4JK();
   }
   else {
-    tbl_size = getNumCandidates();
+    stamped_printf("Error : Division mode = %d\n", terrain_mode);
+    return false;
   }
 
 
@@ -224,21 +231,33 @@ bool SubDomain::findOptimalDivision(int terrain_mode)
 
 
   // 候補のパラメータを登録
-  if (terrain_mode == 1) {
-    if (grid_type == "node") {
-      registerCandidates4JK_Node(tbl);
-    }
-    else {
-      registerCandidates4JK_Cell(tbl);
-    }
-  }
-  else {
-    if (grid_type == "node") {
-      registerCandidates_Node(tbl);
-    }
-    else {
-      registerCandidates_Cell(tbl);
-    }
+  switch (terrain_mode) {
+    case 0:
+      if (grid_type == "node") {
+        registerCandidates_Node(tbl);
+      }
+      else {
+        registerCandidates_Cell(tbl);
+      }
+      break;
+
+    case 1:
+      if (grid_type == "node") {
+        registerCandidates4IJ_Node(tbl);
+      }
+      else {
+        registerCandidates4IJ_Cell(tbl);
+      }
+      break;
+
+    case 2:
+      if (grid_type == "node") {
+        registerCandidates4JK_Node(tbl);
+      }
+      else {
+        registerCandidates4JK_Cell(tbl);
+      }
+      break;
   }
 
 
@@ -487,6 +506,30 @@ int SubDomain::getNumCandidates4JK()
 
 
 /*
+ * @fn getNumCandidates4IJ
+ * @brief 分割数の組み合わせ数を数え上げる(K方向は非分割)
+ * @retval 候補の数
+ * @note FDM, FVM共通
+ */
+int SubDomain::getNumCandidates4IJ()
+{
+  int odr=0;
+  int np = numProc;
+  const int k = 1;
+
+#pragma omp single
+  for (int j=1; j<=np; j++) {
+    for (int i=1; i<=np/j+1; i++) {
+      // 分割候補の積がプロセス数、かつ、分割数が全要素数以下であること
+      if ( i*j*k == np && i<=G_size[0] && j<=G_size[1] ) odr++;
+    }
+  }
+
+  return odr;
+}
+
+
+/*
  * @fn registerCandidates_Cell
  * @brief 分割数の候補パラメータを登録する
  * @param [in,out] tbl 候補配列
@@ -603,6 +646,109 @@ void SubDomain::registerCandidates_Node(cntl_tbl* tbl)
   }
 
 }
+
+
+
+/*
+ * @fn registerCandidates4IJ_Cell
+ * @brief IJ分割時の分割数の候補パラメータを登録する
+ * @param [in,out] tbl 候補配列
+ */
+void SubDomain::registerCandidates4IJ_Cell(cntl_tbl* tbl)
+{
+  int odr=0;
+  int c=0;
+  int np = numProc;
+  const int a = (grid_type == "node") ? 1 : 0;
+  const int gsize[3] = {G_size[0]+a, G_size[1]+a, G_size[2]+a};
+  const int k = 1;
+
+#pragma omp single
+  for (int j=1; j<=np; j++) {
+    for (int i=1; i<=np/j+1; i++) {
+
+      if ( i*j*k == np && i<=G_size[0] && j<=G_size[1] ) {
+
+        // 割り切れない場合には、基準サイズを一つだけ大きくしておく
+        int vy = gsize[1]/j;
+        if ( gsize[1] != vy*j ) vy +=1;
+
+        int vx = gsize[0]/i;
+        if ( gsize[0] != vx*i ) vx +=1;
+
+        tbl[odr].dsz[0] = vx; // 基準サイズ
+        tbl[odr].dsz[1] = vy;
+        tbl[odr].dsz[2] = G_size[2];
+
+        // 余りの数だけ基準サイズで、残りは基準サイズ-1
+        tbl[odr].mod[0] = gsize[0] % i;
+        tbl[odr].mod[1] = gsize[1] % j;
+        tbl[odr].mod[2] = 0;
+
+        tbl[odr].div[0]= i;  // Number of divisions for each direction
+        tbl[odr].div[1]= j;
+        tbl[odr].div[2]= 1;
+
+        tbl[odr].org_idx = c++; // 作成時のリストの順番を記録
+        odr++;
+      }
+    }
+  }
+
+}
+
+
+/*
+ * @fn registerCandidates4IJ_Node
+ * @brief IJ分割時の分割数の候補パラメータを登録する
+ * @param [in,out] tbl 候補配列
+ */
+void SubDomain::registerCandidates4IJ_Node(cntl_tbl* tbl)
+{
+  int odr=0;
+  int c=0;
+  int np = numProc;
+  const int k = 1;
+
+#pragma omp single
+  for (int j=1; j<=np; j++) {
+    for (int i=1; i<=np/j+1; i++) {
+
+      if ( i*j*k == np && i<=G_size[0] && j<=G_size[1] ) {
+        int jj = G_size[1]+j-1;
+        int ii = G_size[0]+i-1;
+
+        int jm = jj % j;
+        int im = ii % i;
+
+        // 余りの数だけ基準サイズで、残りは基準サイズ-1
+        tbl[odr].mod[0] = im;
+        tbl[odr].mod[1] = jm;
+        tbl[odr].mod[2] = 0;
+
+        // 割り切れない場合には、基準サイズを一つだけ大きくしておく
+        int vy = jj / j;
+        if ( jm != 0 ) vy++;
+
+        int vx = ii / i;
+        if ( im != 0 ) vx++;
+
+        tbl[odr].dsz[0] = vx; // 基準サイズ
+        tbl[odr].dsz[1] = vy;
+        tbl[odr].dsz[2] = G_size[2];
+
+        tbl[odr].div[0]= i;  // Number of divisions for each direction
+        tbl[odr].div[1]= j;
+        tbl[odr].div[2]= 1;
+
+        tbl[odr].org_idx = c++; // 作成時のリストの順番を記録
+        odr++;
+      }
+    }
+  }
+
+}
+
 
 
 /*

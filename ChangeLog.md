@@ -6,6 +6,12 @@
 ## REVISION HISTORY
 
 ---
+- 2018-11-10 Version 1.2.2
+  - CB_SubDomain.cpp (203):  bug fix if-statement
+  - example のBrickCommクラス対応
+
+
+---
 - 2018-11-09 Version 1.2.1
   - getNumCandidates4IJ()
   - registerCandidates4IJ_Cell()

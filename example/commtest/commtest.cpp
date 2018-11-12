@@ -17,6 +17,7 @@
 // 袖通信テスト
 
 #include <CB_SubDomain.h>
+#include <CB_Comm.h>
 #include <stdlib.h>
 
 // @fn alloc_real
@@ -88,6 +89,7 @@ int main(int argc, char * argv[]) {
   int m_sz[3], np, myRank;
   int proc_grp = 0;
   int div_mode=0;
+  int nID[6]={0,0,0,0,0,0};  ///< 隣接ランクテーブル
 
   // conversion from ASCII char to digit
   m_sz[0]    = atoi(argv[1]);
@@ -120,14 +122,17 @@ int main(int argc, char * argv[]) {
     exit(-1);
   }
 
-  // 袖通信バッファの初期化
-  D.initComm(3);
 
   // subdomain size
-  int imax = D.size[0];
-  int jmax = D.size[1];
-  int kmax = D.size[2];
+  int lsz[3]={0,0,0}; // サブドメインサイズ
+  D.getLocalSize(lsz);
+
+  int imax = lsz[0];
+  int jmax = lsz[1];
+  int kmax = lsz[2];
   size_t len = (size_t)( (imax+2*gc) * (jmax+2*gc) * (kmax+2*gc) );
+
+  D.getCommTable(nID);
 
   // Definition of Array
   REAL_TYPE* s = NULL;  ///< scalar work
@@ -158,13 +163,28 @@ int main(int argc, char * argv[]) {
   MPI_Request req[NOFACE*2];
   for (int i=0; i<NOFACE*2; i++) req[i] = MPI_REQUEST_NULL;
 
+
+  BrickComm CM;      ///< 通信クラス
+
+  // 通信クラス設定
+  if ( !CM.setBrickComm(lsz, gc, MPI_COMM_WORLD, nID, "cell") ) {
+    stamped_printf("\tBrickComm settng error.\n");
+    return 0;
+  }
+
+  // 通信バッファ確保  # of component = 3
+  if  ( !CM.init(3) ) {
+    stamped_printf("\tBrickComm initialize error.\n");
+    return 0;
+  }
+
   // 袖通信(scalar)
-  D.Comm_S_nonblocking(s, gc, req);
-  D.Comm_S_wait_nonblocking(s, gc, req);
+  CM.Comm_S_nonblocking(s, gc, req);
+  CM.Comm_S_wait_nonblocking(s, gc, req);
 
   // 袖通信(vector)
-  D.Comm_V_nonblocking(v, gc, req);
-  D.Comm_V_wait_nonblocking(v, gc, req);
+  CM.Comm_V_nonblocking(v, gc, req);
+  CM.Comm_V_wait_nonblocking(v, gc, req);
 
   // log
   char fname1[512], fname2[512];

@@ -193,7 +193,7 @@ bool SubDomain::findOptimalDivision(int terrain_mode)
   if (terrain_mode == 0) {
     tbl_size = getNumCandidates();
   }
-  if (terrain_mode == 1) {
+  else if (terrain_mode == 1) {
     tbl_size = getNumCandidates4IJ();
   }
   else if (terrain_mode == 2) {

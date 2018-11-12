@@ -1,7 +1,8 @@
 // Diff3D
 
-#include "Diff3D.h"
 #include <CB_SubDomain.h>
+#include <CB_Comm.h>
+#include "Diff3D.h"
 
 // @fn alloc_int
 // @brief allocatin of integer array
@@ -217,6 +218,7 @@ int main(int argc, char * argv[])
   int dsz[3]={0,0,0};    ///< 全計算領域の要素数
   REAL_TYPE origin[3]={0.0, 0.0, 0.0};  ///< global origin
   int m_dv[3]={0,0,0};   ///< 領域分割数
+  int nID[6]={0,0,0,0,0,0};  ///< 隣接ランクテーブル
 
 
   // Initialize MPI
@@ -276,17 +278,21 @@ int main(int argc, char * argv[])
     exit(-1);
   }
 
+  int hd[3];
+  D.getLocalHead(hd);
+
 
   // origin of each SubDomain, Fortran Index
-  P_phys.org[0] = origin[0] + (D.head[0]-1)*P_phys.dh;
-  P_phys.org[1] = origin[1] + (D.head[1]-1)*P_phys.dh;
-  P_phys.org[2] = origin[2] + (D.head[2]-1)*P_phys.dh;
+  P_phys.org[0] = origin[0] + (hd[0]-1)*P_phys.dh;
+  P_phys.org[1] = origin[1] + (hd[1]-1)*P_phys.dh;
+  P_phys.org[2] = origin[2] + (hd[2]-1)*P_phys.dh;
 
 
   int lsz[3]={0,0,0}; // サブドメインサイズ
-  lsz[0] = D.size[0];
-  lsz[1] = D.size[1];
-  lsz[2] = D.size[2];
+  D.getLocalSize(lsz);
+
+  D.getCommTable(nID);
+
 
   // Definition of Array
   REAL_TYPE* q = NULL;  ///< unknown variable
@@ -300,8 +306,20 @@ int main(int argc, char * argv[])
   if ( !(w=alloc_real(len)) ) MPI_Abort(MPI_COMM_WORLD, -1);
 
 
-  // 通信バッファ確保 scalar
-  D.initComm(1);
+  BrickComm CM;      ///< 通信クラス
+
+  // 通信クラス設定
+  if ( !CM.setBrickComm(lsz, gc, MPI_COMM_WORLD, nID, "cell") ) {
+    stamped_printf("\tBrickComm settng error.\n");
+    return 0;
+  }
+
+  // 通信バッファ確保  # of component = 1
+  if  ( !CM.init(1) ) {
+    stamped_printf("\tBrickComm initialize error.\n");
+    return 0;
+  }
+
 
   // Communication identifier for nonblocking
   MPI_Request req[NOFACE*2];
@@ -311,11 +329,12 @@ int main(int argc, char * argv[])
   initialize_(lsz, &gc, q, w);
 
 
-  D.Comm_S_nonblocking(q, gc, req);
-  D.Comm_S_wait_nonblocking(q, gc, req);
 
-  D.Comm_S_nonblocking(w, gc, req);
-  D.Comm_S_wait_nonblocking(w, gc, req);
+  CM.Comm_S_nonblocking(q, gc, req);
+  CM.Comm_S_wait_nonblocking(q, gc, req);
+
+  CM.Comm_S_nonblocking(w, gc, req);
+  CM.Comm_S_wait_nonblocking(w, gc, req);
 
 
   REAL_TYPE time = 0.0;
@@ -332,11 +351,11 @@ int main(int argc, char * argv[])
     time += P_phys.dt;
 
     // boundary condition
-    bc_(lsz, &gc, q, &P_phys.dh, P_phys.org, D.comm_tbl);
+    bc_(lsz, &gc, q, &P_phys.dh, P_phys.org, nID);
 
 
-    D.Comm_S_nonblocking(q, gc, req);
-    D.Comm_S_wait_nonblocking(q, gc, req);
+    CM.Comm_S_nonblocking(q, gc, req);
+    CM.Comm_S_wait_nonblocking(q, gc, req);
 
     // time marching
     res = 0.0;
@@ -354,8 +373,8 @@ int main(int argc, char * argv[])
     res = sqrt(res);
 
 
-    D.Comm_S_nonblocking(q, gc, req);
-    D.Comm_S_wait_nonblocking(q, gc, req);
+    CM.Comm_S_nonblocking(q, gc, req);
+    CM.Comm_S_wait_nonblocking(q, gc, req);
 
 
     // display history

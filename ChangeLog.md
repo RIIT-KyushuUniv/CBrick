@@ -3,7 +3,27 @@
 ## TODO
 - MPIでdiff3dの残差の値が異なる
 
+
+## check
+     | Odd | Even | 自動と指定
+Node | ok  |  ok  | $ mpirun -np 3 ./div3 11 11 11 0 >> {4, 4, 5}
+                    $ mpirun -np 3 ./div3 10 10 10 0 >> {4, 4, 5}
+                    $ mpirun -np 2 ./div3 10 10 10 0 >> {5, 6}
+                    $ mpirun -np 2 ./div4 11 11 11 2 1 1 0 >> {6, 6}
+Cell | ok  |  ok  | $ mpirun -np 2 ./div1 9 9 9 0 >> {4, 5}
+                    $ mpirun -np 2 ./div2 9 9 9 1 1 2 0 >> {4, 5}
+                    $ mpirun -np 3 ./div1 10 10 10 0 >> {3, 3, 4}
+                    $ mpirun -np 3 ./div2 10 10 10 1 3 1 0 >> {3, 3, 4}
+IJ   |     |      |
+JK   |     |      |
+
+
 ## REVISION HISTORY
+
+---
+- 2018-11-10 Version 1.3.0
+  - enumerate()でcellとnodeを共通化
+
 
 ---
 - 2018-11-10 Version 1.2.2

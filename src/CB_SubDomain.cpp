@@ -35,8 +35,18 @@ bool SubDomain::findParameter()
   }
 
 
-  // 候補パラメータ保持クラス
-  cntl_tbl tbl(numProc);
+  // 候補配列の確保
+  cntl_tbl* tbl=NULL;
+  if ( !(tbl = new cntl_tbl[1]) ) {
+    printf("\tFail to allocate memory\n");
+    return false;
+  }
+
+  // 評価するパラメータを保持する配列 >> デストラクタで delete score [];
+  if ( !(tbl[0].score = new score_tbl[numProc]) ) {
+    printf("\tFail to allocate memory\n");
+    return false;
+  }
 
 
   Hostonly_ {
@@ -44,35 +54,22 @@ bool SubDomain::findParameter()
     fprintf(fp, "G_size = %5d %5d %5d\n\n", G_size[0], G_size[1], G_size[2]);
   }
 
+  int mesh = (grid_type == "node") ? 1 : 0;
+  int odr=0;  // dummy
+  int c=0;    // dummy
 
-  // 候補のパラメータを登録
-  // 割り切れない場合には、基準サイズを一つだけ大きくしておく
-  int vx = G_size[0]/G_div[0];
-  if ( G_size[0] != vx*G_div[0] ) vx +=1;
+  enumerate(G_div[0], G_div[1], G_div[2], odr, c, &tbl[0], mesh);
 
-  int vy = G_size[1]/G_div[1];
-  if ( G_size[1] != vy*G_div[1] ) vy +=1;
-
-  int vz = G_size[2]/G_div[2];
-  if ( G_size[2] != vz*G_div[2] ) vz +=1;
-
-  tbl.dsz[0] = vx;  // 基準サイズ
-  tbl.dsz[1] = vy;
-  tbl.dsz[2] = vz;
-
-  // 余りの数だけ基準サイズで、残りは基準サイズ-1
-  tbl.mod[0] = G_size[0] % G_div[0];
-  tbl.mod[1] = G_size[1] % G_div[1];
-  tbl.mod[2] = G_size[2] % G_div[2];
 
   // printout
   Hostonly_ {
+    cntl_tbl* t = &tbl[0];
     fprintf(fp, "\nDivision parameter\n");
     fprintf(fp, " div_x div_y div_z : default size(x,y,z) :   mod(x,y,z)\n");
     fprintf(fp, " %5d %5d %5d :   %5d %5d %5d : %4d %4d %4d\n",
            G_div[0], G_div[1], G_div[2],
-           tbl.dsz[0], tbl.dsz[1], tbl.dsz[2],
-           tbl.mod[0], tbl.mod[1], tbl.mod[2]);
+           t->dsz[0], t->dsz[1], t->dsz[2],
+           t->mod[0], t->mod[1], t->mod[2]);
     fprintf(fp, "\n\n");
   }
 
@@ -94,9 +91,9 @@ bool SubDomain::findParameter()
         pin[1] = j;
         pin[2] = k;
 
-        getSize(&tbl, pin, m);
+        getSize(&tbl[0], pin, m);
 
-        pp = &tbl.score[m];
+        pp = &tbl[0].score[m];
 
         getSrf(pp);
 
@@ -118,12 +115,12 @@ bool SubDomain::findParameter()
   Hostonly_ fprintf(fp, "\n");
 
   // 評価値の計算
-  Evaluation(&tbl, 1, fp);
+  Evaluation(&tbl[0], 1, fp);
 
 
   // 決定した分割パラメータをsd[]に保存
   for (int i=0; i<numProc; i++) {
-    score_tbl* p = &tbl.score[i];
+    score_tbl* p = &tbl[0].score[i];
     sd[i].sz[0] = p->sz[0];
     sd[i].sz[1] = p->sz[1];
     sd[i].sz[2] = p->sz[2];
@@ -230,33 +227,20 @@ bool SubDomain::findOptimalDivision(int terrain_mode)
   }
 
 
+  int mesh = (grid_type == "node") ? 1 : 0;
+
   // 候補のパラメータを登録
   switch (terrain_mode) {
     case 0:
-      if (grid_type == "node") {
-        registerCandidates_Node(tbl);
-      }
-      else {
-        registerCandidates_Cell(tbl);
-      }
+      registerCandidates(tbl, mesh);
       break;
 
     case 1:
-      if (grid_type == "node") {
-        registerCandidates4IJ_Node(tbl);
-      }
-      else {
-        registerCandidates4IJ_Cell(tbl);
-      }
+      registerCandidates4IJ(tbl, mesh);
       break;
 
     case 2:
-      if (grid_type == "node") {
-        registerCandidates4JK_Node(tbl);
-      }
-      else {
-        registerCandidates4JK_Cell(tbl);
-      }
+      registerCandidates4JK(tbl, mesh);
       break;
   }
 
@@ -470,7 +454,6 @@ int SubDomain::getNumCandidates()
   for (int k=1; k<=np; k++) {
     for (int j=1; j<=np/k+1; j++) {
       for (int i=1; i<=np/(j*k)+1; i++) {
-
         // 分割候補の積がプロセス数、かつ、分割数が全要素数以下であること
         if ( i*j*k == np && i<=G_size[0] && j<=G_size[1] && k<=G_size[2] ) odr++;
       }
@@ -497,7 +480,7 @@ int SubDomain::getNumCandidates4JK()
   for (int k=1; k<=np; k++) {
     for (int j=1; j<=np/k+1; j++) {
       // 分割候補の積がプロセス数、かつ、分割数が全要素数以下であること
-      if ( i*j*k == np && j<=G_size[1] && k<=G_size[2] ) odr++;
+      if ( i*j*k == np && i<=G_size[0] && j<=G_size[1] && k<=G_size[2] ) odr++;
     }
   }
 
@@ -521,7 +504,7 @@ int SubDomain::getNumCandidates4IJ()
   for (int j=1; j<=np; j++) {
     for (int i=1; i<=np/j+1; i++) {
       // 分割候補の積がプロセス数、かつ、分割数が全要素数以下であること
-      if ( i*j*k == np && i<=G_size[0] && j<=G_size[1] ) odr++;
+      if ( i*j*k == np && i<=G_size[0] && j<=G_size[1] && k<=G_size[2] ) odr++;
     }
   }
 
@@ -529,73 +512,32 @@ int SubDomain::getNumCandidates4IJ()
 }
 
 
-/*
- * @fn registerCandidates_Cell
- * @brief 分割数の候補パラメータを登録する
- * @param [in,out] tbl 候補配列
- */
-void SubDomain::registerCandidates_Cell(cntl_tbl* tbl)
-{
-  int odr=0;
-  int c=0;
-  int np = numProc;
-
-#pragma omp single
-  for (int k=1; k<=np; k++) {
-    for (int j=1; j<=np/k+1; j++) {
-      for (int i=1; i<=np/(j*k)+1; i++) {
-
-        if ( i*j*k == np && i<=G_size[0] && j<=G_size[1] && k<=G_size[2] ) {
-
-          // 等分で割り切れない場合には、基準サイズを一つだけ大きくしておく
-          int vx = G_size[0]/i;
-          if ( G_size[0] != vx*i ) vx +=1;
-
-          int vy = G_size[1]/j;
-          if ( G_size[1] != vy*j ) vy +=1;
-
-          int vz = G_size[2]/k;
-          if ( G_size[2] != vz*k ) vz +=1;
-
-          tbl[odr].dsz[0] = vx;  // 基準サイズ
-          tbl[odr].dsz[1] = vy;
-          tbl[odr].dsz[2] = vz;
-
-          // 余りの数だけ基準サイズで、残りは基準サイズ-1
-          tbl[odr].mod[0] = G_size[0] % i;
-          tbl[odr].mod[1] = G_size[1] % j;
-          tbl[odr].mod[2] = G_size[2] % k;
-
-          tbl[odr].div[0]= i;  // Number of divisions for each direction
-          tbl[odr].div[1]= j;
-          tbl[odr].div[2]= k;
-
-          tbl[odr].org_idx = c++; // 作成時のリストの順番を記録
-          odr++;
-        }
-      }
-    }
-  }
-
-}
-
 
 /*
- * @fn registerCandidates_Node
+ * @fn registerCandidates
+ * @brief 分割数の候補パラメータを登録する
+ * @param [in,out] tbl  候補配列
+ * @param [in]     mesh 0-cell, 1-node
+ * @fn registerCandidates
  * @brief 分割数の候補パラメータを登録する
  * @param [in,out] tbl 候補配列
- * ex) G_size=11
- *  index     1  2  3  4  5  6  7  8  9  10 11 : T%div    S
- *  div=1     |  +  +  +  +  +  +  +  +  +  |     0      11
- *  div=2     |  +  +  +  +  |  +  +  +  +  |     0       6
- *  div=3     |  +  +  +  |  +  +  |  +  +  |     1       5
- *  div=4     |  +  +  |  +  +  |  +  |  +  |     2       4
- *  div=5     |  +  |  +  |  +  |  +  |  +  |     0       3
  *
- *  T = G_size + div - 1;
- *  S = T/div (T%div==0), T/div+1(T%div/=0)
+ * ex) G_size=11
+ *  index     1  2  3  4  5  6  7  8  9  10 11 :  T   R    Q    S
+ *  div=1     |  +  +  +  +  +  +  +  +  +  |    11   0   11   11
+ *  div=2     |  +  +  +  +  |  +  +  +  +  |    12   0    6    6
+ *  div=3     |  +  +  +  |  +  +  |  +  +  |    13   1    4    5
+ *  div=4     |  +  +  |  +  +  |  +  |  +  |    14   2    3    4
+ *  div=5     |  +  |  +  |  +  |  +  |  +  |    15   0    3    3
+ *
+ *  T = G_size + div - 1;             // 点数の総和 node
+ *  T = G_size;                       // 点数の総和 cell
+ *  R = T%div                         // 剰余
+ *  Q = T/div                         //
+ *  S = Q (R==0), Q+1 (R!=0)          // 基準点数
+ *
  */
-void SubDomain::registerCandidates_Node(cntl_tbl* tbl)
+void SubDomain::registerCandidates(cntl_tbl* tbl, const int mesh)
 {
   int odr=0;
   int c=0;
@@ -605,105 +547,21 @@ void SubDomain::registerCandidates_Node(cntl_tbl* tbl)
   for (int k=1; k<=np; k++) {
     for (int j=1; j<=np/k+1; j++) {
       for (int i=1; i<=np/(j*k)+1; i++) {
-
-        if ( i*j*k == np && i<=G_size[0] && j<=G_size[1] && k<=G_size[2] ) {
-          int ii = G_size[0]+i-1;
-          int jj = G_size[1]+j-1;
-          int kk = G_size[2]+k-1;
-
-          int im = ii % i;
-          int jm = jj % j;
-          int km = kk % k;
-
-          // 余りの数だけ基準サイズで、残りは基準サイズ-1
-          tbl[odr].mod[0] = im;
-          tbl[odr].mod[1] = jm;
-          tbl[odr].mod[2] = km;
-
-          // 等分で割り切れない場合には、基準サイズを一つだけ大きくしておく
-          int vx = ii / i;
-          if ( im != 0 ) vx++;
-
-          int vy = jj / j;
-          if ( jm != 0 ) vy++;
-
-          int vz = kk / k;
-          if ( km != 0 ) vz++;
-
-          tbl[odr].dsz[0] = vx;  // 基準サイズ
-          tbl[odr].dsz[1] = vy;
-          tbl[odr].dsz[2] = vz;
-
-          tbl[odr].div[0]= i;  // Number of divisions for each direction
-          tbl[odr].div[1]= j;
-          tbl[odr].div[2]= k;
-
-          tbl[odr].org_idx = c++; // 作成時のリストの順番を記録
-          odr++;
-        }
+        //enumerate(i, j, k, odr, c, tbl, mesh);
+        enumerate(i, j, k, odr, c, &tbl[odr], mesh);
       }
     }
   }
-
-}
-
-
-
-/*
- * @fn registerCandidates4IJ_Cell
- * @brief IJ分割時の分割数の候補パラメータを登録する
- * @param [in,out] tbl 候補配列
- */
-void SubDomain::registerCandidates4IJ_Cell(cntl_tbl* tbl)
-{
-  int odr=0;
-  int c=0;
-  int np = numProc;
-  const int a = (grid_type == "node") ? 1 : 0;
-  const int gsize[3] = {G_size[0]+a, G_size[1]+a, G_size[2]+a};
-  const int k = 1;
-
-#pragma omp single
-  for (int j=1; j<=np; j++) {
-    for (int i=1; i<=np/j+1; i++) {
-
-      if ( i*j*k == np && i<=G_size[0] && j<=G_size[1] ) {
-
-        // 割り切れない場合には、基準サイズを一つだけ大きくしておく
-        int vy = gsize[1]/j;
-        if ( gsize[1] != vy*j ) vy +=1;
-
-        int vx = gsize[0]/i;
-        if ( gsize[0] != vx*i ) vx +=1;
-
-        tbl[odr].dsz[0] = vx; // 基準サイズ
-        tbl[odr].dsz[1] = vy;
-        tbl[odr].dsz[2] = G_size[2];
-
-        // 余りの数だけ基準サイズで、残りは基準サイズ-1
-        tbl[odr].mod[0] = gsize[0] % i;
-        tbl[odr].mod[1] = gsize[1] % j;
-        tbl[odr].mod[2] = 0;
-
-        tbl[odr].div[0]= i;  // Number of divisions for each direction
-        tbl[odr].div[1]= j;
-        tbl[odr].div[2]= 1;
-
-        tbl[odr].org_idx = c++; // 作成時のリストの順番を記録
-        odr++;
-      }
-    }
-  }
-
 }
 
 
 /*
- * @fn registerCandidates4IJ_Node
+ * @fn registerCandidates4IJ
  * @brief IJ分割時の分割数の候補パラメータを登録する
- * @param [in,out] tbl 候補配列
+ * @param [in,out] tbl  候補配列
+ * @param [in]     mesh 0-cell, 1-node
  */
-void SubDomain::registerCandidates4IJ_Node(cntl_tbl* tbl)
+void SubDomain::registerCandidates4IJ(cntl_tbl* tbl, const int mesh)
 {
   int odr=0;
   int c=0;
@@ -713,99 +571,19 @@ void SubDomain::registerCandidates4IJ_Node(cntl_tbl* tbl)
 #pragma omp single
   for (int j=1; j<=np; j++) {
     for (int i=1; i<=np/j+1; i++) {
-
-      if ( i*j*k == np && i<=G_size[0] && j<=G_size[1] ) {
-        int jj = G_size[1]+j-1;
-        int ii = G_size[0]+i-1;
-
-        int jm = jj % j;
-        int im = ii % i;
-
-        // 余りの数だけ基準サイズで、残りは基準サイズ-1
-        tbl[odr].mod[0] = im;
-        tbl[odr].mod[1] = jm;
-        tbl[odr].mod[2] = 0;
-
-        // 割り切れない場合には、基準サイズを一つだけ大きくしておく
-        int vy = jj / j;
-        if ( jm != 0 ) vy++;
-
-        int vx = ii / i;
-        if ( im != 0 ) vx++;
-
-        tbl[odr].dsz[0] = vx; // 基準サイズ
-        tbl[odr].dsz[1] = vy;
-        tbl[odr].dsz[2] = G_size[2];
-
-        tbl[odr].div[0]= i;  // Number of divisions for each direction
-        tbl[odr].div[1]= j;
-        tbl[odr].div[2]= 1;
-
-        tbl[odr].org_idx = c++; // 作成時のリストの順番を記録
-        odr++;
-      }
+      //enumerate(i, j, k, odr, c, tbl, mesh);
+      enumerate(i, j, k, odr, c, &tbl[odr], mesh);
     }
   }
-
 }
 
-
-
 /*
- * @fn registerCandidates4JK_Cell
+ * @fn registerCandidates4JK
  * @brief JK分割時の分割数の候補パラメータを登録する
- * @param [in,out] tbl 候補配列
+ * @param [in,out] tbl  候補配列
+ * @param [in]     mesh 0-cell, 1-node
  */
-void SubDomain::registerCandidates4JK_Cell(cntl_tbl* tbl)
-{
-  int odr=0;
-  int c=0;
-  int np = numProc;
-  const int a = (grid_type == "node") ? 1 : 0;
-  const int gsize[3] = {G_size[0]+a, G_size[1]+a, G_size[2]+a};
-  const int i = 1;
-
-#pragma omp single
-  for (int k=1; k<=np; k++) {
-    for (int j=1; j<=np/k+1; j++) {
-
-      if ( i*j*k == np && j<=G_size[1] && k<=G_size[2] ) {
-
-        // 割り切れない場合には、基準サイズを一つだけ大きくしておく
-        int vy = gsize[1]/j;
-        if ( gsize[1] != vy*j ) vy +=1;
-
-        int vz = gsize[2]/k;
-        if ( gsize[2] != vz*k ) vz +=1;
-
-        tbl[odr].dsz[0] = G_size[0]; // 基準サイズ
-        tbl[odr].dsz[1] = vy;
-        tbl[odr].dsz[2] = vz;
-
-        // 余りの数だけ基準サイズで、残りは基準サイズ-1
-        tbl[odr].mod[0] = 0;
-        tbl[odr].mod[1] = gsize[1] % j;
-        tbl[odr].mod[2] = gsize[2] % k;
-
-        tbl[odr].div[0]= 1;  // Number of divisions for each direction
-        tbl[odr].div[1]= j;
-        tbl[odr].div[2]= k;
-
-        tbl[odr].org_idx = c++; // 作成時のリストの順番を記録
-        odr++;
-      }
-    }
-  }
-
-}
-
-
-/*
- * @fn registerCandidates4JK_Node
- * @brief JK分割時の分割数の候補パラメータを登録する
- * @param [in,out] tbl 候補配列
- */
-void SubDomain::registerCandidates4JK_Node(cntl_tbl* tbl)
+void SubDomain::registerCandidates4JK(cntl_tbl* tbl, const int mesh)
 {
   int odr=0;
   int c=0;
@@ -815,41 +593,12 @@ void SubDomain::registerCandidates4JK_Node(cntl_tbl* tbl)
 #pragma omp single
   for (int k=1; k<=np; k++) {
     for (int j=1; j<=np/k+1; j++) {
-
-      if ( i*j*k == np && j<=G_size[1] && k<=G_size[2] ) {
-        int jj = G_size[1]+j-1;
-        int kk = G_size[2]+k-1;
-
-        int jm = jj % j;
-        int km = kk % k;
-
-        // 余りの数だけ基準サイズで、残りは基準サイズ-1
-        tbl[odr].mod[0] = 0;
-        tbl[odr].mod[1] = jm;
-        tbl[odr].mod[2] = km;
-
-        // 割り切れない場合には、基準サイズを一つだけ大きくしておく
-        int vy = jj / j;
-        if ( jm != 0 ) vy++;
-
-        int vz = kk / k;
-        if ( km != 0 ) vz++;
-
-        tbl[odr].dsz[0] = G_size[0]; // 基準サイズ
-        tbl[odr].dsz[1] = vy;
-        tbl[odr].dsz[2] = vz;
-
-        tbl[odr].div[0]= 1;  // Number of divisions for each direction
-        tbl[odr].div[1]= j;
-        tbl[odr].div[2]= k;
-
-        tbl[odr].org_idx = c++; // 作成時のリストの順番を記録
-        odr++;
-      }
+      //enumerate(i, j, k, odr, c, tbl, mesh);
+      enumerate(i, j, k, odr, c, &tbl[odr], mesh);
     }
   }
-
 }
+
 
 
 /*
@@ -862,12 +611,14 @@ void SubDomain::registerCandidates4JK_Node(cntl_tbl* tbl)
  *       ただし、mod[]==0の場合は標準サイズ
  *
  *        0  1  2  3  4  5  6  7  8  9 10 11 12 13 14
- * cell   0  1  2  3  0  1  2  3  0  1  2  3  0  1  2
- *      |--+--+--+--|--+--+--+--|--+--+--+--|--+--+--|
- * node 0  1  2  3  4           0  1  2  3  4
-                    0  1  2  3  4           0  1  2  3
+ * cell   0  1  2  0  1  2  3  0  1  2  3  0  1  2  3
+ *      |--+--+--|--+--+--+--|--+--+--+--|--+--+--+--|
+ * node 0  1  2  3           0  1  2  3  4
+                 0  1  2  3  4           0  1  2  3  4
         0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15
  */
+
+
 void SubDomain::getSize(cntl_tbl* t, const int* in, const int m)
 {
   int tmp[3];
@@ -876,21 +627,21 @@ void SubDomain::getSize(cntl_tbl* t, const int* in, const int m)
     tmp[0] = t->dsz[0];
   }
   else {
-    tmp[0] = (in[0] < t->mod[0]) ? t->dsz[0] : t->dsz[0]-1;
+    tmp[0] = (in[0] < t->div[0] - t->mod[0]) ? t->dsz[0]-1 : t->dsz[0];
   }
 
   if (t->mod[1] == 0) {
     tmp[1] = t->dsz[1];
   }
   else {
-    tmp[1] = (in[1] < t->mod[1]) ? t->dsz[1] : t->dsz[1]-1;
+    tmp[1] = (in[1] < t->div[1] - t->mod[1]) ? t->dsz[1]-1 : t->dsz[1];
   }
 
   if (t->mod[2] == 0) {
     tmp[2] = t->dsz[2];
   }
   else {
-    tmp[2] = (in[2] < t->mod[2]) ? t->dsz[2] : t->dsz[2]-1;
+    tmp[2] = (in[2] < t->div[2] - t->mod[2]) ? t->dsz[2]-1 : t->dsz[2];
   }
 
   t->score[m].sz[0] = tmp[0];

@@ -66,8 +66,8 @@ cmake_policy(SET CMP0012 NEW)
 
 
 #######
-set(PROJECT_VERSION "1.2.2")
-set(LIB_REVISION "20181111_0830")
+set(PROJECT_VERSION "1.3.0")
+set(LIB_REVISION "20181112_0700")
 #######
 
 

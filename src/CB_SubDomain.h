@@ -405,28 +405,17 @@ private:
   void getHeadIndex();
 
   int getNumCandidates();
-
   int getNumCandidates4IJ();
-
   int getNumCandidates4JK();
+  void registerCandidates(cntl_tbl* tbl, const int mesh);
+  void registerCandidates4IJ(cntl_tbl* tbl, const int mesh);
+  void registerCandidates4JK(cntl_tbl* tbl, const int mesh);
 
   void getSize(cntl_tbl* t, const int* in, const int m);
 
   void getSizeNode(score_tbl* t);
 
   void getSrf(score_tbl* t);
-
-  void registerCandidates_Cell(cntl_tbl* t);
-
-  void registerCandidates_Node(cntl_tbl* t);
-
-  void registerCandidates4IJ_Cell(cntl_tbl* tbl);
-
-  void registerCandidates4IJ_Node(cntl_tbl* tbl);
-
-  void registerCandidates4JK_Cell(cntl_tbl* tbl);
-
-  void registerCandidates4JK_Node(cntl_tbl* tbl);
 
   int sortComm(cntl_tbl* t, const int c_sz, FILE* fp);
 
@@ -435,6 +424,65 @@ private:
   int sortLenX(cntl_tbl* t, const int c_sz, FILE* fp);
 
   int sortVolume(cntl_tbl* t, const int tbl_sz, FILE* fp);
+
+  // todo tblをポインタで、呼び出し元も変更
+  inline void enumerate(const int i,
+                        const int j,
+                        const int k,
+                        int& odr,
+                        int& c,
+                        cntl_tbl* t,
+                        const int mesh)
+  {
+    int np = numProc;
+    int ii, jj, kk;
+    int im, jm, km;
+    int vx, vy, vz;
+
+    if (mesh==0) { // cell
+      ii = G_size[0];
+      jj = G_size[1];
+      kk = G_size[2];
+    }
+    else { // node
+      ii = G_size[0]+i-1;
+      jj = G_size[1]+j-1;
+      kk = G_size[2]+k-1;
+    }
+
+    if ( i*j*k == np && i<=G_size[0] && j<=G_size[1] && k<=G_size[2] ) {
+
+      im = ii % i;
+      jm = jj % j;
+      km = kk % k;
+
+      // 余りの数だけ基準サイズで、残りは基準サイズ-1
+      t->mod[0] = im;
+      t->mod[1] = jm;
+      t->mod[2] = km;
+
+      // 等分で割り切れない場合には、基準サイズを一つだけ大きくしておく
+      vx = ii / i;
+      if ( im != 0 ) vx++;
+
+      vy = jj / j;
+      if ( jm != 0 ) vy++;
+
+      vz = kk / k;
+      if ( km != 0 ) vz++;
+
+      t->dsz[0] = vx;  // 基準サイズ
+      t->dsz[1] = vy;
+      t->dsz[2] = vz;
+
+      t->div[0]= i;  // Number of divisions for each direction
+      t->div[1]= j;
+      t->div[2]= k;
+
+      t->org_idx = c++; // 作成時のリストの順番を記録
+      odr++;
+    }
+  }
 
 };
 

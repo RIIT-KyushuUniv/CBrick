@@ -52,6 +52,7 @@ void BrickComm::pack_VXnode(const REAL_TYPE *array,
     for (int l=0; l<3; l++) {
       for( int k=0; k<NK; k++ ){
         for( int j=0; j<NJ; j++ ){
+          #pragma novector
           for( int i=0; i<gc; i++ ){
             sendm[_IDX_VI(i,j,k,l,NJ,NK,gc)] = array[_IDX_V3D(i+1,j,k,l,NI,NJ,NK,VC)];
           }
@@ -66,6 +67,7 @@ void BrickComm::pack_VXnode(const REAL_TYPE *array,
     for (int l=0; l<3; l++) {
       for( int k=0; k<NK; k++ ){
         for( int j=0; j<NJ; j++ ){
+          #pragma novector
           for( int i=0; i<gc; i++ ){
             sendp[_IDX_VI(i,j,k,l,NJ,NK,gc)] = array[_IDX_V3D(NI-2+i,j,k,l,NI,NJ,NK,VC)];
           }
@@ -78,8 +80,8 @@ void BrickComm::pack_VXnode(const REAL_TYPE *array,
 
 /*
  * @brief unpack send data for I direction
- * @param [in,out]  array   dest array
- * @param [in]  gc number of guide cell layer to be sent
+ * @param [out] array   dest array
+ * @param [in]  gc      number of guide cell layer to be sent
  * @param [in]  recvm   recv buffer of I- direction
  * @param [in]  recvp   recv buffer of I+ direction
  * @param [in]  nIDm    Rank number of I- direction
@@ -103,6 +105,7 @@ void BrickComm::unpack_VXnode(REAL_TYPE *array,
     for (int l=0; l<3; l++) {
       for( int k=0; k<NK; k++ ){
         for( int j=0; j<NJ; j++ ){
+          #pragma novector
           for( int i=0; i<gc; i++ ){
             array[_IDX_V3D(i-1,j,k,l,NI,NJ,NK,VC)] = recvm[_IDX_VI(i,j,k,l,NJ,NK,gc)];
           }
@@ -117,6 +120,7 @@ void BrickComm::unpack_VXnode(REAL_TYPE *array,
     for (int l=0; l<3; l++) {
       for( int k=0; k<NK; k++ ){
         for( int j=0; j<NJ; j++ ){
+          #pragma novector
           for( int i=0; i<gc; i++ ){
             array[_IDX_V3D(NI+i,j,k,l,NI,NJ,NK,VC)] = recvp[_IDX_VI(i,j,k,l,NJ,NK,gc)];
           }
@@ -129,7 +133,7 @@ void BrickComm::unpack_VXnode(REAL_TYPE *array,
 /*
  * @brief pack send data for J direction
  * @param [in]  array   source array
- * @param [in]  gc number of guide cell layer to be sent
+ * @param [in]  gc      number of guide cell layer to be sent
  * @param [out] sendm   send buffer of J- direction
  * @param [out] sendp   send buffer of J+ direction
  * @param [in]  nIDm    Rank number of J- direction
@@ -152,9 +156,10 @@ void BrickComm::pack_VYnode(const REAL_TYPE *array,
 #pragma omp parallel for collapse(3)
     for (int l=0; l<3; l++) {
       for( int k=0; k<NK; k++ ){
-        for( int j=1; j<=gc; j++ ){
+        for( int j=0; j<gc; j++ ){
+          #pragma novector
           for( int i=0; i<NI; i++ ){
-            sendm[_IDX_VJ(i,j,k,l,NI,1,NK,gc)] = array[_IDX_V3D(i,j,k,l,NI,NJ,NK,VC)];
+            sendm[_IDX_VJ(i,j,k,l,NI,NK,gc)] = array[_IDX_V3D(i,j+1,k,l,NI,NJ,NK,VC)];
           }
         }
       }
@@ -166,9 +171,10 @@ void BrickComm::pack_VYnode(const REAL_TYPE *array,
 #pragma omp parallel for collapse(3)
     for (int l=0; l<3; l++) {
       for( int k=0; k<NK; k++ ){
-        for( int j=NJ-gc; j<NJ; j++ ){
+        for( int j=0; j<gc; j++ ){
+          #pragma novector
           for( int i=0; i<NI; i++ ){
-            sendp[_IDX_VJ(i,j,k,l,NI,NJ-gc,NK,gc)] = array[_IDX_V3D(i,j,k,l,NI,NJ,NK,VC)];
+            sendp[_IDX_VJ(i,j,k,l,NI,NK,gc)] = array[_IDX_V3D(i,NJ-2+j,k,l,NI,NJ,NK,VC)];
           }
         }
       }
@@ -179,8 +185,8 @@ void BrickComm::pack_VYnode(const REAL_TYPE *array,
 
 /*
  * @brief unpack send data for J direction
- * @param [in,out]  array   dest array
- * @param [in]  gc number of guide cell layer to be sent
+ * @param [out] array   dest array
+ * @param [in]  gc      number of guide cell layer to be sent
  * @param [in]  recvm   recv buffer of J- direction
  * @param [in]  recvp   recv buffer of J+ direction
  * @param [in]  nIDm    Rank number of J- direction
@@ -203,9 +209,10 @@ void BrickComm::unpack_VYnode(REAL_TYPE *array,
 #pragma omp parallel for collapse(3)
     for (int l=0; l<3; l++) {
       for( int k=0; k<NK; k++ ){
-        for( int j=1-gc; j<1; j++ ){
+        for( int j=0; j<gc; j++ ){
+          #pragma novector
           for( int i=0; i<NI; i++ ){
-            array[_IDX_V3D(i,j,k,l,NI,NJ,NK,VC)] = recvm[_IDX_VJ(i,j,k,l,NI,1-gc,NK,gc)];
+            array[_IDX_V3D(i,j-1,k,l,NI,NJ,NK,VC)] = recvm[_IDX_VJ(i,j,k,l,NI,NK,gc)];
           }
         }
       }
@@ -217,9 +224,10 @@ void BrickComm::unpack_VYnode(REAL_TYPE *array,
 #pragma omp parallel for collapse(3)
     for (int l=0; l<3; l++) {
       for( int k=0; k<NK; k++ ){
-        for( int j=NJ; j<NJ+gc; j++ ){
+        for( int j=0; j<gc; j++ ){
+          #pragma novector
           for( int i=0; i<NI; i++ ){
-            array[_IDX_V3D(i,j,k,l,NI,NJ,NK,VC)] = recvp[_IDX_VJ(i,j,k,l,NI,NJ,NK,gc)];
+            array[_IDX_V3D(i,NJ+j,k,l,NI,NJ,NK,VC)] = recvp[_IDX_VJ(i,j,k,l,NI,NK,gc)];
           }
         }
       }
@@ -231,7 +239,7 @@ void BrickComm::unpack_VYnode(REAL_TYPE *array,
 /*
  * @brief pack send data for K direction
  * @param [in]  array   source array
- * @param [in]  gc number of guide cell layer actually to be sent
+ * @param [in]  gc      number of guide cell layer actually to be sent
  * @param [out] sendm   send buffer of K- direction
  * @param [out] sendp   send buffer of K+ direction
  * @param [in]  nIDm    Rank number of K- direction
@@ -253,10 +261,11 @@ void BrickComm::pack_VZnode(const REAL_TYPE *array,
   {
 #pragma omp parallel for collapse(3)
     for (int l=0; l<3; l++) {
-      for( int k=1; k<=gc; k++ ){
+      for( int k=0; k<gc; k++ ){
         for( int j=0; j<NJ; j++ ){
+          #pragma novector
           for( int i=0; i<NI; i++ ){
-            sendm[_IDX_VK(i,j,k,l,NI,NJ,1,gc)] = array[_IDX_V3D(i,j,k,l,NI,NJ,NK,VC)];
+            sendm[_IDX_VK(i,j,k,l,NI,NJ,gc)] = array[_IDX_V3D(i,j,k+1,l,NI,NJ,NK,VC)];
           }
         }
       }
@@ -267,10 +276,11 @@ void BrickComm::pack_VZnode(const REAL_TYPE *array,
   {
 #pragma omp parallel for collapse(3)
     for (int l=0; l<3; l++) {
-      for( int k=NK-gc; k<NK; k++ ){
+      for( int k=0; k<gc; k++ ){
         for( int j=0; j<NJ; j++ ){
+          #pragma novector
           for( int i=0; i<NI; i++ ){
-            sendp[_IDX_VK(i,j,k,l,NI,NJ,NK-gc,gc)] = array[_IDX_V3D(i,j,k,l,NI,NJ,NK,VC)];
+            sendp[_IDX_VK(i,j,k,l,NI,NJ,gc)] = array[_IDX_V3D(i,j,NK-2+k,l,NI,NJ,NK,VC)];
           }
         }
       }
@@ -281,8 +291,8 @@ void BrickComm::pack_VZnode(const REAL_TYPE *array,
 
 /*
  * @brief unpack send data for K direction
- * @param [in,out]  array   dest array
- * @param [in]  gc number of guide cell layer to be sent
+ * @param [out] array   dest array
+ * @param [in]  gc      number of guide cell layer to be sent
  * @param [in]  recvm   recv buffer of K- direction
  * @param [in]  recvp   recv buffer of K+ direction
  * @param [in]  nIDm    Rank number of K- direction
@@ -304,10 +314,11 @@ void BrickComm::unpack_VZnode(REAL_TYPE *array,
   {
 #pragma omp parallel for collapse(3)
     for (int l=0; l<3; l++) {
-      for( int k=1-gc; k<1; k++ ){
+      for( int k=0; k<gc; k++ ){
         for( int j=0; j<NJ; j++ ){
+          #pragma novector
           for( int i=0; i<NI; i++ ){
-            array[_IDX_V3D(i,j,k,l,NI,NJ,NK,VC)] = recvm[_IDX_VK(i,j,k,l,NI,NJ,1-gc,gc)];
+            array[_IDX_V3D(i,j,k-1,l,NI,NJ,NK,VC)] = recvm[_IDX_VK(i,j,k,l,NI,NJ,gc)];
           }
         }
       }
@@ -318,10 +329,11 @@ void BrickComm::unpack_VZnode(REAL_TYPE *array,
   {
 #pragma omp parallel for collapse(3)
     for (int l=0; l<3; l++) {
-      for( int k=NK; k<NK+gc; k++ ){
+      for( int k=0; k<gc; k++ ){
         for( int j=0; j<NJ; j++ ){
+          #pragma novector
           for( int i=0; i<NI; i++ ){
-            array[_IDX_V3D(i,j,k,l,NI,NJ,NK,VC)] = recvp[_IDX_VK(i,j,k,l,NI,NJ,NK,gc)];
+            array[_IDX_V3D(i,j,NK+k,l,NI,NJ,NK,VC)] = recvp[_IDX_VK(i,j,k,l,NI,NJ,gc)];
           }
         }
       }

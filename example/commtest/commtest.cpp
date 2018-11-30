@@ -333,7 +333,7 @@ bool checkTransferZ(const int* rsize,
     for( int k=0; k<gc; k++ ){
     for( int j=0; j<NJ; j++ ){
     for (int i=0; i<NI; i++) {
-      int bf = Y[_IDX_S3D(i,j,NK+k,NI,NJ,gc)];
+      REAL_TYPE bf = Y[_IDX_S3D(i,j,NK+k,NI,NJ,gc)];
       int rk = (int)bf/(int)BASE;
       int val= (int)(bf-rk*BASE);
       if ( (rk != dp) || (val != j) ) {

@@ -53,11 +53,10 @@
 //+ (_J-(_JS)) * (_NI+2*(_VC)) \
 //+ (_I+(_VC)) \
 //)
-#define _IDX_SJ(_I,_J,_K,_NI,_JS,_VC) \
-( (_K)       * (_NI) * (_VC) \
-+ (_J-(_JS)) * (_NI) \
-+ (_I) \
-)
+#define _IDX_SJ(_I,_J,_K,_NI,_VC) \
+    ( (_K) * (_NI) * (_VC) \
+    + (_J) * (_NI) \
+    + (_I) )
 
 /* バッファへのインデクス変換 (K方向)
  *  @param [in] _I  i方向インデクス
@@ -74,11 +73,10 @@
 //+ (_J+(_VC)) * (_NI+2*(_VC)) \
 //+ (_I+(_VC)) \
 //)
-#define _IDX_SK(_I,_J,_K,_NI,_NJ,_KS,_VC) \
-( (_K-(_KS)) * (_NI) * (_NJ) \
-+ (_J)       * (_NI) \
-+ (_I) \
-)
+#define _IDX_SK(_I,_J,_K,_NI,_NJ) \
+    ( (_K) * (_NI) * (_NJ) \
+    + (_J) * (_NI) \
+    + (_I) )
 
 
 /* バッファへのインデクス変換 (I方向)
@@ -120,9 +118,9 @@
 //+ (_J-(_JS)) * (_NI+2*(_VC)) \
 //+ (_I+(_VC)) \
 //)
-#define _IDX_VJ(_I,_J,_K,_L,_NI,_JS,_NK,_VC) \
+#define _IDX_VJ(_I,_J,_K,_L,_NI,_NK,_VC) \
 ( (_L) * (_NI) * (_VC) * (_NK) \
-+ _IDX_SJ(_I,_J,_K,_NI,_JS,_VC) \
++ _IDX_SJ(_I,_J,_K,_NI,_VC) \
 )
 
 /* バッファへのインデクス変換 (K方向)
@@ -142,9 +140,9 @@
 //+ (_J+(_VC)) * (_NI+2*(_VC)) \
 //+ (_I+(_VC)) \
 //)
-#define _IDX_VK(_I,_J,_K,_L,_NI,_NJ,_KS,_VC) \
+#define _IDX_VK(_I,_J,_K,_L,_NI,_NJ,_VC) \
 ( (_L) * (_NI) * (_NJ) * (_VC) \
-+ _IDX_SK(_I,_J,_K,_NI,_NJ,_KS,_VC) \
++ _IDX_SK(_I,_J,_K,_NI,_NJ) \
 )
 
 #endif // _CB_PACK_H_

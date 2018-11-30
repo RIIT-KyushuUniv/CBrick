@@ -44,6 +44,7 @@ void BrickComm::pack_VXcell(const REAL_TYPE *array,
     for (int l=0; l<3; l++) {
       for( int k=0; k<NK; k++ ){
         for( int j=0; j<NJ; j++ ){
+          #pragma novector
           for( int i=0; i<gc; i++ ){
             sendm[_IDX_VI(i,j,k,l,NJ,NK,gc)] = array[_IDX_V3D(i,j,k,l,NI,NJ,NK,VC)];
           }
@@ -58,6 +59,7 @@ void BrickComm::pack_VXcell(const REAL_TYPE *array,
     for (int l=0; l<3; l++) {
       for( int k=0; k<NK; k++ ){
         for( int j=0; j<NJ; j++ ){
+          #pragma novector
           for( int i=0; i<gc; i++ ){
             sendp[_IDX_VI(i,j,k,l,NJ,NK,gc)] = array[_IDX_V3D(NI-gc+i,j,k,l,NI,NJ,NK,VC)];
           }
@@ -95,6 +97,7 @@ void BrickComm::unpack_VXcell(REAL_TYPE *array,
     for (int l=0; l<3; l++) {
       for( int k=0; k<NK; k++ ){
         for( int j=0; j<NJ; j++ ){
+          #pragma novector
           for( int i=0; i<gc; i++ ){
             array[_IDX_V3D(i-gc,j,k,l,NI,NJ,NK,VC)] = recvm[_IDX_VI(i,j,k,l,NJ,NK,gc)];
           }
@@ -109,6 +112,7 @@ void BrickComm::unpack_VXcell(REAL_TYPE *array,
     for (int l=0; l<3; l++) {
       for( int k=0; k<NK; k++ ){
         for( int j=0; j<NJ; j++ ){
+          #pragma novector
           for( int i=0; i<gc; i++ ){
             array[_IDX_V3D(NI+i,j,k,l,NI,NJ,NK,VC)] = recvp[_IDX_VI(i,j,k,l,NJ,NK,gc)];
           }
@@ -145,8 +149,9 @@ void BrickComm::pack_VYcell(const REAL_TYPE *array,
     for (int l=0; l<3; l++) {
       for( int k=0; k<NK; k++ ){
         for( int j=0; j<gc; j++ ){
+          #pragma novector
           for( int i=0; i<NI; i++ ){
-            sendm[_IDX_VJ(i,j,k,l,NI,0,NK,gc)] = array[_IDX_V3D(i,j,k,l,NI,NJ,NK,VC)];
+            sendm[_IDX_VJ(i,j,k,l,NI,NK,gc)] = array[_IDX_V3D(i,j,k,l,NI,NJ,NK,VC)];
           }
         }
       }
@@ -158,9 +163,10 @@ void BrickComm::pack_VYcell(const REAL_TYPE *array,
 #pragma omp parallel for collapse(3)
     for (int l=0; l<3; l++) {
       for( int k=0; k<NK; k++ ){
-        for( int j=NJ-gc; j<NJ; j++ ){
+        for( int j=0; j<gc; j++ ){
+          #pragma novector
           for( int i=0; i<NI; i++ ){
-            sendp[_IDX_VJ(i,j,k,l,NI,NJ-gc,NK,gc)] = array[_IDX_V3D(i,j,k,l,NI,NJ,NK,VC)];
+            sendp[_IDX_VJ(i,j,k,l,NI,NK,gc)] = array[_IDX_V3D(i,j,k,l,NI,NJ,NK,VC)];
           }
         }
       }
@@ -195,9 +201,10 @@ void BrickComm::unpack_VYcell(REAL_TYPE *array,
 #pragma omp parallel for collapse(3)
     for (int l=0; l<3; l++) {
       for( int k=0; k<NK; k++ ){
-        for( int j=0-gc; j<0; j++ ){
+        for( int j=0; j<gc; j++ ){
+          #pragma novector
           for( int i=0; i<NI; i++ ){
-            array[_IDX_V3D(i,j,k,l,NI,NJ,NK,VC)] = recvm[_IDX_VJ(i,j,k,l,NI,0-gc,NK,gc)];
+            array[_IDX_V3D(i,j,k,l,NI,NJ,NK,VC)] = recvm[_IDX_VJ(i,j,k,l,NI,NK,gc)];
           }
         }
       }
@@ -209,9 +216,10 @@ void BrickComm::unpack_VYcell(REAL_TYPE *array,
 #pragma omp parallel for collapse(3)
     for (int l=0; l<3; l++) {
       for( int k=0; k<NK; k++ ){
-        for( int j=NJ; j<NJ+gc; j++ ){
+        for( int j=0; j<gc; j++ ){
+          #pragma novector
           for( int i=0; i<NI; i++ ){
-            array[_IDX_V3D(i,j,k,l,NI,NJ,NK,VC)] = recvp[_IDX_VJ(i,j,k,l,NI,NJ,NK,gc)];
+            array[_IDX_V3D(i,j,k,l,NI,NJ,NK,VC)] = recvp[_IDX_VJ(i,j,k,l,NI,NK,gc)];
           }
         }
       }
@@ -247,8 +255,9 @@ void BrickComm::pack_VZcell(const REAL_TYPE *array,
     for (int l=0; l<3; l++) {
       for( int k=0; k<gc; k++ ){
         for( int j=0; j<NJ; j++ ){
+          #pragma novector
           for( int i=0; i<NI; i++ ){
-            sendm[_IDX_VK(i,j,k,l,NI,NJ,0,gc)] = array[_IDX_V3D(i,j,k,l,NI,NJ,NK,VC)];
+            sendm[_IDX_VK(i,j,k,l,NI,NJ,gc)] = array[_IDX_V3D(i,j,k,l,NI,NJ,NK,VC)];
           }
         }
       }
@@ -259,10 +268,11 @@ void BrickComm::pack_VZcell(const REAL_TYPE *array,
   {
 #pragma omp parallel for collapse(3)
     for (int l=0; l<3; l++) {
-      for( int k=NK-gc; k<NK; k++ ){
+      for( int k=0; k<gc; k++ ){
         for( int j=0; j<NJ; j++ ){
+          #pragma novector
           for( int i=0; i<NI; i++ ){
-            sendp[_IDX_VK(i,j,k,l,NI,NJ,NK-gc,gc)] = array[_IDX_V3D(i,j,k,l,NI,NJ,NK,VC)];
+            sendp[_IDX_VK(i,j,k,l,NI,NJ,gc)] = array[_IDX_V3D(i,j,k,l,NI,NJ,NK,VC)];
           }
         }
       }
@@ -296,10 +306,11 @@ void BrickComm::unpack_VZcell(REAL_TYPE *array,
   {
 #pragma omp parallel for collapse(3)
     for (int l=0; l<3; l++) {
-      for( int k=0-gc; k<0; k++ ){
+      for( int k=0; k<gc; k++ ){
         for( int j=0; j<NJ; j++ ){
+          #pragma novector
           for( int i=0; i<NI; i++ ){
-            array[_IDX_V3D(i,j,k,l,NI,NJ,NK,VC)] = recvm[_IDX_VK(i,j,k,l,NI,NJ,0-gc,gc)];
+            array[_IDX_V3D(i,j,k,l,NI,NJ,NK,VC)] = recvm[_IDX_VK(i,j,k,l,NI,NJ,gc)];
           }
         }
       }
@@ -310,10 +321,11 @@ void BrickComm::unpack_VZcell(REAL_TYPE *array,
   {
 #pragma omp parallel for collapse(3)
     for (int l=0; l<3; l++) {
-      for( int k=NK; k<NK+gc; k++ ){
+      for( int k=0; k<gc; k++ ){
         for( int j=0; j<NJ; j++ ){
+          #pragma novector
           for( int i=0; i<NI; i++ ){
-            array[_IDX_V3D(i,j,k,l,NI,NJ,NK,VC)] = recvp[_IDX_VK(i,j,k,l,NI,NJ,NK,gc)];
+            array[_IDX_V3D(i,j,k,l,NI,NJ,NK,VC)] = recvp[_IDX_VK(i,j,k,l,NI,NJ,gc)];
           }
         }
       }
@@ -373,10 +385,11 @@ bool BrickComm::pack_VEcell(REAL_TYPE *array,
       switch(dir)
       {
       case int(E_mYmZ):
-#pragma omp parallel for collapse(4)
+#pragma omp parallel for collapse(3)
         for( int l=0; l<3; l++ ){
           for( int k=0; k<gc; k++ ){
             for( int j=0; j<gc; j++ ){
+              #pragma novector
               for( int i=0; i<NI; i++ ){
                 sendptr[_IDX_V3D(i,j,k,l,NI,gc,gc,0)] = array[_IDX_V3D(i,j,k,l,NI,NJ,NK,VC)];
               }
@@ -386,10 +399,11 @@ bool BrickComm::pack_VEcell(REAL_TYPE *array,
         break;
 
       case int(E_pYmZ):
-#pragma omp parallel for collapse(4)
+#pragma omp parallel for collapse(3)
         for( int l=0; l<3; l++ ){
           for( int k=0; k<gc; k++ ){
             for( int j=NJ-gc; j<NJ; j++ ){
+              #pragma novector
               for( int i=0; i<NI; i++ ){
                 sendptr[_IDX_V3D(i,j-(NJ-gc),k,l,NI,gc,gc,0)] = array[_IDX_V3D(i,j,k,l,NI,NJ,NK,VC)];
               }
@@ -399,10 +413,11 @@ bool BrickComm::pack_VEcell(REAL_TYPE *array,
         break;
 
       case int(E_mYpZ):
-#pragma omp parallel for collapse(4)
+#pragma omp parallel for collapse(3)
         for( int l=0; l<3; l++ ){
           for( int k=NK-gc; k<NK; k++ ){
             for( int j=0; j<gc; j++ ){
+              #pragma novector
               for( int i=0; i<NI; i++ ){
                 sendptr[_IDX_V3D(i,j,k-(NK-gc),l,NI,gc,gc,0)] = array[_IDX_V3D(i,j,k,l,NI,NJ,NK,VC)];
               }
@@ -412,10 +427,11 @@ bool BrickComm::pack_VEcell(REAL_TYPE *array,
         break;
       case int(E_pYpZ):
 
-#pragma omp parallel for collapse(4)
+#pragma omp parallel for collapse(3)
         for( int l=0; l<3; l++ ){
           for( int k=NK-gc; k<NK; k++ ){
             for( int j=NJ-gc; j<NJ; j++ ){
+              #pragma novector
               for( int i=0; i<NI; i++ ){
                 sendptr[_IDX_V3D(i,j-(NJ-gc),k-(NK-gc),l,NI,gc,gc,0)] = array[_IDX_V3D(i,j,k,l,NI,NJ,NK,VC)];
               }

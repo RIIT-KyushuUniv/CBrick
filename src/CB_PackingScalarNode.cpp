@@ -52,6 +52,7 @@ rankB   [-2]   [-1]    [0]    [1]    [2]
 #pragma omp parallel for collapse(2)
     for( int k=0; k<NK; k++ ){
       for( int j=0; j<NJ; j++ ){
+        #pragma novector
         for( int i=0; i<gc; i++ ){
           sendm[_IDX_SI(i,j,k,NJ,gc)] = array[_IDX_S3D(i+1,j,k,NI,NJ,VC)];
         }
@@ -65,6 +66,7 @@ rankB   [-2]   [-1]    [0]    [1]    [2]
 #pragma omp parallel for collapse(2)
     for( int k=0; k<NK; k++ ){
       for( int j=0; j<NJ; j++ ){
+        #pragma novector
         for( int i=0; i<gc; i++ ){
           sendp[_IDX_SI(i,j,k,NJ,gc)] = array[_IDX_S3D(NI-2+i,j,k,NI,NJ,VC)];
         }
@@ -76,8 +78,8 @@ rankB   [-2]   [-1]    [0]    [1]    [2]
 
 /*
  * @brief unpack send data for I direction
- * @param [in,out]  array   dest array
- * @param [in]  gc number of guide cell layer to be sent
+ * @param [out] array   dest array
+ * @param [in]  gc      number of guide cell layer to be sent
  * @param [in]  recvm   recv buffer of I- direction
  * @param [in]  recvp   recv buffer of I+ direction
  * @param [in]  nIDm    Rank number of I- direction
@@ -109,6 +111,7 @@ rankB   [-2]   [-1]    [0]    [1]    [2]
 #pragma omp parallel for collapse(2)
     for( int k=0; k<NK; k++ ){
       for( int j=0; j<NJ; j++ ){
+        #pragma novector
         for( int i=0; i<gc; i++ ){
           array[_IDX_S3D(i-1,j,k,NI,NJ,VC)] = recvm[_IDX_SI(i,j,k,NJ,gc)];
         }
@@ -122,6 +125,7 @@ rankB   [-2]   [-1]    [0]    [1]    [2]
 #pragma omp parallel for collapse(2)
     for( int k=0; k<NK; k++ ){
       for( int j=0; j<NJ; j++ ){
+        #pragma novector
         for( int i=0; i<gc; i++ ){
           array[_IDX_S3D(NI+i,j,k,NI,NJ,VC)] = recvp[_IDX_SI(i,j,k,NJ,gc)];
         }
@@ -133,7 +137,7 @@ rankB   [-2]   [-1]    [0]    [1]    [2]
 /*
  * @brief pack send data for J direction
  * @param [in]  array   source array
- * @param [in]  gc number of guide cell layer to be sent
+ * @param [in]  gc      number of guide cell layer to be sent
  * @param [out] sendm   send buffer of J- direction
  * @param [out] sendp   send buffer of J+ direction
  * @param [in]  nIDm    Rank number of J- direction
@@ -155,9 +159,10 @@ void BrickComm::pack_SYnode(const REAL_TYPE *array,
   {
 #pragma omp parallel for collapse(2)
     for( int k=0; k<NK; k++ ){
-      for( int j=1; j<=gc; j++ ){
+      for( int j=0; j<gc; j++ ){
+        #pragma novector
         for( int i=0; i<NI; i++ ){
-          sendm[_IDX_SJ(i,j,k,NI,1,gc)] = array[_IDX_S3D(i,j,k,NI,NJ,VC)];
+          sendm[_IDX_SJ(i,j,k,NI,gc)] = array[_IDX_S3D(i,j+1,k,NI,NJ,VC)];
         }
       }
     }
@@ -167,9 +172,10 @@ void BrickComm::pack_SYnode(const REAL_TYPE *array,
   {
 #pragma omp parallel for collapse(2)
     for( int k=0; k<NK; k++ ){
-      for( int j=NJ-gc; j<NJ; j++ ){
+      for( int j=0; j<gc; j++ ){
+        #pragma novector
         for( int i=0; i<NI; i++ ){
-          sendp[_IDX_SJ(i,j,k,NI,NJ-gc,gc)] = array[_IDX_S3D(i,j,k,NI,NJ,VC)];
+          sendp[_IDX_SJ(i,j,k,NI,gc)] = array[_IDX_S3D(i,NJ-2+j,k,NI,NJ,VC)];
         }
       }
     }
@@ -179,8 +185,8 @@ void BrickComm::pack_SYnode(const REAL_TYPE *array,
 
 /*
  * @brief unpack send data for J direction
- * @param [in,out]  array   dest array
- * @param [in]  gc number of guide cell layer to be sent
+ * @param [out] array   dest array
+ * @param [in]  gc      number of guide cell layer to be sent
  * @param [in]  recvm   recv buffer of J- direction
  * @param [in]  recvp   recv buffer of J+ direction
  * @param [in]  nIDm    Rank number of J- direction
@@ -202,9 +208,10 @@ void BrickComm::unpack_SYnode(REAL_TYPE *array,
   {
 #pragma omp parallel for collapse(2)
     for( int k=0; k<NK; k++ ){
-      for( int j=1-gc; j<1; j++ ){
+      for( int j=0; j<gc; j++ ){
+        #pragma novector
         for( int i=0; i<NI; i++ ){
-          array[_IDX_S3D(i,j,k,NI,NJ,VC)] = recvm[_IDX_SJ(i,j,k,NI,1-gc,gc)];
+          array[_IDX_S3D(i,j-1,k,NI,NJ,VC)] = recvm[_IDX_SJ(i,j,k,NI,gc)];
         }
       }
     }
@@ -214,9 +221,10 @@ void BrickComm::unpack_SYnode(REAL_TYPE *array,
   {
 #pragma omp parallel for collapse(2)
     for( int k=0; k<NK; k++ ){
-      for( int j=NJ; j<NJ+gc; j++ ){
+      for( int j=0; j<gc; j++ ){
+        #pragma novector
         for( int i=0; i<NI; i++ ){
-          array[_IDX_S3D(i,j,k,NI,NJ,VC)] = recvp[_IDX_SJ(i,j,k,NI,NJ,gc)];
+          array[_IDX_S3D(i,NJ+j,k,NI,NJ,VC)] = recvp[_IDX_SJ(i,j,k,NI,gc)];
         }
       }
     }
@@ -227,7 +235,7 @@ void BrickComm::unpack_SYnode(REAL_TYPE *array,
 /*
  * @brief pack send data for K direction
  * @param [in]  array   source array
- * @param [in]  gc number of guide cell layer actually to be sent
+ * @param [in]  gc      number of guide cell layer actually to be sent
  * @param [out] sendm   send buffer of K- direction
  * @param [out] sendp   send buffer of K+ direction
  * @param [in]  nIDm    Rank number of K- direction
@@ -248,10 +256,11 @@ void BrickComm::pack_SZnode(const REAL_TYPE *array,
   if( nIDm >= 0 )
   {
 #pragma omp parallel for collapse(2)
-    for( int k=1; k<=gc; k++ ){
+    for( int k=0; k<gc; k++ ){
       for( int j=0; j<NJ; j++ ){
+        #pragma novector
         for( int i=0; i<NI; i++ ){
-          sendm[_IDX_SK(i,j,k,NI,NJ,1,gc)] = array[_IDX_S3D(i,j,k,NI,NJ,VC)];
+          sendm[_IDX_SK(i,j,k,NI,NJ)] = array[_IDX_S3D(i,j,k+1,NI,NJ,VC)];
         }
       }
     }
@@ -260,10 +269,11 @@ void BrickComm::pack_SZnode(const REAL_TYPE *array,
   if( nIDp >= 0 )
   {
 #pragma omp parallel for collapse(2)
-    for( int k=NK-gc; k<NK; k++ ){
+    for( int k=0; k<gc; k++ ){
       for( int j=0; j<NJ; j++ ){
+        #pragma novector
         for( int i=0; i<NI; i++ ){
-          sendp[_IDX_SK(i,j,k,NI,NJ,NK-gc,gc)] = array[_IDX_S3D(i,j,k,NI,NJ,VC)];
+          sendp[_IDX_SK(i,j,k,NI,NJ)] = array[_IDX_S3D(i,j,NK-2+k,NI,NJ,VC)];
         }
       }
     }
@@ -295,10 +305,11 @@ void BrickComm::unpack_SZnode(REAL_TYPE *array,
   if( nIDm >= 0 )
   {
 #pragma omp parallel for collapse(2)
-    for( int k=1-gc; k<1; k++ ){
+    for( int k=0; k<gc; k++ ){
       for( int j=0; j<NJ; j++ ){
+        #pragma novector
         for( int i=0; i<NI; i++ ){
-          array[_IDX_S3D(i,j,k,NI,NJ,VC)] = recvm[_IDX_SK(i,j,k,NI,NJ,1-gc,gc)];
+          array[_IDX_S3D(i,j,k-1,NI,NJ,VC)] = recvm[_IDX_SK(i,j,k,NI,NJ)];
         }
       }
     }
@@ -307,10 +318,11 @@ void BrickComm::unpack_SZnode(REAL_TYPE *array,
   if( nIDp >= 0 )
   {
 #pragma omp parallel for collapse(2)
-    for( int k=NK; k<NK+gc; k++ ){
+    for( int k=0; k<gc; k++ ){
       for( int j=0; j<NJ; j++ ){
+        #pragma novector
         for( int i=0; i<NI; i++ ){
-          array[_IDX_S3D(i,j,k,NI,NJ,VC)] = recvp[_IDX_SK(i,j,k,NI,NJ,NK,gc)];
+          array[_IDX_S3D(i,j,NK+k,NI,NJ,VC)] = recvp[_IDX_SK(i,j,k,NI,NJ)];
         }
       }
     }

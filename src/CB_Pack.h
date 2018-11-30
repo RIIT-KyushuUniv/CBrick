@@ -16,6 +16,8 @@
  * @brief  Packing header
  */
 
+
+
 /* バッファへのインデクス変換 (I方向)
  *  @param [in] _I  i方向インデクス
  *  @param [in] _J  j方向インデクス
@@ -25,16 +27,17 @@
  *  @param [in] _VC 実際に送受信する仮想セル数
  *  @return 1次元インデクス
  */
+// 横方向の袖まで含んだ形式
 //#define _IDX_SI(_I,_J,_K,_IS,_NJ,_VC) \
 //( (_K+(_VC)) * (_VC) * (_NJ+2*(_VC)) \
 //+ (_J+(_VC)) * (_VC) \
 //+ (_I-(_IS)) \
 //)
-#define _IDX_SI(_I,_J,_K,_IS,_NJ,_VC) \
-( (_K)       * (_VC) * (_NJ) \
-+ (_J)       * (_VC) \
-+ (_I-(_IS)) \
-)
+#define _IDX_SI(_I,_J,_K,_NJ,_VC) \
+    ( (_K) * (_VC) * (_NJ) \
+    + (_J) * (_VC) \
+    + (_I) )
+
 
 /* バッファへのインデクス変換 (J方向)
  *  @param [in] _I  i方向インデクス
@@ -95,9 +98,9 @@
 //+ (_J+(_VC)) * (_VC) \
 //+ (_I-(_IS)) \
 //)
-#define _IDX_VI(_I,_J,_K,_L,_IS,_NJ,_NK,_VC) \
+#define _IDX_VI(_I,_J,_K,_L,_NJ,_NK,_VC) \
 ( (_L) * (_VC) * (_NJ) * (_NK) \
-+ _IDX_SI(_I,_J,_K,_IS,_NJ,_VC) \
++ _IDX_SI(_I,_J,_K,_NJ,_VC) \
 )
 
 /* バッファへのインデクス変換 (J方向)

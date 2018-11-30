@@ -246,7 +246,7 @@ public:
   bool createRankTable();
 
   // @brief 最適な分割数を見つける
-  // @param [in] mode {0-IJK分割、デフォルト、1-JK分割}
+  // @param [in] mode {0-IJK分割:デフォルト、1-IJ分割, 2-JK分割}
   bool findOptimalDivision(int terrain_mode=0);
 
   // @brief Global > Localインデクス変換

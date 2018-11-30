@@ -83,6 +83,9 @@ enum DIRection {
 };
 
 
+
+
+
 /** 3次元インデクス(i,j,k) -> 1次元インデクス変換マクロ [C version]
  *  @param [in] _I  i方向インデクス
  *  @param [in] _J  j方向インデクス
@@ -101,12 +104,12 @@ enum DIRection {
 
 /** 3次元インデクス(i,j,k) -> 1次元インデクス変換マクロ
  *  @note i,j,kインデクスはF表記
- *  @param [in] _I  i方向インデクス
- *  @param [in] _J  j方向インデクス
- *  @param [in] _K  k方向インデクス
- *  @param [in] _NI i方向インデクスサイズ
- *  @param [in] _NJ j方向インデクスサイズ
- *  @param [in] _NK k方向インデクスサイズ
+ *  @param [in] _I  i方向インデクス (0,NI-1)
+ *  @param [in] _J  j方向インデクス (0, NJ-1)
+ *  @param [in] _K  k方向インデクス (0, NK-1)
+ *  @param [in] _NI i方向インデクスサイズ NI
+ *  @param [in] _NJ j方向インデクスサイズ NJ
+ *  @param [in] _NK k方向インデクスサイズ NK
  *  @param [in] _VC 仮想セル数
  *  @return 1次元インデクス
  */
@@ -118,22 +121,40 @@ enum DIRection {
 
 
 /** 3次元インデクス(i,j,k,l) -> 1次元インデクス変換マクロ [C version]
- *  @param [in] _I  i方向インデクス
- *  @param [in] _J  j方向インデクス
- *  @param [in] _K  k方向インデクス
- *  @param [in] _L  ベクトル成分インデクス {0,1,2}
+ *  @param [in] _I  i方向インデクス (1,NI)
+ *  @param [in] _J  j方向インデクス (1,NJ)
+ *  @param [in] _K  k方向インデクス (1,NK)
+ *  @param [in] _L  ベクトル成分インデクス {1,2,3}
  *  @param [in] _NI i方向インデクスサイズ
  *  @param [in] _NJ j方向インデクスサイズ
  *  @param [in] _NK k方向インデクスサイズ
  *  @param [in] _VC 仮想セル数
  *  @return 1次元インデクス
  */
- #define _IDX_V3D(_I,_J,_K,_L,_NI,_NJ,_NK,_VC) \
- ( (_L) * (_NI+2*(_VC)) * (_NJ+2*(_VC)) * (_NK+2*(_VC))  \
- + (_K+(_VC)) * (_NI+2*(_VC)) * (_NJ+2*(_VC)) \
- + (_J+(_VC)) * (_NI+2*(_VC)) \
- + (_I+(_VC)) \
+ #define _F_IDX_V3D(_I,_J,_K,_L,_NI,_NJ,_NK,_VC) \
+ ( ((_L)-1) * (_NI+2*(_VC)) * (_NJ+2*(_VC)) * (_NK+2*(_VC))  \
+ + (_K+(_VC)-1) * (_NI+2*(_VC)) * (_NJ+2*(_VC)) \
+ + (_J+(_VC)-1) * (_NI+2*(_VC)) \
+ + (_I+(_VC)-1) \
  )
+
+ /** 3次元インデクス(i,j,k,l) -> 1次元インデクス変換マクロ [C version]
+  *  @param [in] _I  i方向インデクス
+  *  @param [in] _J  j方向インデクス
+  *  @param [in] _K  k方向インデクス
+  *  @param [in] _L  ベクトル成分インデクス {0,1,2}
+  *  @param [in] _NI i方向インデクスサイズ
+  *  @param [in] _NJ j方向インデクスサイズ
+  *  @param [in] _NK k方向インデクスサイズ
+  *  @param [in] _VC 仮想セル数
+  *  @return 1次元インデクス
+  */
+  #define _IDX_V3D(_I,_J,_K,_L,_NI,_NJ,_NK,_VC) \
+  ( (_L) * (_NI+2*(_VC)) * (_NJ+2*(_VC)) * (_NK+2*(_VC))  \
+  + (_K+(_VC)) * (_NI+2*(_VC)) * (_NJ+2*(_VC)) \
+  + (_J+(_VC)) * (_NI+2*(_VC)) \
+  + (_I+(_VC)) \
+  )
 
 
 #define stamped_printf printf("%s (%d):  ",__FILE__, __LINE__), printf

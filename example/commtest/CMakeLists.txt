@@ -20,6 +20,5 @@ link_directories(
 
 add_executable(commtest commtest.cpp)
 target_link_libraries(commtest -lCBrick_f)
-set (test_parameters -np 4 "./commtest" "64" "64" "64" "2" "cell")
+set (test_parameters -np 4 "./commtest" "64" "64" "64" "2" "cell" "F")
 add_test(NAME test1 COMMAND "mpirun" ${test_parameters})
-

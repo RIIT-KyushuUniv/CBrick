@@ -21,6 +21,13 @@ JK   |     |      |
 ## REVISION HISTORY
 
 ---
+- 2018-11-30 Version 1.3.1
+  - 袖通信が怪しいので、テストを書く  > commtest
+  - node, X方向のみ確認 >> 2, 3分割, F/Cindex
+  - Y, Z方向の修正は、commtestの方向とpack/unpackを見ること
+
+
+---
 - 2018-11-10 Version 1.3.0
   - enumerate()でcellとnodeを共通化
 

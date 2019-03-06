@@ -10,6 +10,19 @@
 #ifndef Diff3D_h
 #define Diff3D_h
 
+// precision
+#ifdef _REAL_IS_DOUBLE_
+#define REAL_TYPE double
+#else
+/** 実数型の指定
+ * - デフォルトでは、REAL_TYPE=float
+ * - コンパイル時オプション-D_REAL_IS_DOUBLE_を付与することで
+ *   REAL_TYPE=doubleになる
+ */
+#define REAL_TYPE float
+#endif
+
+
 #include <mpi.h>
 #include <math.h>
 #include <stdio.h>

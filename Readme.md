@@ -9,7 +9,7 @@ A class library to help making applications on Cartesian grid, including simple 
 
 
 ## Copyright
-- Copyright (c) 2017-2018 Research Institute for Information Technology(RIIT), Kyushu University. All rights reserved.
+- Copyright (c) 2017-2019 Research Institute for Information Technology(RIIT), Kyushu University. All rights reserved.
 
 
 ## Software Requirement

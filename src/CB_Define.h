@@ -6,7 +6,7 @@
 #
 # CBrick
 #
-# Copyright (c) 2017-2018 Research Institute for Information Technology(RIIT),
+# Copyright (c) 2017-2019 Research Institute for Information Technology(RIIT),
 #                    Kyushu University.  All rights reserved.
 #
 ####################################################################################
@@ -25,24 +25,24 @@
 #include <omp.h>
 #endif
 
-// precision
+/* 実数型の指定
+* - デフォルトでは、REAL_TYPE=float
+* - コンパイル時オプション-D_REAL_IS_DOUBLE_を付与することで
+*   REAL_TYPE=doubleになる
+
 #ifdef _REAL_IS_DOUBLE_
 #define REAL_TYPE double
 #else
-/** 実数型の指定
- * - デフォルトでは、REAL_TYPE=float
- * - コンパイル時オプション-D_REAL_IS_DOUBLE_を付与することで
- *   REAL_TYPE=doubleになる
- */
 #define REAL_TYPE float
 #endif
+*/
 
 #define _SIZE_DOUBLE_ 8
 
-#ifndef _DIAGONAL_COMM
-#define NOFACE 6
-#else
+#ifdef _DIAGONAL_COMM
 #define NOFACE 26
+#else
+#define NOFACE 6
 #endif
 
 #define ON 1

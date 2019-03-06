@@ -1,22 +1,24 @@
+#ifndef _CB_PACK_V_NODE_H_
+#define _CB_PACK_V_NODE_H_
+
 /*
 ###################################################################################
 #
 # CBrick
 #
-# Copyright (c) 2017-2018 Research Institute for Information Technology(RIIT),
+# Copyright (c) 2017-2019 Research Institute for Information Technology(RIIT),
 #                    Kyushu University.  All rights reserved.
 #
 ####################################################################################
 */
 
 /*
- * @file   CB_PackingVectorCell.cpp
+ * @file   CB_PackingVectorNode.h
  * @brief  BrickComm class
  */
 
-#include "CB_Comm.h"
 
-
+// #########################################################
 /*
  * @brief pack send data for I direction
  * @param [in]  array   source array
@@ -26,17 +28,26 @@
  * @param [in]  nIDm    Rank number of I- direction
  * @param [in]  nIDp    Rank number of I+ direction
  */
-void BrickComm::pack_VXcell(const REAL_TYPE *array,
-                        const int gc,
-                        REAL_TYPE *sendm,
-                        REAL_TYPE *sendp,
-                        const int nIDm,
-                        const int nIDp)
+template <class T>
+void BrickComm::pack_VXnode(const T *array,
+                               const int gc,
+                               T *sendm,
+                               T *sendp,
+                               const int nIDm,
+                               const int nIDp)
 {
   int NI = size[0];
   int NJ = size[1];
   int NK = size[2];
   int VC = halo_width;
+
+  /*
+                   <--gc-->
+  rankA  [NI-3] [NI-2] [NI-1]  [NI]  [NI+1]
+       -----+------+------|------+------+-------> i
+  rankB   [-2]   [-1]    [0]    [1]    [2]
+                                 <--gc-->
+  */
 
   if( nIDm >= 0 )
   {
@@ -46,7 +57,7 @@ void BrickComm::pack_VXcell(const REAL_TYPE *array,
         for( int j=0; j<NJ; j++ ){
           #pragma novector
           for( int i=0; i<gc; i++ ){
-            sendm[_IDX_VI(i,j,k,l,NJ,NK,gc)] = array[_IDX_V3D(i,j,k,l,NI,NJ,NK,VC)];
+            sendm[_IDX_VI(i,j,k,l,NJ,NK,gc)] = array[_IDX_V3D(i+1,j,k,l,NI,NJ,NK,VC)];
           }
         }
       }
@@ -61,7 +72,7 @@ void BrickComm::pack_VXcell(const REAL_TYPE *array,
         for( int j=0; j<NJ; j++ ){
           #pragma novector
           for( int i=0; i<gc; i++ ){
-            sendp[_IDX_VI(i,j,k,l,NJ,NK,gc)] = array[_IDX_V3D(NI-gc+i,j,k,l,NI,NJ,NK,VC)];
+            sendp[_IDX_VI(i,j,k,l,NJ,NK,gc)] = array[_IDX_V3D(NI-2+i,j,k,l,NI,NJ,NK,VC)];
           }
         }
       }
@@ -70,21 +81,23 @@ void BrickComm::pack_VXcell(const REAL_TYPE *array,
 }
 
 
+// #########################################################
 /*
  * @brief unpack send data for I direction
- * @param [in,out]  array   dest array
+ * @param [out] array   dest array
  * @param [in]  gc      number of guide cell layer to be sent
  * @param [in]  recvm   recv buffer of I- direction
  * @param [in]  recvp   recv buffer of I+ direction
  * @param [in]  nIDm    Rank number of I- direction
  * @param [in]  nIDp    Rank number of I+ direction
  */
-void BrickComm::unpack_VXcell(REAL_TYPE *array,
-                          const int gc,
-                          const REAL_TYPE *recvm,
-                          const REAL_TYPE *recvp,
-                          const int nIDm,
-                          const int nIDp)
+template <class T>
+void BrickComm::unpack_VXnode(T *array,
+                                 const int gc,
+                                 const T *recvm,
+                                 const T *recvp,
+                                 const int nIDm,
+                                 const int nIDp)
 {
   int NI = size[0];
   int NJ = size[1];
@@ -99,7 +112,7 @@ void BrickComm::unpack_VXcell(REAL_TYPE *array,
         for( int j=0; j<NJ; j++ ){
           #pragma novector
           for( int i=0; i<gc; i++ ){
-            array[_IDX_V3D(i-gc,j,k,l,NI,NJ,NK,VC)] = recvm[_IDX_VI(i,j,k,l,NJ,NK,gc)];
+            array[_IDX_V3D(i-1,j,k,l,NI,NJ,NK,VC)] = recvm[_IDX_VI(i,j,k,l,NJ,NK,gc)];
           }
         }
       }
@@ -122,21 +135,24 @@ void BrickComm::unpack_VXcell(REAL_TYPE *array,
   }
 }
 
+
+// #########################################################
 /*
  * @brief pack send data for J direction
  * @param [in]  array   source array
- * @param [in]  gc number of guide cell layer to be sent
+ * @param [in]  gc      number of guide cell layer to be sent
  * @param [out] sendm   send buffer of J- direction
  * @param [out] sendp   send buffer of J+ direction
  * @param [in]  nIDm    Rank number of J- direction
  * @param [in]  nIDp    Rank number of J+ direction
  */
-void BrickComm::pack_VYcell(const REAL_TYPE *array,
-                        const int gc,
-                        REAL_TYPE *sendm,
-                        REAL_TYPE *sendp,
-                        const int nIDm,
-                        const int nIDp)
+template <class T>
+void BrickComm::pack_VYnode(const T *array,
+                               const int gc,
+                               T *sendm,
+                               T *sendp,
+                               const int nIDm,
+                               const int nIDp)
 {
   int NI = size[0];
   int NJ = size[1];
@@ -151,7 +167,7 @@ void BrickComm::pack_VYcell(const REAL_TYPE *array,
         for( int j=0; j<gc; j++ ){
           #pragma novector
           for( int i=0; i<NI; i++ ){
-            sendm[_IDX_VJ(i,j,k,l,NI,NK,gc)] = array[_IDX_V3D(i,j,k,l,NI,NJ,NK,VC)];
+            sendm[_IDX_VJ(i,j,k,l,NI,NK,gc)] = array[_IDX_V3D(i,j+1,k,l,NI,NJ,NK,VC)];
           }
         }
       }
@@ -166,7 +182,7 @@ void BrickComm::pack_VYcell(const REAL_TYPE *array,
         for( int j=0; j<gc; j++ ){
           #pragma novector
           for( int i=0; i<NI; i++ ){
-            sendp[_IDX_VJ(i,j,k,l,NI,NK,gc)] = array[_IDX_V3D(i,j,k,l,NI,NJ,NK,VC)];
+            sendp[_IDX_VJ(i,j,k,l,NI,NK,gc)] = array[_IDX_V3D(i,NJ-2+j,k,l,NI,NJ,NK,VC)];
           }
         }
       }
@@ -175,21 +191,23 @@ void BrickComm::pack_VYcell(const REAL_TYPE *array,
 }
 
 
+// #########################################################
 /*
  * @brief unpack send data for J direction
- * @param [in,out]  array   dest array
- * @param [in]  gc number of guide cell layer to be sent
+ * @param [out] array   dest array
+ * @param [in]  gc      number of guide cell layer to be sent
  * @param [in]  recvm   recv buffer of J- direction
  * @param [in]  recvp   recv buffer of J+ direction
  * @param [in]  nIDm    Rank number of J- direction
  * @param [in]  nIDp    Rank number of J+ direction
  */
-void BrickComm::unpack_VYcell(REAL_TYPE *array,
-                          const int gc,
-                          const REAL_TYPE *recvm,
-                          const REAL_TYPE *recvp,
-                          const int nIDm,
-                          const int nIDp)
+template <class T>
+void BrickComm::unpack_VYnode(T *array,
+                                 const int gc,
+                                 const T *recvm,
+                                 const T *recvp,
+                                 const int nIDm,
+                                 const int nIDp)
 {
   int NI = size[0];
   int NJ = size[1];
@@ -204,7 +222,7 @@ void BrickComm::unpack_VYcell(REAL_TYPE *array,
         for( int j=0; j<gc; j++ ){
           #pragma novector
           for( int i=0; i<NI; i++ ){
-            array[_IDX_V3D(i,j,k,l,NI,NJ,NK,VC)] = recvm[_IDX_VJ(i,j,k,l,NI,NK,gc)];
+            array[_IDX_V3D(i,j-1,k,l,NI,NJ,NK,VC)] = recvm[_IDX_VJ(i,j,k,l,NI,NK,gc)];
           }
         }
       }
@@ -219,7 +237,7 @@ void BrickComm::unpack_VYcell(REAL_TYPE *array,
         for( int j=0; j<gc; j++ ){
           #pragma novector
           for( int i=0; i<NI; i++ ){
-            array[_IDX_V3D(i,j,k,l,NI,NJ,NK,VC)] = recvp[_IDX_VJ(i,j,k,l,NI,NK,gc)];
+            array[_IDX_V3D(i,NJ+j,k,l,NI,NJ,NK,VC)] = recvp[_IDX_VJ(i,j,k,l,NI,NK,gc)];
           }
         }
       }
@@ -228,21 +246,23 @@ void BrickComm::unpack_VYcell(REAL_TYPE *array,
 }
 
 
+// #########################################################
 /*
  * @brief pack send data for K direction
  * @param [in]  array   source array
- * @param [in]  gc number of guide cell layer actually to be sent
+ * @param [in]  gc      number of guide cell layer actually to be sent
  * @param [out] sendm   send buffer of K- direction
  * @param [out] sendp   send buffer of K+ direction
  * @param [in]  nIDm    Rank number of K- direction
  * @param [in]  nIDp    Rank number of K+ direction
  */
-void BrickComm::pack_VZcell(const REAL_TYPE *array,
-                        const int gc,
-                        REAL_TYPE *sendm,
-                        REAL_TYPE *sendp,
-                        const int nIDm,
-                        const int nIDp)
+template <class T>
+void BrickComm::pack_VZnode(const T *array,
+                               const int gc,
+                               T *sendm,
+                               T *sendp,
+                               const int nIDm,
+                               const int nIDp)
 {
   int NI = size[0];
   int NJ = size[1];
@@ -257,7 +277,7 @@ void BrickComm::pack_VZcell(const REAL_TYPE *array,
         for( int j=0; j<NJ; j++ ){
           #pragma novector
           for( int i=0; i<NI; i++ ){
-            sendm[_IDX_VK(i,j,k,l,NI,NJ,gc)] = array[_IDX_V3D(i,j,k,l,NI,NJ,NK,VC)];
+            sendm[_IDX_VK(i,j,k,l,NI,NJ,gc)] = array[_IDX_V3D(i,j,k+1,l,NI,NJ,NK,VC)];
           }
         }
       }
@@ -272,7 +292,7 @@ void BrickComm::pack_VZcell(const REAL_TYPE *array,
         for( int j=0; j<NJ; j++ ){
           #pragma novector
           for( int i=0; i<NI; i++ ){
-            sendp[_IDX_VK(i,j,k,l,NI,NJ,gc)] = array[_IDX_V3D(i,j,k,l,NI,NJ,NK,VC)];
+            sendp[_IDX_VK(i,j,k,l,NI,NJ,gc)] = array[_IDX_V3D(i,j,NK-2+k,l,NI,NJ,NK,VC)];
           }
         }
       }
@@ -281,21 +301,23 @@ void BrickComm::pack_VZcell(const REAL_TYPE *array,
 }
 
 
+// #########################################################
 /*
  * @brief unpack send data for K direction
- * @param [in,out]  array   dest array
- * @param [in]  gc number of guide cell layer to be sent
+ * @param [out] array   dest array
+ * @param [in]  gc      number of guide cell layer to be sent
  * @param [in]  recvm   recv buffer of K- direction
  * @param [in]  recvp   recv buffer of K+ direction
  * @param [in]  nIDm    Rank number of K- direction
  * @param [in]  nIDp    Rank number of K+ direction
  */
-void BrickComm::unpack_VZcell(REAL_TYPE *array,
-                          const int gc,
-                          const REAL_TYPE *recvm,
-                          const REAL_TYPE *recvp,
-                          const int nIDm,
-                          const int nIDp)
+template <class T>
+void BrickComm::unpack_VZnode(T *array,
+                                 const int gc,
+                                 const T *recvm,
+                                 const T *recvp,
+                                 const int nIDm,
+                                 const int nIDp)
 {
   int NI = size[0];
   int NJ = size[1];
@@ -310,7 +332,7 @@ void BrickComm::unpack_VZcell(REAL_TYPE *array,
         for( int j=0; j<NJ; j++ ){
           #pragma novector
           for( int i=0; i<NI; i++ ){
-            array[_IDX_V3D(i,j,k,l,NI,NJ,NK,VC)] = recvm[_IDX_VK(i,j,k,l,NI,NJ,gc)];
+            array[_IDX_V3D(i,j,k-1,l,NI,NJ,NK,VC)] = recvm[_IDX_VK(i,j,k,l,NI,NJ,gc)];
           }
         }
       }
@@ -325,7 +347,7 @@ void BrickComm::unpack_VZcell(REAL_TYPE *array,
         for( int j=0; j<NJ; j++ ){
           #pragma novector
           for( int i=0; i<NI; i++ ){
-            array[_IDX_V3D(i,j,k,l,NI,NJ,NK,VC)] = recvp[_IDX_VK(i,j,k,l,NI,NJ,gc)];
+            array[_IDX_V3D(i,j,NK+k,l,NI,NJ,NK,VC)] = recvp[_IDX_VK(i,j,k,l,NI,NJ,gc)];
           }
         }
       }
@@ -333,6 +355,11 @@ void BrickComm::unpack_VZcell(REAL_TYPE *array,
   }
 }
 
+
+
+
+#ifdef _DIAGONAL_COMM
+// #########################################################
 /*
  * @brief pack send data for diagonal edge
  * @param [in]  array    source array
@@ -342,25 +369,18 @@ void BrickComm::unpack_VZcell(REAL_TYPE *array,
  * @param [out] req      Array of MPI request
  * @retval true-success, false-fail
  */
-bool BrickComm::pack_VEcell(REAL_TYPE *array,
-                        const int gc,
-                        REAL_TYPE *sendbuf,
-                        REAL_TYPE *recvbuf,
-                        MPI_Request *req)
+template <class T>
+bool BrickComm::pack_VEnode(T *array,
+                               const int gc,
+                               T *sendbuf,
+                               T *recvbuf,
+                               MPI_Request *req)
 {
-#ifdef _DIAGONAL_COMM
-
   int NI = size[0];
   int NJ = size[1];
   int NK = size[2];
   int VC = halo_width;
   int tag = 0;
-  MPI_Datatype dtype = MPI_FLOAT;
-  if( sizeof(REAL_TYPE) == _SIZE_DOUBLE_ )
-  {
-    dtype = MPI_DOUBLE;
-  }
-
   size_t ptr = 0;
 
   //// X edge ////
@@ -368,11 +388,11 @@ bool BrickComm::pack_VEcell(REAL_TYPE *array,
   {
     if( comm_tbl[dir] >= 0 )
     {
-      REAL_TYPE *sendptr = &sendbuf[ptr];
-      REAL_TYPE *recvptr = &recvbuf[ptr];
-      size_t sz = NI * gc * gc * 3;
+      T *sendptr = &sendbuf[ptr];
+      T *recvptr = &recvbuf[ptr];
+      size_t sz = (NI-1) * gc * gc * 3;
 
-      // recv
+      /* recv
       if ( MPI_SUCCESS != MPI_Irecv(recvptr,
                                     sz,
                                     dtype,
@@ -380,18 +400,22 @@ bool BrickComm::pack_VEcell(REAL_TYPE *array,
                                     tag,
                                     MPI_COMM_WORLD,
                                     &req[dir*2]) ) return false;
+       */
+      if ( !IrecvData(recvptr,
+                      sz,
+                      comm_tbl[dir],
+                      &req[dir*2]) ) return false;
 
       // pack
       switch(dir)
       {
       case int(E_mYmZ):
-#pragma omp parallel for collapse(3)
+#pragma omp parallel for collapse(4)
         for( int l=0; l<3; l++ ){
-          for( int k=0; k<gc; k++ ){
-            for( int j=0; j<gc; j++ ){
-              #pragma novector
-              for( int i=0; i<NI; i++ ){
-                sendptr[_IDX_V3D(i,j,k,l,NI,gc,gc,0)] = array[_IDX_V3D(i,j,k,l,NI,NJ,NK,VC)];
+          for( int k=1; k<=gc; k++ ){
+            for( int j=1; j<=gc; j++ ){
+              for( int i=1; i<NI; i++ ){
+                sendptr[_IDX_V3D(i-1,j-1,k-1,l,NI-1,gc,gc,0)] = array[_IDX_V3D(i,j,k,l,NI,NJ,NK,VC)];
               }
             }
           }
@@ -399,13 +423,12 @@ bool BrickComm::pack_VEcell(REAL_TYPE *array,
         break;
 
       case int(E_pYmZ):
-#pragma omp parallel for collapse(3)
+#pragma omp parallel for collapse(4)
         for( int l=0; l<3; l++ ){
-          for( int k=0; k<gc; k++ ){
+          for( int k=1; k<=gc; k++ ){
             for( int j=NJ-gc; j<NJ; j++ ){
-              #pragma novector
-              for( int i=0; i<NI; i++ ){
-                sendptr[_IDX_V3D(i,j-(NJ-gc),k,l,NI,gc,gc,0)] = array[_IDX_V3D(i,j,k,l,NI,NJ,NK,VC)];
+              for( int i=1; i<NI; i++ ){
+                sendptr[_IDX_V3D(i-1,j-(NJ-gc),k-1,l,NI-1,gc,gc,0)] = array[_IDX_V3D(i,j,k,l,NI,NJ,NK,VC)];
               }
             }
           }
@@ -413,13 +436,12 @@ bool BrickComm::pack_VEcell(REAL_TYPE *array,
         break;
 
       case int(E_mYpZ):
-#pragma omp parallel for collapse(3)
+#pragma omp parallel for collapse(4)
         for( int l=0; l<3; l++ ){
           for( int k=NK-gc; k<NK; k++ ){
-            for( int j=0; j<gc; j++ ){
-              #pragma novector
-              for( int i=0; i<NI; i++ ){
-                sendptr[_IDX_V3D(i,j,k-(NK-gc),l,NI,gc,gc,0)] = array[_IDX_V3D(i,j,k,l,NI,NJ,NK,VC)];
+            for( int j=1; j<=gc; j++ ){
+              for( int i=1; i<NI; i++ ){
+                sendptr[_IDX_V3D(i-1,j-1,k-(NK-gc),l,NI-1,gc,gc,0)] = array[_IDX_V3D(i,j,k,l,NI,NJ,NK,VC)];
               }
             }
           }
@@ -427,13 +449,12 @@ bool BrickComm::pack_VEcell(REAL_TYPE *array,
         break;
       case int(E_pYpZ):
 
-#pragma omp parallel for collapse(3)
+#pragma omp parallel for collapse(4)
         for( int l=0; l<3; l++ ){
           for( int k=NK-gc; k<NK; k++ ){
             for( int j=NJ-gc; j<NJ; j++ ){
-              #pragma novector
-              for( int i=0; i<NI; i++ ){
-                sendptr[_IDX_V3D(i,j-(NJ-gc),k-(NK-gc),l,NI,gc,gc,0)] = array[_IDX_V3D(i,j,k,l,NI,NJ,NK,VC)];
+              for( int i=1; i<NI; i++ ){
+                sendptr[_IDX_V3D(i-1,j-(NJ-gc),k-(NK-gc),l,NI-1,gc,gc,0)] = array[_IDX_V3D(i,j,k,l,NI,NJ,NK,VC)];
               }
             }
           }
@@ -441,7 +462,7 @@ bool BrickComm::pack_VEcell(REAL_TYPE *array,
         break;
       }
 
-      // send
+      /* send
       if ( MPI_SUCCESS != MPI_Isend(sendptr,
                                     sz,
                                     dtype,
@@ -449,6 +470,11 @@ bool BrickComm::pack_VEcell(REAL_TYPE *array,
                                     tag,
                                     MPI_COMM_WORLD,
                                     &req[dir*2+1]) ) return false;
+       */
+      if ( !IsendData(sendptr,
+                      sz,
+                      comm_tbl[dir],
+                      &req[dir*2+1]) ) return false;
 
       // pointer
       ptr += sz;
@@ -460,11 +486,11 @@ bool BrickComm::pack_VEcell(REAL_TYPE *array,
   {
     if( comm_tbl[dir] >= 0 )
     {
-      REAL_TYPE *sendptr = &sendbuf[ptr];
-      REAL_TYPE *recvptr = &recvbuf[ptr];
-      size_t sz = gc * NJ * gc * 3;
+      T *sendptr = &sendbuf[ptr];
+      T *recvptr = &recvbuf[ptr];
+      size_t sz = gc * (NJ-1) * gc * 3;
 
-      // recv
+      /* recv
       if ( MPI_SUCCESS != MPI_Irecv(recvptr,
                                     sz,
                                     dtype,
@@ -472,6 +498,11 @@ bool BrickComm::pack_VEcell(REAL_TYPE *array,
                                     tag,
                                     MPI_COMM_WORLD,
                                     &req[dir*2]) ) return false;
+       */
+      if ( !IrecvData(recvptr,
+                      sz,
+                      comm_tbl[dir],
+                      &req[dir*2]) ) return false;
 
       // pack
       switch(dir)
@@ -479,10 +510,10 @@ bool BrickComm::pack_VEcell(REAL_TYPE *array,
       case int(E_mXmZ):
 #pragma omp parallel for collapse(4)
         for( int l=0; l<3; l++ ){
-          for( int k=0; k<gc; k++ ){
-            for( int j=0; j<NJ; j++ ){
-              for( int i=0; i<gc; i++ ){
-                sendptr[_IDX_V3D(i,j,k,l,gc,NJ,gc,0)] = array[_IDX_V3D(i,j,k,l,NI,NJ,NK,VC)];
+          for( int k=1; k<=gc; k++ ){
+            for( int j=1; j<NJ; j++ ){
+              for( int i=1; i<=gc; i++ ){
+                sendptr[_IDX_V3D(i-1,j-1,k-1,l,gc,NJ-1,gc,0)] = array[_IDX_V3D(i,j,k,l,NI,NJ,NK,VC)];
               }
             }
           }
@@ -492,10 +523,10 @@ bool BrickComm::pack_VEcell(REAL_TYPE *array,
       case int(E_pXmZ):
 #pragma omp parallel for collapse(4)
         for( int l=0; l<3; l++ ){
-          for( int k=0; k<gc; k++ ){
-            for( int j=0; j<NJ; j++ ){
+          for( int k=1; k<=gc; k++ ){
+            for( int j=1; j<NJ; j++ ){
               for( int i=NI-gc; i<NI; i++ ){
-                sendptr[_IDX_V3D(i-(NI-gc),j,k,l,gc,NJ,gc,0)] = array[_IDX_V3D(i,j,k,l,NI,NJ,NK,VC)];
+                sendptr[_IDX_V3D(i-(NI-gc),j-1,k-1,l,gc,NJ-1,gc,0)] = array[_IDX_V3D(i,j,k,l,NI,NJ,NK,VC)];
               }
             }
           }
@@ -506,9 +537,9 @@ bool BrickComm::pack_VEcell(REAL_TYPE *array,
 #pragma omp parallel for collapse(4)
         for( int l=0; l<3; l++ ){
           for( int k=NK-gc; k<NK; k++ ){
-            for( int j=0; j<NJ; j++ ){
-              for( int i=0; i<gc; i++ ){
-                sendptr[_IDX_V3D(i,j,k-(NK-gc),l,gc,NJ,gc,0)] = array[_IDX_V3D(i,j,k,l,NI,NJ,NK,VC)];
+            for( int j=1; j<NJ; j++ ){
+              for( int i=1; i<=gc; i++ ){
+                sendptr[_IDX_V3D(i-1,j-1,k-(NK-gc),l,gc,NJ-1,gc,0)] = array[_IDX_V3D(i,j,k,l,NI,NJ,NK,VC)];
               }
             }
           }
@@ -519,9 +550,9 @@ bool BrickComm::pack_VEcell(REAL_TYPE *array,
 #pragma omp parallel for collapse(4)
         for( int l=0; l<3; l++ ){
           for( int k=NK-gc; k<NK; k++ ){
-            for( int j=0; j<NJ; j++ ){
+            for( int j=1; j<NJ; j++ ){
               for( int i=NI-gc; i<NI; i++ ){
-                sendptr[_IDX_V3D(i-(NI-gc),j,k-(NK-gc),l,gc,NJ,gc,0)] = array[_IDX_V3D(i,j,k,l,NI,NJ,NK,VC)];
+                sendptr[_IDX_V3D(i-(NI-gc),j-1,k-(NK-gc),l,gc,NJ-1,gc,0)] = array[_IDX_V3D(i,j,k,l,NI,NJ,NK,VC)];
               }
             }
           }
@@ -529,7 +560,7 @@ bool BrickComm::pack_VEcell(REAL_TYPE *array,
         break;
       }
 
-      // send
+      /* send
       if ( MPI_SUCCESS != MPI_Isend(sendptr,
                                     sz,
                                     dtype,
@@ -537,6 +568,11 @@ bool BrickComm::pack_VEcell(REAL_TYPE *array,
                                     tag,
                                     MPI_COMM_WORLD,
                                     &req[dir*2+1]) ) return false;
+       */
+      if ( !IsendData(sendptr,
+                      sz,
+                      comm_tbl[dir],
+                      &req[dir*2+1]) ) return false;
 
       // pointer
       ptr += sz;
@@ -548,11 +584,11 @@ bool BrickComm::pack_VEcell(REAL_TYPE *array,
   {
     if( comm_tbl[dir] >= 0 )
     {
-      REAL_TYPE *sendptr = &sendbuf[ptr];
-      REAL_TYPE *recvptr = &recvbuf[ptr];
-      size_t sz = gc * gc * NK * 3;
+      T *sendptr = &sendbuf[ptr];
+      T *recvptr = &recvbuf[ptr];
+      size_t sz = gc * gc * (NK-1) * 3;
 
-      // recv
+      /* recv
       if ( MPI_SUCCESS != MPI_Irecv(recvptr,
                                     sz,
                                     dtype,
@@ -560,6 +596,11 @@ bool BrickComm::pack_VEcell(REAL_TYPE *array,
                                     tag,
                                     MPI_COMM_WORLD,
                                     &req[dir*2]) ) return false;
+       */
+      if ( !IrecvData(recvptr,
+                      sz,
+                      comm_tbl[dir],
+                      &req[dir*2]) ) return false;
 
       // pack
       switch(dir)
@@ -567,10 +608,10 @@ bool BrickComm::pack_VEcell(REAL_TYPE *array,
       case int(E_mXmY):
 #pragma omp parallel for collapse(4)
         for( int l=0; l<3; l++ ){
-          for( int k=0; k<NK; k++ ){
-            for( int j=0; j<gc; j++ ){
-              for( int i=0; i<gc; i++ ){
-                sendptr[_IDX_V3D(i,j,k,l,gc,gc,NK,0)] = array[_IDX_V3D(i,j,k,l,NI,NJ,NK,VC)];
+          for( int k=1; k<NK; k++ ){
+            for( int j=1; j<=gc; j++ ){
+              for( int i=1; i<=gc; i++ ){
+                sendptr[_IDX_V3D(i-1,j-1,k-1,l,gc,gc,NK-1,0)] = array[_IDX_V3D(i,j,k,l,NI,NJ,NK,VC)];
               }
             }
           }
@@ -580,10 +621,10 @@ bool BrickComm::pack_VEcell(REAL_TYPE *array,
       case int(E_pXmY):
 #pragma omp parallel for collapse(4)
         for( int l=0; l<3; l++ ){
-          for( int k=0; k<NK; k++ ){
-            for( int j=0; j<gc; j++ ){
+          for( int k=1; k<NK; k++ ){
+            for( int j=1; j<=gc; j++ ){
               for( int i=NI-gc; i<NI; i++ ){
-                sendptr[_IDX_V3D(i-(NI-gc),j,k,l,gc,gc,NK,0)] = array[_IDX_V3D(i,j,k,l,NI,NJ,NK,VC)];
+                sendptr[_IDX_V3D(i-(NI-gc),j-1,k-1,l,gc,gc,NK-1,0)] = array[_IDX_V3D(i,j,k,l,NI,NJ,NK,VC)];
               }
             }
           }
@@ -593,10 +634,10 @@ bool BrickComm::pack_VEcell(REAL_TYPE *array,
       case int(E_mXpY):
 #pragma omp parallel for collapse(4)
         for( int l=0; l<3; l++ ){
-          for( int k=0; k<NK; k++ ){
+          for( int k=1; k<NK; k++ ){
             for( int j=NJ-gc; j<NJ; j++ ){
-              for( int i=0; i<gc; i++ ){
-                sendptr[_IDX_V3D(i,j-(NJ-gc),k,l,gc,gc,NK,0)] = array[_IDX_V3D(i,j,k,l,NI,NJ,NK,VC)];
+              for( int i=1; i<=gc; i++ ){
+                sendptr[_IDX_V3D(i-1,j-(NJ-gc),k-1,l,gc,gc,NK-1,0)] = array[_IDX_V3D(i,j,k,l,NI,NJ,NK,VC)];
               }
             }
           }
@@ -606,10 +647,10 @@ bool BrickComm::pack_VEcell(REAL_TYPE *array,
 
 #pragma omp parallel for collapse(4)
         for( int l=0; l<3; l++ ){
-          for( int k=0; k<NK; k++ ){
+          for( int k=1; k<NK; k++ ){
             for( int j=NJ-gc; j<NJ; j++ ){
               for( int i=NI-gc; i<NI; i++ ){
-                sendptr[_IDX_V3D(i-(NI-gc),j-(NJ-gc),k,l,gc,gc,NK,0)] = array[_IDX_V3D(i,j,k,l,NI,NJ,NK,VC)];
+                sendptr[_IDX_V3D(i-(NI-gc),j-(NJ-gc),k-1,l,gc,gc,NK-1,0)] = array[_IDX_V3D(i,j,k,l,NI,NJ,NK,VC)];
               }
             }
           }
@@ -617,7 +658,7 @@ bool BrickComm::pack_VEcell(REAL_TYPE *array,
         break;
       }
 
-      // send
+      /* send
       if ( MPI_SUCCESS != MPI_Isend(sendptr,
                                     sz,
                                     dtype,
@@ -625,28 +666,33 @@ bool BrickComm::pack_VEcell(REAL_TYPE *array,
                                     tag,
                                     MPI_COMM_WORLD,
                                     &req[dir*2+1]) ) return false;
+       */
+      if ( !IsendData(sendptr,
+                      sz,
+                      comm_tbl[dir],
+                      &req[dir*2+1]) ) return false;
 
       // pointer
       ptr += sz;
     }
   }
 
-#endif
   return true;
 }
 
+
+// #########################################################
 /*
  * @brief unpack send data for diagonal edge
  * @param [out] array    dest array
  * @param [in]  gc  number of guide cell layer to be sent
  * @param [in]  recvbuf  recv buffer
  */
-void BrickComm::unpack_VEcell(REAL_TYPE *array,
-                          const int gc,
-                          const REAL_TYPE *recvbuf)
+template <class T>
+void BrickComm::unpack_VEnode(T *array,
+                                 const int gc,
+                                 const T *recvbuf)
 {
-#ifdef _DIAGONAL_COMM
-
   int NI = size[0];
   int NJ = size[1];
   int NK = size[2];
@@ -659,8 +705,8 @@ void BrickComm::unpack_VEcell(REAL_TYPE *array,
   {
     if( comm_tbl[dir] >= 0 )
     {
-      const REAL_TYPE *recvptr = &recvbuf[ptr];
-      size_t sz = NI * gc * gc * 3;
+      const T *recvptr = &recvbuf[ptr];
+      size_t sz = (NI-1) * gc * gc * 3;
 
       // unpack
       switch(dir)
@@ -668,10 +714,10 @@ void BrickComm::unpack_VEcell(REAL_TYPE *array,
       case int(E_mYmZ):
 #pragma omp parallel for collapse(4)
         for( int l=0; l<3; l++ ){
-          for( int k=0-gc; k<0; k++ ){
-            for( int j=0-gc; j<0; j++ ){
-              for( int i=0; i<NI; i++ ){
-                array[_IDX_V3D(i,j,k,l,NI,NJ,NK,VC)] = recvptr[_IDX_V3D(i,j-(0-gc),k-(0-gc),l,NI,gc,gc,0)];
+          for( int k=1-gc; k<=0; k++ ){
+            for( int j=1-gc; j<=0; j++ ){
+              for( int i=1; i<NI; i++ ){
+                array[_IDX_V3D(i,j,k,l,NI,NJ,NK,VC)] = recvptr[_IDX_V3D(i-1,j-(1-gc),k-(1-gc),l,NI-1,gc,gc,0)];
               }
             }
           }
@@ -681,10 +727,10 @@ void BrickComm::unpack_VEcell(REAL_TYPE *array,
       case int(E_pYmZ):
 #pragma omp parallel for collapse(4)
         for( int l=0; l<3; l++ ){
-          for( int k=0-gc; k<0; k++ ){
+          for( int k=1-gc; k<=0; k++ ){
             for( int j=NJ; j<NJ+gc; j++ ){
-              for( int i=0; i<NI; i++ ){
-                array[_IDX_V3D(i,j,k,l,NI,NJ,NK,VC)] = recvptr[_IDX_V3D(i,j-(NJ),k-(0-gc),l,NI,gc,gc,0)];
+              for( int i=1; i<NI; i++ ){
+                array[_IDX_V3D(i,j,k,l,NI,NJ,NK,VC)] = recvptr[_IDX_V3D(i-1,j-(NJ),k-(1-gc),l,NI-1,gc,gc,0)];
               }
             }
           }
@@ -695,9 +741,9 @@ void BrickComm::unpack_VEcell(REAL_TYPE *array,
 #pragma omp parallel for collapse(4)
         for( int l=0; l<3; l++ ){
           for( int k=NK; k<NK+gc; k++ ){
-            for( int j=0-gc; j<0; j++ ){
-              for( int i=0; i<NI; i++ ){
-                array[_IDX_V3D(i,j,k,l,NI,NJ,NK,VC)] = recvptr[_IDX_V3D(i,j-(0-gc),k-(NK),l,NI,gc,gc,0)];
+            for( int j=1-gc; j<=0; j++ ){
+              for( int i=1; i<NI; i++ ){
+                array[_IDX_V3D(i,j,k,l,NI,NJ,NK,VC)] = recvptr[_IDX_V3D(i-1,j-(1-gc),k-(NK),l,NI-1,gc,gc,0)];
               }
             }
           }
@@ -709,8 +755,8 @@ void BrickComm::unpack_VEcell(REAL_TYPE *array,
         for( int l=0; l<3; l++ ){
           for( int k=NK; k<NK+gc; k++ ){
             for( int j=NJ; j<NJ+gc; j++ ){
-              for( int i=0; i<NI; i++ ){
-                array[_IDX_V3D(i,j,k,l,NI,NJ,NK,VC)] = recvptr[_IDX_V3D(i,j-(NJ),k-(NK),l,NI,gc,gc,0)];
+              for( int i=1; i<NI; i++ ){
+                array[_IDX_V3D(i,j,k,l,NI,NJ,NK,VC)] = recvptr[_IDX_V3D(i-1,j-(NJ),k-(NK),l,NI-1,gc,gc,0)];
               }
             }
           }
@@ -727,8 +773,8 @@ void BrickComm::unpack_VEcell(REAL_TYPE *array,
   {
     if( comm_tbl[dir] >= 0 )
     {
-      const REAL_TYPE *recvptr = &recvbuf[ptr];
-      size_t sz = gc * NJ * gc * 3;
+      const T *recvptr = &recvbuf[ptr];
+      size_t sz = gc * (NJ-1) * gc * 3;
 
       // unpack
       switch(dir)
@@ -736,10 +782,10 @@ void BrickComm::unpack_VEcell(REAL_TYPE *array,
       case int(E_mXmZ):
 #pragma omp parallel for collapse(4)
         for( int l=0; l<3; l++ ){
-          for( int k=0-gc; k<0; k++ ){
-            for( int j=0; j<NJ; j++ ){
-              for( int i=0-gc; i<0; i++ ){
-                array[_IDX_V3D(i,j,k,l,NI,NJ,NK,VC)] = recvptr[_IDX_V3D(i-(0-gc),j,k-(0-gc),l,gc,NJ,gc,0)];
+          for( int k=1-gc; k<=0; k++ ){
+            for( int j=1; j<NJ; j++ ){
+              for( int i=1-gc; i<=0; i++ ){
+                array[_IDX_V3D(i,j,k,l,NI,NJ,NK,VC)] = recvptr[_IDX_V3D(i-(1-gc),j-1,k-(1-gc),l,gc,NJ-1,gc,0)];
               }
             }
           }
@@ -749,10 +795,10 @@ void BrickComm::unpack_VEcell(REAL_TYPE *array,
       case int(E_pXmZ):
 #pragma omp parallel for collapse(4)
         for( int l=0; l<3; l++ ){
-          for( int k=0-gc; k<0; k++ ){
-            for( int j=0; j<NJ; j++ ){
+          for( int k=1-gc; k<=0; k++ ){
+            for( int j=1; j<NJ; j++ ){
               for( int i=NI; i<NI+gc; i++ ){
-                array[_IDX_V3D(i,j,k,l,NI,NJ,NK,VC)] = recvptr[_IDX_V3D(i-(NI),j,k-(0-gc),l,gc,NJ,gc,0)];
+                array[_IDX_V3D(i,j,k,l,NI,NJ,NK,VC)] = recvptr[_IDX_V3D(i-(NI),j-1,k-(1-gc),l,gc,NJ-1,gc,0)];
               }
             }
           }
@@ -763,9 +809,9 @@ void BrickComm::unpack_VEcell(REAL_TYPE *array,
 #pragma omp parallel for collapse(4)
         for( int l=0; l<3; l++ ){
           for( int k=NK; k<NK+gc; k++ ){
-            for( int j=0; j<NJ; j++ ){
-              for( int i=0-gc; i<0; i++ ){
-                array[_IDX_V3D(i,j,k,l,NI,NJ,NK,VC)] = recvptr[_IDX_V3D(i-(0-gc),j,k-(NK),l,gc,NJ,gc,0)];
+            for( int j=1; j<NJ; j++ ){
+              for( int i=1-gc; i<=0; i++ ){
+                array[_IDX_V3D(i,j,k,l,NI,NJ,NK,VC)] = recvptr[_IDX_V3D(i-(1-gc),j-1,k-(NK),l,gc,NJ-1,gc,0)];
               }
             }
           }
@@ -776,9 +822,9 @@ void BrickComm::unpack_VEcell(REAL_TYPE *array,
 #pragma omp parallel for collapse(4)
         for( int l=0; l<3; l++ ){
           for( int k=NK; k<NK+gc; k++ ){
-            for( int j=0; j<NJ; j++ ){
+            for( int j=1; j<NJ; j++ ){
               for( int i=NI; i<NI+gc; i++ ){
-                array[_IDX_V3D(i,j,k,l,NI,NJ,NK,VC)] = recvptr[_IDX_V3D(i-(NI),j,k-(NK),l,gc,NJ,gc,0)];
+                array[_IDX_V3D(i,j,k,l,NI,NJ,NK,VC)] = recvptr[_IDX_V3D(i-(NI),j-1,k-(NK),l,gc,NJ-1,gc,0)];
               }
             }
           }
@@ -795,8 +841,8 @@ void BrickComm::unpack_VEcell(REAL_TYPE *array,
   {
     if( comm_tbl[dir] >= 0 )
     {
-      const REAL_TYPE *recvptr = &recvbuf[ptr];
-      size_t sz = gc * gc * NK * 3;
+      const T *recvptr = &recvbuf[ptr];
+      size_t sz = gc * gc * (NK-1) * 3;
 
       // unpack
       switch(dir)
@@ -804,10 +850,10 @@ void BrickComm::unpack_VEcell(REAL_TYPE *array,
       case int(E_mXmY):
 #pragma omp parallel for collapse(4)
         for( int l=0; l<3; l++ ){
-          for( int k=0; k<NK; k++ ){
-            for( int j=0-gc; j<0; j++ ){
-              for( int i=0-gc; i<0; i++ ){
-                array[_IDX_V3D(i,j,k,l,NI,NJ,NK,VC)] = recvptr[_IDX_V3D(i-(0-gc),j-(0-gc),k,l,gc,gc,NK,0)];
+          for( int k=1; k<NK; k++ ){
+            for( int j=1-gc; j<=0; j++ ){
+              for( int i=1-gc; i<=0; i++ ){
+                array[_IDX_V3D(i,j,k,l,NI,NJ,NK,VC)] = recvptr[_IDX_V3D(i-(1-gc),j-(1-gc),k-1,l,gc,gc,NK-1,0)];
               }
             }
           }
@@ -817,10 +863,10 @@ void BrickComm::unpack_VEcell(REAL_TYPE *array,
       case int(E_pXmY):
 #pragma omp parallel for collapse(4)
         for( int l=0; l<3; l++ ){
-          for( int k=0; k<NK; k++ ){
-            for( int j=0-gc; j<0; j++ ){
+          for( int k=1; k<NK; k++ ){
+            for( int j=1-gc; j<=0; j++ ){
               for( int i=NI; i<NI+gc; i++ ){
-                array[_IDX_V3D(i,j,k,l,NI,NJ,NK,VC)] = recvptr[_IDX_V3D(i-(NI),j-(0-gc),k,l,gc,gc,NK,0)];
+                array[_IDX_V3D(i,j,k,l,NI,NJ,NK,VC)] = recvptr[_IDX_V3D(i-(NI),j-(1-gc),k-1,l,gc,gc,NK-1,0)];
               }
             }
           }
@@ -830,10 +876,10 @@ void BrickComm::unpack_VEcell(REAL_TYPE *array,
       case int(E_mXpY):
 #pragma omp parallel for collapse(4)
         for( int l=0; l<3; l++ ){
-          for( int k=0; k<NK; k++ ){
+          for( int k=1; k<NK; k++ ){
             for( int j=NJ; j<NJ+gc; j++ ){
-              for( int i=0-gc; i<0; i++ ){
-                array[_IDX_V3D(i,j,k,l,NI,NJ,NK,VC)] = recvptr[_IDX_V3D(i-(0-gc),j-(NJ),k,l,gc,gc,NK,0)];
+              for( int i=1-gc; i<=0; i++ ){
+                array[_IDX_V3D(i,j,k,l,NI,NJ,NK,VC)] = recvptr[_IDX_V3D(i-(1-gc),j-(NJ),k-1,l,gc,gc,NK-1,0)];
               }
             }
           }
@@ -843,10 +889,10 @@ void BrickComm::unpack_VEcell(REAL_TYPE *array,
       case int(E_pXpY):
 #pragma omp parallel for collapse(4)
         for( int l=0; l<3; l++ ){
-          for( int k=0; k<NK; k++ ){
+          for( int k=1; k<NK; k++ ){
             for( int j=NJ; j<NJ+gc; j++ ){
               for( int i=NI; i<NI+gc; i++ ){
-                array[_IDX_V3D(i,j,k,l,NI,NJ,NK,VC)] = recvptr[_IDX_V3D(i-(NI),j-(NJ),k,l,gc,gc,NK,0)];
+                array[_IDX_V3D(i,j,k,l,NI,NJ,NK,VC)] = recvptr[_IDX_V3D(i-(NI),j-(NJ),k-1,l,gc,gc,NK-1,0)];
               }
             }
           }
@@ -858,9 +904,10 @@ void BrickComm::unpack_VEcell(REAL_TYPE *array,
     }
   }
 
-#endif
 }
 
+
+// #########################################################
 /*
  * @brief pack send data for diagonal corner
  * @param [in]  array    source array
@@ -870,25 +917,18 @@ void BrickComm::unpack_VEcell(REAL_TYPE *array,
  * @param [out] req      Array of MPI request
  * @retval true-success, false-fail
  */
-bool BrickComm::pack_VCcell(REAL_TYPE *array,
-                        const int gc,
-                        REAL_TYPE *sendbuf,
-                        REAL_TYPE *recvbuf,
-                        MPI_Request *req)
+template <class T>
+bool BrickComm::pack_VCnode(T *array,
+                               const int gc,
+                               T *sendbuf,
+                               T *recvbuf,
+                               MPI_Request *req)
 {
-#ifdef _DIAGONAL_COMM
-
   int NI = size[0];
   int NJ = size[1];
   int NK = size[2];
   int VC = halo_width;
   int tag = 0;
-  MPI_Datatype dtype = MPI_FLOAT;
-  if( sizeof(REAL_TYPE) == _SIZE_DOUBLE_ )
-  {
-    dtype = MPI_DOUBLE;
-  }
-
   size_t ptr = 0;
 
   //// 8 corner ////
@@ -896,11 +936,11 @@ bool BrickComm::pack_VCcell(REAL_TYPE *array,
   {
     if( comm_tbl[dir] >= 0 )
     {
-      REAL_TYPE *sendptr = &sendbuf[ptr];
-      REAL_TYPE *recvptr = &recvbuf[ptr];
+      T *sendptr = &sendbuf[ptr];
+      T *recvptr = &recvbuf[ptr];
       size_t sz = gc * gc * gc * 3;
 
-      // recv
+      /* recv
       if ( MPI_SUCCESS != MPI_Irecv(recvptr,
                                     sz,
                                     dtype,
@@ -908,6 +948,11 @@ bool BrickComm::pack_VCcell(REAL_TYPE *array,
                                     tag,
                                     MPI_COMM_WORLD,
                                     &req[dir*2]) ) return false;
+       */
+      if ( !IrecvData(recvptr,
+                      sz,
+                      comm_tbl[dir],
+                      &req[dir*2]) ) return false;
 
       // pack
       switch(dir)
@@ -915,10 +960,10 @@ bool BrickComm::pack_VCcell(REAL_TYPE *array,
       case int(C_mXmYmZ):
 #pragma omp parallel for collapse(4)
         for( int l=0; l<3; l++ ){
-          for( int k=0; k<gc; k++ ){
-            for( int j=0; j<gc; j++ ){
-              for( int i=0; i<gc; i++ ){
-                sendptr[_IDX_V3D(i,j,k,l,gc,gc,gc,0)] = array[_IDX_V3D(i,j,k,l,NI,NJ,NK,VC)];
+          for( int k=1; k<=gc; k++ ){
+            for( int j=1; j<=gc; j++ ){
+              for( int i=1; i<=gc; i++ ){
+                sendptr[_IDX_V3D(i-1,j-1,k-1,l,gc,gc,gc,0)] = array[_IDX_V3D(i,j,k,l,NI,NJ,NK,VC)];
               }
             }
           }
@@ -928,10 +973,10 @@ bool BrickComm::pack_VCcell(REAL_TYPE *array,
       case int(C_pXmYmZ):
 #pragma omp parallel for collapse(4)
         for( int l=0; l<3; l++ ){
-          for( int k=0; k<gc; k++ ){
-            for( int j=0; j<gc; j++ ){
+          for( int k=1; k<=gc; k++ ){
+            for( int j=1; j<=gc; j++ ){
               for( int i=NI-gc; i<NI; i++ ){
-                sendptr[_IDX_V3D(i-(NI-gc),j,k,l,gc,gc,gc,0)] = array[_IDX_V3D(i,j,k,l,NI,NJ,NK,VC)];
+                sendptr[_IDX_V3D(i-(NI-gc),j-1,k-1,l,gc,gc,gc,0)] = array[_IDX_V3D(i,j,k,l,NI,NJ,NK,VC)];
               }
             }
           }
@@ -941,10 +986,10 @@ bool BrickComm::pack_VCcell(REAL_TYPE *array,
       case int(C_mXpYmZ):
 #pragma omp parallel for collapse(4)
         for( int l=0; l<3; l++ ){
-          for( int k=0; k<gc; k++ ){
+          for( int k=1; k<=gc; k++ ){
             for( int j=NJ-gc; j<NJ; j++ ){
-              for( int i=0; i<gc; i++ ){
-                sendptr[_IDX_V3D(i,j-(NJ-gc),k,l,gc,gc,gc,0)] = array[_IDX_V3D(i,j,k,l,NI,NJ,NK,VC)];
+              for( int i=1; i<=gc; i++ ){
+                sendptr[_IDX_V3D(i-1,j-(NJ-gc),k-1,l,gc,gc,gc,0)] = array[_IDX_V3D(i,j,k,l,NI,NJ,NK,VC)];
               }
             }
           }
@@ -954,10 +999,10 @@ bool BrickComm::pack_VCcell(REAL_TYPE *array,
       case int(C_pXpYmZ):
 #pragma omp parallel for collapse(4)
         for( int l=0; l<3; l++ ){
-          for( int k=0; k<gc; k++ ){
+          for( int k=1; k<=gc; k++ ){
             for( int j=NJ-gc; j<NJ; j++ ){
               for( int i=NI-gc; i<NI; i++ ){
-                sendptr[_IDX_V3D(i-(NI-gc),j-(NJ-gc),k,l,gc,gc,gc,0)] = array[_IDX_V3D(i,j,k,l,NI,NJ,NK,VC)];
+                sendptr[_IDX_V3D(i-(NI-gc),j-(NJ-gc),k-1,l,gc,gc,gc,0)] = array[_IDX_V3D(i,j,k,l,NI,NJ,NK,VC)];
               }
             }
           }
@@ -968,9 +1013,9 @@ bool BrickComm::pack_VCcell(REAL_TYPE *array,
 #pragma omp parallel for collapse(4)
         for( int l=0; l<3; l++ ){
           for( int k=NK-gc; k<NK; k++ ){
-            for( int j=0; j<gc; j++ ){
-              for( int i=0; i<gc; i++ ){
-                sendptr[_IDX_V3D(i,j,k-(NK-gc),l,gc,gc,gc,0)] = array[_IDX_V3D(i,j,k,l,NI,NJ,NK,VC)];
+            for( int j=1; j<=gc; j++ ){
+              for( int i=1; i<=gc; i++ ){
+                sendptr[_IDX_V3D(i-1,j-1,k-(NK-gc),l,gc,gc,gc,0)] = array[_IDX_V3D(i,j,k,l,NI,NJ,NK,VC)];
               }
             }
           }
@@ -981,9 +1026,9 @@ bool BrickComm::pack_VCcell(REAL_TYPE *array,
 #pragma omp parallel for collapse(4)
         for( int l=0; l<3; l++ ){
           for( int k=NK-gc; k<NK; k++ ){
-            for( int j=0; j<gc; j++ ){
+            for( int j=1; j<=gc; j++ ){
               for( int i=NI-gc; i<NI; i++ ){
-                sendptr[_IDX_V3D(i-(NI-gc),j,k-(NK-gc),l,gc,gc,gc,0)] = array[_IDX_V3D(i,j,k,l,NI,NJ,NK,VC)];
+                sendptr[_IDX_V3D(i-(NI-gc),j-1,k-(NK-gc),l,gc,gc,gc,0)] = array[_IDX_V3D(i,j,k,l,NI,NJ,NK,VC)];
               }
             }
           }
@@ -995,8 +1040,8 @@ bool BrickComm::pack_VCcell(REAL_TYPE *array,
         for( int l=0; l<3; l++ ){
           for( int k=NK-gc; k<NK; k++ ){
             for( int j=NJ-gc; j<NJ; j++ ){
-              for( int i=0; i<gc; i++ ){
-                sendptr[_IDX_V3D(i,j-(NJ-gc),k-(NK-gc),l,gc,gc,gc,0)] = array[_IDX_V3D(i,j,k,l,NI,NJ,NK,VC)];
+              for( int i=1; i<=gc; i++ ){
+                sendptr[_IDX_V3D(i-1,j-(NJ-gc),k-(NK-gc),l,gc,gc,gc,0)] = array[_IDX_V3D(i,j,k,l,NI,NJ,NK,VC)];
               }
             }
           }
@@ -1017,7 +1062,7 @@ bool BrickComm::pack_VCcell(REAL_TYPE *array,
         break;
       }
 
-      // send
+      /* send
       if ( MPI_SUCCESS != MPI_Isend(sendptr,
                                     sz,
                                     dtype,
@@ -1025,28 +1070,33 @@ bool BrickComm::pack_VCcell(REAL_TYPE *array,
                                     tag,
                                     MPI_COMM_WORLD,
                                     &req[dir*2+1]) ) return false;
+       */
+      if ( !IsendData(sendptr,
+                      sz,
+                      comm_tbl[dir],
+                      &req[dir*2+1]) ) return false;
 
       // pointer
       ptr += sz;
     }
   }
 
-#endif
   return true;
 }
 
+
+// #########################################################
 /*
  * @brief unpack send data for diagonal corner
  * @param [out] array    dest array
  * @param [in]  gc  number of guide cell layer to be sent
  * @param [in]  recvbuf  recv buffer
  */
-void BrickComm::unpack_VCcell(REAL_TYPE *array,
-                          const int gc,
-                          const REAL_TYPE *recvbuf)
+template <class T>
+void BrickComm::unpack_VCnode(T *array,
+                                 const int gc,
+                                 const T *recvbuf)
 {
-#ifdef _DIAGONAL_COMM
-
   int NI = size[0];
   int NJ = size[1];
   int NK = size[2];
@@ -1059,7 +1109,7 @@ void BrickComm::unpack_VCcell(REAL_TYPE *array,
   {
     if( comm_tbl[dir] >= 0 )
     {
-      const REAL_TYPE *recvptr = &recvbuf[ptr];
+      const T *recvptr = &recvbuf[ptr];
       size_t sz = gc * gc * gc * 3;
 
       // unpack
@@ -1068,10 +1118,10 @@ void BrickComm::unpack_VCcell(REAL_TYPE *array,
       case int(C_mXmYmZ):
 #pragma omp parallel for collapse(4)
         for( int l=0; l<3; l++ ){
-          for( int k=0-gc; k<0; k++ ){
-            for( int j=0-gc; j<0; j++ ){
-              for( int i=0-gc; i<0; i++ ){
-                array[_IDX_V3D(i,j,k,l,NI,NJ,NK,VC)] = recvptr[_IDX_V3D(i-(0-gc),j-(0-gc),k-(0-gc),l,gc,gc,gc,0)];
+          for( int k=1-gc; k<=0; k++ ){
+            for( int j=1-gc; j<=0; j++ ){
+              for( int i=1-gc; i<=0; i++ ){
+                array[_IDX_V3D(i,j,k,l,NI,NJ,NK,VC)] = recvptr[_IDX_V3D(i-(1-gc),j-(1-gc),k-(1-gc),l,gc,gc,gc,0)];
               }
             }
           }
@@ -1081,10 +1131,10 @@ void BrickComm::unpack_VCcell(REAL_TYPE *array,
       case int(C_pXmYmZ):
 #pragma omp parallel for collapse(4)
         for( int l=0; l<3; l++ ){
-          for( int k=0-gc; k<0; k++ ){
-            for( int j=0-gc; j<0; j++ ){
+          for( int k=1-gc; k<=0; k++ ){
+            for( int j=1-gc; j<=0; j++ ){
               for( int i=NI; i<NI+gc; i++ ){
-                array[_IDX_V3D(i,j,k,l,NI,NJ,NK,VC)] = recvptr[_IDX_V3D(i-(NI),j-(0-gc),k-(0-gc),l,gc,gc,gc,0)];
+                array[_IDX_V3D(i,j,k,l,NI,NJ,NK,VC)] = recvptr[_IDX_V3D(i-(NI),j-(1-gc),k-(1-gc),l,gc,gc,gc,0)];
               }
             }
           }
@@ -1094,10 +1144,10 @@ void BrickComm::unpack_VCcell(REAL_TYPE *array,
       case int(C_mXpYmZ):
 #pragma omp parallel for collapse(4)
         for( int l=0; l<3; l++ ){
-          for( int k=0-gc; k<0; k++ ){
+          for( int k=1-gc; k<=0; k++ ){
             for( int j=NJ; j<NJ+gc; j++ ){
-              for( int i=0-gc; i<0; i++ ){
-                array[_IDX_V3D(i,j,k,l,NI,NJ,NK,VC)] = recvptr[_IDX_V3D(i-(0-gc),j-(NJ),k-(0-gc),l,gc,gc,gc,0)];
+              for( int i=1-gc; i<=0; i++ ){
+                array[_IDX_V3D(i,j,k,l,NI,NJ,NK,VC)] = recvptr[_IDX_V3D(i-(1-gc),j-(NJ),k-(1-gc),l,gc,gc,gc,0)];
               }
             }
           }
@@ -1107,10 +1157,10 @@ void BrickComm::unpack_VCcell(REAL_TYPE *array,
       case int(C_pXpYmZ):
 #pragma omp parallel for collapse(4)
         for( int l=0; l<3; l++ ){
-          for( int k=0-gc; k<0; k++ ){
+          for( int k=1-gc; k<=0; k++ ){
             for( int j=NJ; j<NJ+gc; j++ ){
               for( int i=NI; i<NI+gc; i++ ){
-                array[_IDX_V3D(i,j,k,l,NI,NJ,NK,VC)] = recvptr[_IDX_V3D(i-(NI),j-(NJ),k-(0-gc),l,gc,gc,gc,0)];
+                array[_IDX_V3D(i,j,k,l,NI,NJ,NK,VC)] = recvptr[_IDX_V3D(i-(NI),j-(NJ),k-(1-gc),l,gc,gc,gc,0)];
               }
             }
           }
@@ -1121,9 +1171,9 @@ void BrickComm::unpack_VCcell(REAL_TYPE *array,
 #pragma omp parallel for collapse(4)
         for( int l=0; l<3; l++ ){
           for( int k=NK; k<NK+gc; k++ ){
-            for( int j=0-gc; j<0; j++ ){
-              for( int i=0-gc; i<0; i++ ){
-                array[_IDX_V3D(i,j,k,l,NI,NJ,NK,VC)] = recvptr[_IDX_V3D(i-(0-gc),j-(0-gc),k-(NK),l,gc,gc,gc,0)];
+            for( int j=1-gc; j<=0; j++ ){
+              for( int i=1-gc; i<=0; i++ ){
+                array[_IDX_V3D(i,j,k,l,NI,NJ,NK,VC)] = recvptr[_IDX_V3D(i-(1-gc),j-(1-gc),k-(NK),l,gc,gc,gc,0)];
               }
             }
           }
@@ -1134,9 +1184,9 @@ void BrickComm::unpack_VCcell(REAL_TYPE *array,
 #pragma omp parallel for collapse(4)
         for( int l=0; l<3; l++ ){
           for( int k=NK; k<NK+gc; k++ ){
-            for( int j=0-gc; j<0; j++ ){
+            for( int j=1-gc; j<=0; j++ ){
               for( int i=NI; i<NI+gc; i++ ){
-                array[_IDX_V3D(i,j,k,l,NI,NJ,NK,VC)] = recvptr[_IDX_V3D(i-(NI),j-(0-gc),k-(NK),l,gc,gc,gc,0)];
+                array[_IDX_V3D(i,j,k,l,NI,NJ,NK,VC)] = recvptr[_IDX_V3D(i-(NI),j-(1-gc),k-(NK),l,gc,gc,gc,0)];
               }
             }
           }
@@ -1148,8 +1198,8 @@ void BrickComm::unpack_VCcell(REAL_TYPE *array,
         for( int l=0; l<3; l++ ){
           for( int k=NK; k<NK+gc; k++ ){
             for( int j=NJ; j<NJ+gc; j++ ){
-              for( int i=0-gc; i<0; i++ ){
-                array[_IDX_V3D(i,j,k,l,NI,NJ,NK,VC)] = recvptr[_IDX_V3D(i-(0-gc),j-(NJ),k-(NK),l,gc,gc,gc,0)];
+              for( int i=1-gc; i<=0; i++ ){
+                array[_IDX_V3D(i,j,k,l,NI,NJ,NK,VC)] = recvptr[_IDX_V3D(i-(1-gc),j-(NJ),k-(NK),l,gc,gc,gc,0)];
               }
             }
           }
@@ -1174,5 +1224,8 @@ void BrickComm::unpack_VCcell(REAL_TYPE *array,
     }
   }
 
-#endif
 }
+
+#endif // _DIAGONAL_COMM
+
+#endif // _CB_PACK_V_NODE_H_

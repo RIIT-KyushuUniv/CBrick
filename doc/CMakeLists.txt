@@ -2,7 +2,7 @@
 #
 # CBrick
 #
-# Copyright (C) 2017-2018 Research Institute for Information Technology(RIIT), Kyushu University.
+# Copyright (C) 2017-2019 Research Institute for Information Technology(RIIT), Kyushu University.
 # All rights reserved.
 #
 ###################################################################################

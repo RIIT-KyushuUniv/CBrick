@@ -18,6 +18,18 @@
 
 #define BASE 1000
 
+// precision
+#ifdef _REAL_IS_DOUBLE_
+#define REAL_TYPE double
+#else
+/** 実数型の指定
+ * - デフォルトでは、REAL_TYPE=float
+ * - コンパイル時オプション-D_REAL_IS_DOUBLE_を付与することで
+ *   REAL_TYPE=doubleになる
+ */
+#define REAL_TYPE float
+#endif
+
 #include <CB_SubDomain.h>
 #include <CB_Comm.h>
 #include <stdlib.h>
@@ -693,17 +705,41 @@ rankB   [-2]   [-1]    [0]    [1]    [2]
   }
 
   // 袖通信(scalar)
-  CM.Comm_S_nonblocking(X, gc, req);
-  CM.Comm_S_wait_nonblocking(X, gc, req);
+  if (!strcasecmp(grid, "node")) {
+    CM.Comm_S_node(X, gc, req);
+    CM.Comm_S_wait_node(X, gc, req);
+  }
+  else {
+    CM.Comm_S_cell(X, gc, req);
+    CM.Comm_S_wait_cell(X, gc, req);
+  }
 
-  CM.Comm_S_nonblocking(Y, gc, req);
-  CM.Comm_S_wait_nonblocking(Y, gc, req);
+  if (!strcasecmp(grid, "node")) {
+    CM.Comm_S_node(Y, gc, req);
+    CM.Comm_S_wait_node(Y, gc, req);
+  }
+  else {
+    CM.Comm_S_cell(Y, gc, req);
+    CM.Comm_S_wait_cell(Y, gc, req);
+  }
 
-  CM.Comm_S_nonblocking(Z, gc, req);
-  CM.Comm_S_wait_nonblocking(Z, gc, req);
+  if (!strcasecmp(grid, "node")) {
+    CM.Comm_S_node(Z, gc, req);
+    CM.Comm_S_wait_node(Z, gc, req);
+  }
+  else {
+    CM.Comm_S_cell(Z, gc, req);
+    CM.Comm_S_wait_cell(Z, gc, req);
+  }
 
-  CM.Comm_V_nonblocking(V, gc, req);
-  CM.Comm_V_wait_nonblocking(V, gc, req);
+  if (!strcasecmp(grid, "node")) {
+    CM.Comm_V_node(V, gc, req);
+    CM.Comm_V_wait_node(V, gc, req);
+  }
+  else {
+    CM.Comm_V_cell(V, gc, req);
+    CM.Comm_V_wait_cell(V, gc, req);
+  }
 
 
 

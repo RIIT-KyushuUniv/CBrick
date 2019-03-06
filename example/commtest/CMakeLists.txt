@@ -2,7 +2,7 @@
 #
 # CBrick
 #
-# Copyright (c) 2017-2018 Research Institute for Information Technology(RIIT),
+# Copyright (c) 2017-2019 Research Institute for Information Technology(RIIT),
 #                    Kyushu University.  All rights reserved.
 #
 ####################################################################################
@@ -19,6 +19,6 @@ link_directories(
 
 
 add_executable(commtest commtest.cpp)
-target_link_libraries(commtest -lCBrick_f)
+target_link_libraries(commtest -lCBrick)
 set (test_parameters -np 4 "./commtest" "64" "64" "64" "2" "cell" "F")
 add_test(NAME test1 COMMAND "mpirun" ${test_parameters})

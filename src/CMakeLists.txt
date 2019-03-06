@@ -2,7 +2,7 @@
 #
 # CBrick
 #
-# Copyright (c) 2017-2018 Research Institute for Information Technology(RIIT),
+# Copyright (c) 2017-2019 Research Institute for Information Technology(RIIT),
 #                    Kyushu University.  All rights reserved.
 #
 ####################################################################################
@@ -15,34 +15,24 @@ include_directories(
 link_directories()
 
 set(cb_files CB_SubDomain.cpp
-             CB_CommS.cpp
-             CB_CommV.cpp
-             CB_PackingScalarCell.cpp
-             CB_PackingVectorCell.cpp
-             CB_PackingScalarNode.cpp
-             CB_PackingVectorNode.cpp
+             CB_Comm.cpp
    )
 
 
-## float
-
-add_library(CBrick_f STATIC ${cb_files})
-target_link_libraries(CBrick_f)
-install(TARGETS CBrick_f DESTINATION lib)
-
-
-## double
-
-add_library(CBrick_d STATIC ${cb_files})
-set_target_properties(CBrick_d PROPERTIES COMPILE_FLAGS "-D_REAL_IS_DOUBLE_")
-target_link_libraries(CBrick_d)
-install(TARGETS CBrick_d DESTINATION lib)
+add_library(CBrick STATIC ${cb_files})
+target_link_libraries(CBrick)
+install(TARGETS CBrick DESTINATION lib)
 
 install(FILES
         ${PROJECT_BINARY_DIR}/src/CB_Version.h
         ${PROJECT_SOURCE_DIR}/src/CB_SubDomain.h
         ${PROJECT_SOURCE_DIR}/src/CB_Define.h
         ${PROJECT_SOURCE_DIR}/src/CB_Comm.h
+        ${PROJECT_SOURCE_DIR}/src/CB_Comm_inline.h
+        ${PROJECT_SOURCE_DIR}/src/CB_PackingScalarCell.h
+        ${PROJECT_SOURCE_DIR}/src/CB_PackingVectorCell.h
+        ${PROJECT_SOURCE_DIR}/src/CB_PackingScalarNode.h
+        ${PROJECT_SOURCE_DIR}/src/CB_PackingVectorNode.h
         ${PROJECT_SOURCE_DIR}/src/CB_Pack.h
         DESTINATION include)
 ###

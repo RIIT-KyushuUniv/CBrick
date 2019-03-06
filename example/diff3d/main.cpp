@@ -1,8 +1,9 @@
 // Diff3D
 
+#include "Diff3D.h"
 #include <CB_SubDomain.h>
 #include <CB_Comm.h>
-#include "Diff3D.h"
+
 
 // @fn alloc_int
 // @brief allocatin of integer array
@@ -262,6 +263,7 @@ int main(int argc, char * argv[])
   }
 
   SubDomain D(dsz, gc, np, myRank, proc_grp, MPI_COMM_WORLD, "cell", "Findex");
+  
 
   // 分割数指定
   if (div_type == 1) D.setDivision(m_dv);
@@ -309,7 +311,8 @@ int main(int argc, char * argv[])
   BrickComm CM;      ///< 通信クラス
 
   // 通信クラス設定
-  if ( !CM.setBrickComm(lsz, gc, MPI_COMM_WORLD, nID, "cell") ) {
+  if ( !CM.setBrickComm(lsz, gc, MPI_COMM_WORLD, nID, "cell") )
+  {
     stamped_printf("\tBrickComm settng error.\n");
     return 0;
   }
@@ -328,14 +331,19 @@ int main(int argc, char * argv[])
   // initialization
   initialize_(lsz, &gc, q, w);
 
+  // node
+  //  CM.Comm_S_node(q, gc, req);
+  //  CM.Comm_S_wait_node(q, gc, req);
 
+    CM.Comm_S_cell(q, gc, req);
+    CM.Comm_S_wait_cell(q, gc, req);
 
-  CM.Comm_S_nonblocking(q, gc, req);
-  CM.Comm_S_wait_nonblocking(q, gc, req);
-
-  CM.Comm_S_nonblocking(w, gc, req);
-  CM.Comm_S_wait_nonblocking(w, gc, req);
-
+  // node
+  //  CM.Comm_S_node(w, gc, req);
+  //  CM.Comm_S_wait_node(w, gc, req);
+  
+    CM.Comm_S_cell(w, gc, req);
+    CM.Comm_S_wait_cell(w, gc, req);
 
   REAL_TYPE time = 0.0;
   REAL_TYPE res;
@@ -353,9 +361,13 @@ int main(int argc, char * argv[])
     // boundary condition
     bc_(lsz, &gc, q, &P_phys.dh, P_phys.org, nID);
 
+    // node
+    //  CM.Comm_S_node(q, gc, req);
+    //  CM.Comm_S_wait_node(q, gc, req);
 
-    CM.Comm_S_nonblocking(q, gc, req);
-    CM.Comm_S_wait_nonblocking(q, gc, req);
+      CM.Comm_S_cell(q, gc, req);
+      CM.Comm_S_wait_cell(q, gc, req);
+
 
     // time marching
     res = 0.0;
@@ -372,9 +384,12 @@ int main(int argc, char * argv[])
 
     res = sqrt(res);
 
+    // node
+    //  CM.Comm_S_node(q, gc, req);
+    //  CM.Comm_S_wait_node(q, gc, req);
 
-    CM.Comm_S_nonblocking(q, gc, req);
-    CM.Comm_S_wait_nonblocking(q, gc, req);
+      CM.Comm_S_cell(q, gc, req);
+      CM.Comm_S_wait_cell(q, gc, req);
 
 
     // display history

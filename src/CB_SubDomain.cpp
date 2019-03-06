@@ -3,7 +3,7 @@
 #
 # CBrick
 #
-# Copyright (c) 2017-2018 Research Institute for Information Technology(RIIT),
+# Copyright (c) 2017-2019 Research Institute for Information Technology(RIIT),
 #                    Kyushu University.  All rights reserved.
 #
 ####################################################################################
@@ -16,6 +16,7 @@
 
 #include "CB_SubDomain.h"
 
+// #########################################################
 /*
  * @fn findParameter
  * @brief 指定分割数に対応したパラメータを得る
@@ -163,6 +164,7 @@ bool SubDomain::findParameter()
 }
 
 
+// #########################################################
 /*
  * @fn findOptimalDivision()
  * @brief 最適な分割数を見つける
@@ -439,6 +441,7 @@ bool SubDomain::findOptimalDivision(int terrain_mode)
 }
 
 
+// #########################################################
 /*
  * @fn getNumCandidates
  * @brief 分割数の組み合わせ数を数え上げる
@@ -464,6 +467,7 @@ int SubDomain::getNumCandidates()
 }
 
 
+// #########################################################
 /*
  * @fn getNumCandidates4JK
  * @brief 分割数の組み合わせ数を数え上げる(I方向は非分割)
@@ -488,6 +492,7 @@ int SubDomain::getNumCandidates4JK()
 }
 
 
+// #########################################################
 /*
  * @fn getNumCandidates4IJ
  * @brief 分割数の組み合わせ数を数え上げる(K方向は非分割)
@@ -512,7 +517,7 @@ int SubDomain::getNumCandidates4IJ()
 }
 
 
-
+// #########################################################
 /*
  * @fn registerCandidates
  * @brief 分割数の候補パラメータを登録する
@@ -555,6 +560,7 @@ void SubDomain::registerCandidates(cntl_tbl* tbl, const int mesh)
 }
 
 
+// #########################################################
 /*
  * @fn registerCandidates4IJ
  * @brief IJ分割時の分割数の候補パラメータを登録する
@@ -577,6 +583,8 @@ void SubDomain::registerCandidates4IJ(cntl_tbl* tbl, const int mesh)
   }
 }
 
+
+// #########################################################
 /*
  * @fn registerCandidates4JK
  * @brief JK分割時の分割数の候補パラメータを登録する
@@ -600,7 +608,7 @@ void SubDomain::registerCandidates4JK(cntl_tbl* tbl, const int mesh)
 }
 
 
-
+// #########################################################
 /*
  * @fn getSize
  * @brief サブドメインのサイズを計算
@@ -617,8 +625,6 @@ void SubDomain::registerCandidates4JK(cntl_tbl* tbl, const int mesh)
                  0  1  2  3  4           0  1  2  3  4
         0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15
  */
-
-
 void SubDomain::getSize(cntl_tbl* t, const int* in, const int m)
 {
   int tmp[3];
@@ -650,6 +656,7 @@ void SubDomain::getSize(cntl_tbl* t, const int* in, const int m)
 }
 
 
+// #########################################################
 /*
  * @fn getSrf
  * @brief サブドメインの表面積を計算
@@ -690,7 +697,7 @@ void SubDomain::getSrf(score_tbl* t)
 }
 
 
-
+// #########################################################
 /*
  * @fn Evaluation
  * @brief 評価値を計算
@@ -756,6 +763,7 @@ void SubDomain::Evaluation(cntl_tbl* t, const int tbl_sz, FILE* fp)
 }
 
 
+// #########################################################
 /*
  * @fn sortVolume
  * @brief 計算ボリュームの点でソート
@@ -818,6 +826,7 @@ int SubDomain::sortVolume(cntl_tbl* t, const int tbl_sz, FILE* fp)
 }
 
 
+// #########################################################
 /*
  * @fn sortComm
  * @brief 通信量の点でソート
@@ -880,6 +889,7 @@ int SubDomain::sortComm(cntl_tbl* t, const int c_sz, FILE* fp)
 }
 
 
+// #########################################################
 /*
  * @fn sortLenX
  * @brief X方向の長さ（ベクトル長）の点でソート
@@ -942,7 +952,7 @@ int SubDomain::sortLenX(cntl_tbl* t, const int c_sz, FILE* fp)
 }
 
 
-
+// #########################################################
 /*
  * @fn sortCube
  * @brief 立方体への近さの点でソート
@@ -1005,6 +1015,7 @@ int SubDomain::sortCube(cntl_tbl* t, const int c_sz, FILE* fp)
 }
 
 
+// #########################################################
 /*
  * @fn getHeadIndex
  * @brief 各サブドメインの先頭のグローバルインデクスを計算
@@ -1109,7 +1120,7 @@ void SubDomain::getHeadIndex()
 }
 
 
-
+// #########################################################
 /*
 * @fn createRankTable
 * @brief 通信テーブルを作成
@@ -1262,6 +1273,7 @@ bool SubDomain::createRankTable()
 }
 
 
+// #########################################################
 /*
  * @brief Global > Local インデクス変換
  * @param [in]   Gi   Global index
@@ -1305,6 +1317,7 @@ bool SubDomain::G2L_index(const int* Gi, int* Li)
 }
 
 
+// #########################################################
 // @brief Global > Local インデクス変換 のコンポーネントのみ
 // @param [in]   Gi   Global index
 // @param [out]  Li   Local index

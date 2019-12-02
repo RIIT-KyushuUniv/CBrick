@@ -173,6 +173,23 @@ bool SubDomain::findParameter()
  */
 bool SubDomain::findOptimalDivision(int terrain_mode)
 {
+  if (numProc == 1)
+  {
+    size[0] = G_size[0];
+    size[1] = G_size[1];
+    size[2] = G_size[2];
+    
+    head[0] = 1;
+    head[1] = 1;
+    head[2] = 1;
+    
+    G_div[0] = 1;
+    G_div[1] = 1;
+    G_div[2] = 1;
+    
+    return true;
+  }
+  
   if (auto_div == SPEC) return findParameter();
 
 
@@ -1134,6 +1151,16 @@ void SubDomain::getHeadIndex()
 */
 bool SubDomain::createRankTable()
 {
+  // numProc=1のとき
+  if (numProc == 1)
+  {
+    for (int i=0; i<NOFACE; i++) {
+      comm_tbl[i] = -1;
+    }
+    return true;
+  }
+  
+  
   int nx = G_div[0];
   int ny = G_div[1];
   int nz = G_div[2];

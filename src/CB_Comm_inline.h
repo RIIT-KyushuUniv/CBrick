@@ -17,6 +17,7 @@
  * @brief  BrickComm class inline Header
  */
 
+#include <typeinfo>
 
 // #############################################################
 // MPI_Datatypeを取得
@@ -44,7 +45,7 @@ MPI_Datatype BrickComm::GetMPI_Datatype( T *ptr )
   //  else if( typeid(ptr) == typeid(long long int*) )      return MPI_LONG_LONG_INT;
   //#endif
 #ifdef MPI_LONG_LONG
-  else if( typeid(ptr) == typeid(long long*) )          return MPI_LONG_LONG;
+   else if( typeid(ptr) == typeid(long long*) )          return MPI_LONG_LONG;
 #endif
   //#ifdef MPI_UNSIGNED_LONG_LONG
   //  else if( typeid(ptr) == typeid(unsigned long long*) ) return MPI_UNSIGNED_LONG_LONG;

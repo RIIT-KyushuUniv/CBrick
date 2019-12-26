@@ -11,6 +11,11 @@
 ## REVISION HISTORY
 
 ---
+- 2019-12-25 Version 1.4.2
+  - add include <typeinfo> in CB_Comm_inline.h 
+
+
+---
 - 2019-03-06 Version 1.4.1
   - numPorc=1 の場合にも同じ記述ができるように、処理を追加
   

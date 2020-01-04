@@ -11,6 +11,11 @@
 ## REVISION HISTORY
 
 ---
+- 2020-01-04  Version 1.4.4
+  - copyright 2020
+  
+  
+---
 - 2020-01-04  Version 1.4.3
   - intel_F_TCS >> ITO_TCS
 

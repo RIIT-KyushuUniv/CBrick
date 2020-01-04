@@ -9,7 +9,7 @@ A class library to help making applications on Cartesian grid, including simple 
 
 
 ## Copyright
-- Copyright (c) 2017-2019 Research Institute for Information Technology(RIIT), Kyushu University. All rights reserved.
+- Copyright (c) 2017-2020 Research Institute for Information Technology(RIIT), Kyushu University. All rights reserved.
 
 
 ## Software Requirement
@@ -75,6 +75,16 @@ $ cmake -DINSTALL_DIR=${HOME}/CBrick -Denable_OPENMP=yes -Dwith_example=yes -Dwi
 In case of some Intel compiler environment, please specify environemnt variables
 `export CC=icc CXX=icpc F90=ifort FC=ifort` before compiling.
 Also, for PGI compiler, `export CC=mpicc CXX=mpic++ F90=mpif90 FC=mpif90`
+
+
+### Mac
+
+#### gnu
+
+~~~
+$ module load gcc/9.2.0 openmpi/4.0.2-gcc9
+$ cmake -DINSTALL_DIR=${HOME}/CBrick -Denable_OPENMP=ON ..
+~~~
 
 
 ### FUJITSU compiler / FX10, FX100, K computer on login nodes (Cross compilation) and Fujitsu TCS environment for intel PC

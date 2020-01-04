@@ -2,7 +2,7 @@
 #
 # CBrick
 #
-# Copyright (c) 2017-2019 Research Institute for Information Technology(RIIT),
+# Copyright (c) 2017-2020 Research Institute for Information Technology(RIIT),
 #                    Kyushu University.  All rights reserved.
 #
 ####################################################################################
@@ -69,8 +69,8 @@ cmake_policy(SET CMP0012 NEW)
 
 
 #######
-set(PROJECT_VERSION "1.4.3")
-set(LIB_REVISION "20200104_1500")
+set(PROJECT_VERSION "1.4.4")
+set(LIB_REVISION "20200104_1600")
 #######
 
 

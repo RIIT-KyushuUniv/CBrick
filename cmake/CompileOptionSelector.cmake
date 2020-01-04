@@ -13,7 +13,7 @@
 
 
 macro (AddOptimizeOption)
-  if (TARGET_ARCH STREQUAL "INTEL_F_TCS")
+  if (TARGET_ARCH STREQUAL "ITO_TCS")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Kfast,parallel,optmsg=2 -V -Xg")
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Kfast,parallel,optmsg=2 -V -Xg")
     if (with_example)
@@ -61,7 +61,7 @@ macro (FreeForm)
   if(CMAKE_Fortran_COMPILER MATCHES ".*frtpx$")
     #set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS}")
 
-  elseif(TARGET_ARCH STREQUAL "INTEL_F_TCS")
+  elseif(TARGET_ARCH STREQUAL "ITO_TCS")
     set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -Free")
 
   elseif(CMAKE_Fortran_COMPILER_ID STREQUAL "GNU")

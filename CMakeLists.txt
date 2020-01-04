@@ -17,13 +17,11 @@
 #
 # -D INSTALL_DIR=install_directory
 #
-# -D enable_OPENMP=(no | yes)
+# -D enable_OPENMP=(OFF | ON)
 #
-# -D with_example= {no | yes}
+# -D with_example= {OFF | ON}
 #
-# -D with_MPI= {yes | no}
-#
-# -D with_Diagonal={no | yes}
+# -D with_Diagonal={OFF | ON}
 #
 
 cmake_minimum_required(VERSION 2.6)
@@ -34,8 +32,13 @@ cmake_minimum_required(VERSION 2.6)
 #######
 
 option(enable_OPENMP "Enable OpenMP" "OFF")
-option(with_MPI "Enable MPI" "ON")
 option(with_Diagonal "Enable Diagonal communication" "OFF")
+option(with_example "Build Example" "OFF")
+
+# Default
+set(with_MPI "ON")
+
+
 
 #######
 # Project setting
@@ -66,8 +69,8 @@ cmake_policy(SET CMP0012 NEW)
 
 
 #######
-set(PROJECT_VERSION "1.4.2")
-set(LIB_REVISION "20191225_1500")
+set(PROJECT_VERSION "1.4.3")
+set(LIB_REVISION "20200104_1500")
 #######
 
 
@@ -96,7 +99,7 @@ endif()
 
 
 # OpennMP
-if (enable_OPENMP STREQUAL "yes")
+if (enable_OPENMP STREQUAL "ON")
   checkOpenMP()
 endif()
 
@@ -157,7 +160,7 @@ endif()
 add_subdirectory(src)
 add_subdirectory(doc)
 
-if (with_example STREQUAL "yes")
+if (with_example STREQUAL "ON")
   enable_testing()
   add_subdirectory(example)
 endif()

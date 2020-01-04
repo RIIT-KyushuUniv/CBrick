@@ -23,7 +23,7 @@ A class library to help making applications on Cartesian grid, including simple 
 ### Build
 
 ~~~
-$ export CB_HOME=/hogehoge
+$ export HOME=hogehoge
 $ mkdir build
 $ cd build
 $ export CC=mpiicc CXX=mpiicpc F90=mpiifort // if needed like this line.
@@ -46,33 +46,29 @@ This Cmake generates CBrick_f for float, and CBrick_d for double precision.
    installed at `install_directory/lib` and the header files are placed at
    `install_directory/include`.
 
-`-D enable_OPENMP=` {yes | no}
+`-D enable_OPENMP=` {OFF | ON}
 
->  This option makes OpenMP directives effect. Default is yes.
+>  This option makes OpenMP directives effect. Default is OFF.
 
 
-`-D with_example=` {no | yes}
+`-D with_example=` {OFF | ON}
 
 > Specify the build of test modules.
 
 
-`-D with_MPI=` {yes | no}
-
-> Specify the parallel / serial version.
-
-`-D with_Diagonal=` {no | yes}
+`-D with_Diagonal=` {OFF | ON}
 
 > Specify diagonal communication.
 
 
 ## Configure Examples
 
-`$ export CB_HOME=hogehoge`
+`$ export HOME=hogehoge`
 
 ### INTEL/GNU/PGI compiler
 
 ~~~
-$ cmake -DINSTALL_DIR=${CB_HOME}/CBrick -Denable_OPENMP=yes -Dwith_example=yes -Dwith_Diagonal=yes ..
+$ cmake -DINSTALL_DIR=${HOME}/CBrick -Denable_OPENMP=yes -Dwith_example=yes -Dwith_Diagonal=yes ..
 ~~~
 
 #### Note
@@ -84,26 +80,39 @@ Also, for PGI compiler, `export CC=mpicc CXX=mpic++ F90=mpif90 FC=mpif90`
 ### FUJITSU compiler / FX10, FX100, K computer on login nodes (Cross compilation) and Fujitsu TCS environment for intel PC
 
 ~~~
-$ cmake -DINSTALL_DIR=${CB_HOME}/CBrick \
+$ cmake -DINSTALL_DIR=${HOME}/CBrick \
         -DCMAKE_TOOLCHAIN_FILE=../cmake/Toolchain_fx10.cmake \
         -Denable_OPENMP=yes \
         -Dwith_example=yes ..
 
-$ cmake -DINSTALL_DIR=${CB_HOME}/CBrick \
+$ cmake -DINSTALL_DIR=${HOME}/CBrick \
         -DCMAKE_TOOLCHAIN_FILE=../cmake/Toolchain_fx100.cmake \
         -Denable_OPENMP=yes \
         -Dwith_example=yes ..
 
-$ cmake -DINSTALL_DIR=${CB_HOME}/CBrick \
+$ cmake -DINSTALL_DIR=${HOME}/CBrick \
         -DCMAKE_TOOLCHAIN_FILE=../cmake/Toolchain_K.cmake \
         -Denable_OPENMP=yes \
         -Dwith_example=yes ..
+~~~
 
-$ cmake -DINSTALL_DIR=${CB_HOME}/CBrick \
-        -DCMAKE_TOOLCHAIN_FILE=../cmake/Toolchain_intel_F_TCS.cmake \
-        -Denable_OPENMP=yes \
-        -Dwith_example=yes ..
 
+### ITO susbsystem A/B
+
+#### Intel compiler
+
+~~~
+$ module load intel/2018.3 openmpi/3.1.3-nocuda-intel18.3
+
+$ cmake -DINSTALL_DIR=${HOME}/CBrick -Denable_OPENMP=ON ..
+~~~
+
+#### Fujitsu TCS
+
+~~~
+$ cmake -DINSTALL_DIR=${HOME}/CBrick \
+        -DCMAKE_TOOLCHAIN_FILE=../cmake/Toolchain_ITO_TCS.cmake \
+        -Denable_OPENMP=ON ..
 ~~~
 
 ##### Note
@@ -115,12 +124,3 @@ $ cmake -DINSTALL_DIR=${CB_HOME}/CBrick \
 
 - Kenji Ono
 
-
-### comment for RIIT CX400
-
-~~~
-$ module load intel2017 intelMPI
-$ export CC=mpiicc CXX=mpiicpc F90=mpiifort
-~~~
-
-see [here](https://www.cc.kyushu-u.ac.jp/scp/system/library/intel/intel_7_3.html) and [here](https://www.cc.kyushu-u.ac.jp/scp/system/library/intel/intel.html).
